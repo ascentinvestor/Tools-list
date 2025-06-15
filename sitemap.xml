@@ -2,111 +2,111 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <!-- Main Pages -->
     <url>
-        <loc>https://www.ascentinvestor.in/</loc>
+        <loc>http://www.ascentinvestor.in/</loc>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools</loc>
+        <loc>http://www.ascentinvestor.in/tools</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
 
     <!-- Calculator Pages -->
     <url>
-        <loc>https://www.ascentinvestor.in/tools/swp-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/swp-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/retirement-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/retirement-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/tax-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/tax-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/fd-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/fd-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/nps-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/nps-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/rd-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/rd-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/cagr-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/cagr-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/nsc-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/nsc-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/hra-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/hra-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/mf-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/mf-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/ssy-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/ssy-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/irr-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/irr-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/sip-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/sip-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/goal-sip-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/goal-sip-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/tools/fire-calc</loc>
+        <loc>http://www.ascentinvestor.in/tools/fire-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
 
     <!-- Legal Pages -->
     <url>
-        <loc>https://www.ascentinvestor.in/privacy-policy</loc>
+        <loc>http://www.ascentinvestor.in/privacy-policy</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/refund-policy</loc>
+        <loc>http://www.ascentinvestor.in/refund-policy</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/terms-conditions</loc>
+        <loc>http://www.ascentinvestor.in/terms-conditions</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://www.ascentinvestor.in/fb-disclaimer</loc>
+        <loc>http://www.ascentinvestor.in/fb-disclaimer</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
