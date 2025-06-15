@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Preload critical images -->
-    <link rel="preload" as="image" href="logo-ai.webp" type="image/webp">
+    <link rel="preload" as="image" href="logo-ai.png" type="image/png">
     
     <style>
         /* Minimal CSS reset and styles */
@@ -82,7 +82,7 @@
         <div class="container">
             <div class="header-flex">
                 <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
-                    <img src="logo-ai.webp" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                                            <img src="logo-ai.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async" style="width: 32px; height: 32px;">
                     AscentInvestor
                 </a>
                 <nav class="nav">
@@ -228,7 +228,10 @@
         </div>
     </footer>
 
-    <script>
+    <script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+        // All JavaScript code moved inside DOMContentLoaded for better performance
+        
         // Lightweight chart implementation
         function drawChart(canvas, data, options = {}) {
             const ctx = canvas.getContext('2d');
@@ -361,211 +364,208 @@
             });
         }
 
-        // Main calculation and UI logic
-        document.addEventListener('DOMContentLoaded', function() {
-            const elements = {
-                investmentSlider: document.getElementById('investmentSlider'),
-                investmentValue: document.getElementById('investmentValue'),
-                investmentInWords: document.getElementById('investmentInWords'),
-                withdrawalSlider: document.getElementById('withdrawalSlider'),
-                withdrawalValue: document.getElementById('withdrawalValue'),
-                returnSlider: document.getElementById('returnSlider'),
-                returnValue: document.getElementById('returnValue'),
-                inflationSlider: document.getElementById('inflationSlider'),
-                inflationValue: document.getElementById('inflationValue'),
-                timePeriodSlider: document.getElementById('timePeriodSlider'),
-                timePeriodValue: document.getElementById('timePeriodValue'),
-                taxRateSlider: document.getElementById('taxRateSlider'),
-                taxRateValue: document.getElementById('taxRateValue'),
-                totalWithdrawals: document.getElementById('totalWithdrawals'),
-                totalInterest: document.getElementById('totalInterest'),
-                totalTax: document.getElementById('totalTax'),
-                finalCorpus: document.getElementById('finalCorpus'),
-                yearlyBreakdownBody: document.getElementById('yearlyBreakdownBody'),
-                swpChart: document.getElementById('swpChart')
-            };
+        // Rest of the JavaScript code...
+        const elements = {
+            investmentSlider: document.getElementById('investmentSlider'),
+            investmentValue: document.getElementById('investmentValue'),
+            investmentInWords: document.getElementById('investmentInWords'),
+            withdrawalSlider: document.getElementById('withdrawalSlider'),
+            withdrawalValue: document.getElementById('withdrawalValue'),
+            returnSlider: document.getElementById('returnSlider'),
+            returnValue: document.getElementById('returnValue'),
+            inflationSlider: document.getElementById('inflationSlider'),
+            inflationValue: document.getElementById('inflationValue'),
+            timePeriodSlider: document.getElementById('timePeriodSlider'),
+            timePeriodValue: document.getElementById('timePeriodValue'),
+            taxRateSlider: document.getElementById('taxRateSlider'),
+            taxRateValue: document.getElementById('taxRateValue'),
+            totalWithdrawals: document.getElementById('totalWithdrawals'),
+            totalInterest: document.getElementById('totalInterest'),
+            totalTax: document.getElementById('totalTax'),
+            finalCorpus: document.getElementById('finalCorpus'),
+            yearlyBreakdownBody: document.getElementById('yearlyBreakdownBody'),
+            swpChart: document.getElementById('swpChart')
+        };
 
-            let swpChart;
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+            }).format(num);
+        }
 
-            function formatCurrency(num) {
-                return new Intl.NumberFormat('en-IN', {
-                    style: 'currency',
-                    currency: 'INR',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2,
-                }).format(num);
-            }
-
-            function numberToWords(num) {
-                if (num === 0) return 'Zero Rupees';
-                
-                const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-                const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-                const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-                
-                function convertLessThanThousand(n) {
-                    let result = '';
-                    if (n >= 100) {
-                        result += ones[Math.floor(n / 100)] + ' Hundred ';
-                        n %= 100;
-                    }
-                    if (n >= 20) {
-                        result += tens[Math.floor(n / 10)] + ' ';
-                        n %= 10;
-                    } else if (n >= 10) {
-                        result += teens[n - 10] + ' ';
-                        n = 0;
-                    }
-                    if (n > 0) {
-                        result += ones[n] + ' ';
-                    }
-                    return result;
-                }
-                
+        function numberToWords(num) {
+            if (num === 0) return 'Zero Rupees';
+            
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+            const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            
+            function convertLessThanThousand(n) {
                 let result = '';
-                
-                if (num >= 10000000) {
-                    const crores = Math.floor(num / 10000000);
-                    result += convertLessThanThousand(crores) + 'Crore ';
-                    num %= 10000000;
+                if (n >= 100) {
+                    result += ones[Math.floor(n / 100)] + ' Hundred ';
+                    n %= 100;
                 }
-                
-                if (num >= 100000) {
-                    const lakhs = Math.floor(num / 100000);
-                    result += convertLessThanThousand(lakhs) + 'Lakh ';
-                    num %= 100000;
+                if (n >= 20) {
+                    result += tens[Math.floor(n / 10)] + ' ';
+                    n %= 10;
+                } else if (n >= 10) {
+                    result += teens[n - 10] + ' ';
+                    n = 0;
                 }
-                
-                if (num >= 1000) {
-                    const thousands = Math.floor(num / 1000);
-                    result += convertLessThanThousand(thousands) + 'Thousand ';
-                    num %= 1000;
+                if (n > 0) {
+                    result += ones[n] + ' ';
                 }
-                
-                if (num > 0) {
-                    result += convertLessThanThousand(num);
-                }
-                
-                return result.trim() + ' Rupees';
+                return result;
+            }
+            
+            let result = '';
+            
+            if (num >= 10000000) {
+                const crores = Math.floor(num / 10000000);
+                result += convertLessThanThousand(crores) + 'Crore ';
+                num %= 10000000;
+            }
+            
+            if (num >= 100000) {
+                const lakhs = Math.floor(num / 100000);
+                result += convertLessThanThousand(lakhs) + 'Lakh ';
+                num %= 100000;
+            }
+            
+            if (num >= 1000) {
+                const thousands = Math.floor(num / 1000);
+                result += convertLessThanThousand(thousands) + 'Thousand ';
+                num %= 1000;
+            }
+            
+            if (num > 0) {
+                result += convertLessThanThousand(num);
+            }
+            
+            return result.trim() + ' Rupees';
+        }
+
+        function updateBreakdownTable(yearlyData) {
+            elements.yearlyBreakdownBody.innerHTML = '';
+            if (yearlyData.length === 0) {
+                elements.yearlyBreakdownBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>`;
+                return;
             }
 
-            function updateBreakdownTable(yearlyData) {
-                elements.yearlyBreakdownBody.innerHTML = '';
-                if (yearlyData.length === 0) {
-                    elements.yearlyBreakdownBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>`;
+            yearlyData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight:600">${item.year}</td>
+                    <td style="text-align:right">${formatCurrency(item.openingBalance)}</td>
+                    <td style="text-align:right">${formatCurrency(item.withdrawal)}</td>
+                    <td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td>
+                    <td style="text-align:right;color:#dc2626">${formatCurrency(item.taxPaid)}</td>
+                    <td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>
+                `;
+                elements.yearlyBreakdownBody.appendChild(row);
+            });
+        }
+
+        function calculateSWP() {
+            try {
+                const P = parseFloat(elements.investmentValue.value) || 0;
+                const monthlyWithdrawal = parseFloat(elements.withdrawalValue.value) || 0;
+                const annualReturn = parseFloat(elements.returnValue.value) / 100 || 0;
+                const inflation = parseFloat(elements.inflationValue.value) / 100 || 0;
+                const years = parseFloat(elements.timePeriodValue.value) || 0;
+                const taxRate = parseFloat(elements.taxRateValue.value) / 100 || 0;
+
+                if (P <= 0 || monthlyWithdrawal <= 0 || annualReturn <= 0 || years <= 0) {
+                    updateBreakdownTable([]);
                     return;
                 }
 
-                yearlyData.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td style="font-weight:600">${item.year}</td>
-                        <td style="text-align:right">${formatCurrency(item.openingBalance)}</td>
-                        <td style="text-align:right">${formatCurrency(item.withdrawal)}</td>
-                        <td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td>
-                        <td style="text-align:right;color:#dc2626">${formatCurrency(item.taxPaid)}</td>
-                        <td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>
-                    `;
-                    elements.yearlyBreakdownBody.appendChild(row);
-                });
-            }
+                let yearlyData = [];
+                let currentBalance = P;
+                let totalWithdrawals = 0;
+                let totalInterest = 0;
+                let totalTax = 0;
 
-            function calculateSWP() {
-                try {
-                    const P = parseFloat(elements.investmentValue.value) || 0;
-                    const monthlyWithdrawal = parseFloat(elements.withdrawalValue.value) || 0;
-                    const annualReturn = parseFloat(elements.returnValue.value) / 100 || 0;
-                    const inflation = parseFloat(elements.inflationValue.value) / 100 || 0;
-                    const years = parseFloat(elements.timePeriodValue.value) || 0;
-                    const taxRate = parseFloat(elements.taxRateValue.value) / 100 || 0;
+                for (let year = 1; year <= years; year++) {
+                    const openingBalance = currentBalance;
+                    const annualWithdrawal = monthlyWithdrawal * 12 * Math.pow(1 + inflation, year - 1);
+                    const interestEarned = openingBalance * annualReturn;
+                    const taxPaid = interestEarned * taxRate;
+                    const netInterest = interestEarned - taxPaid;
+                    
+                    currentBalance = openingBalance + netInterest - annualWithdrawal;
+                    
+                    if (currentBalance < 0) currentBalance = 0;
 
-                    if (P <= 0 || monthlyWithdrawal <= 0 || annualReturn <= 0 || years <= 0) {
-                        updateBreakdownTable([]);
-                        return;
-                    }
+                    totalWithdrawals += annualWithdrawal;
+                    totalInterest += interestEarned;
+                    totalTax += taxPaid;
 
-                    let yearlyData = [];
-                    let currentBalance = P;
-                    let totalWithdrawals = 0;
-                    let totalInterest = 0;
-                    let totalTax = 0;
-
-                    for (let year = 1; year <= years; year++) {
-                        const openingBalance = currentBalance;
-                        const annualWithdrawal = monthlyWithdrawal * 12 * Math.pow(1 + inflation, year - 1);
-                        const interestEarned = openingBalance * annualReturn;
-                        const taxPaid = interestEarned * taxRate;
-                        const netInterest = interestEarned - taxPaid;
-                        
-                        currentBalance = openingBalance + netInterest - annualWithdrawal;
-                        
-                        if (currentBalance < 0) currentBalance = 0;
-
-                        totalWithdrawals += annualWithdrawal;
-                        totalInterest += interestEarned;
-                        totalTax += taxPaid;
-
-                        yearlyData.push({
-                            year: `Year ${year}`,
-                            openingBalance: openingBalance,
-                            withdrawal: annualWithdrawal,
-                            interestEarned: interestEarned,
-                            taxPaid: taxPaid,
-                            closingBalance: currentBalance,
-                            corpus: currentBalance
-                        });
-                    }
-
-                    // Update display
-                    elements.totalWithdrawals.textContent = formatCurrency(totalWithdrawals);
-                    elements.totalInterest.textContent = formatCurrency(totalInterest);
-                    elements.totalTax.textContent = formatCurrency(totalTax);
-                    elements.finalCorpus.textContent = formatCurrency(currentBalance);
-
-                    updateBreakdownTable(yearlyData);
-                    drawChart(elements.swpChart, yearlyData.map((data, index) => ({ 
-                        value: data.corpus, 
-                        year: new Date().getFullYear() + index 
-                    })), { 
-                        title: 'Portfolio Value Over Time', 
-                        color: '#4f46e5' 
+                    yearlyData.push({
+                        year: `Year ${year}`,
+                        openingBalance: openingBalance,
+                        withdrawal: annualWithdrawal,
+                        interestEarned: interestEarned,
+                        taxPaid: taxPaid,
+                        closingBalance: currentBalance,
+                        corpus: currentBalance
                     });
+                }
 
-                } catch(error) {
-                    console.error("Error in calculation:", error);
+                // Update display
+                elements.totalWithdrawals.textContent = formatCurrency(totalWithdrawals);
+                elements.totalInterest.textContent = formatCurrency(totalInterest);
+                elements.totalTax.textContent = formatCurrency(totalTax);
+                elements.finalCorpus.textContent = formatCurrency(currentBalance);
+
+                updateBreakdownTable(yearlyData);
+                drawChart(elements.swpChart, yearlyData.map((data, index) => ({ 
+                    value: data.corpus, 
+                    year: new Date().getFullYear() + index 
+                })), { 
+                    title: 'Portfolio Value Over Time', 
+                    color: '#4f46e5' 
+                });
+
+            } catch(error) {
+                console.error("Error in calculation:", error);
+            }
+        }
+
+        // Event listeners for sliders and inputs
+        Object.keys(elements).forEach(key => {
+            if (key.includes('Slider') || key.includes('Value')) {
+                const element = elements[key];
+                if (element) {
+                    element.addEventListener('input', () => {
+                        // Sync slider with input
+                        const baseKey = key.replace('Slider', '').replace('Value', '');
+                        if (key.includes('Slider') && elements[baseKey + 'Value']) {
+                            elements[baseKey + 'Value'].value = element.value;
+                        }
+                        if (key.includes('Value') && elements[baseKey + 'Slider']) {
+                            elements[baseKey + 'Slider'].value = element.value;
+                        }
+                        
+                        // Update words for investment
+                        if (baseKey === 'investment') {
+                            elements.investmentInWords.textContent = numberToWords(parseInt(element.value));
+                        }
+                        
+                        calculateSWP();
+                    });
                 }
             }
-
-            // Event listeners for sliders and inputs
-            Object.keys(elements).forEach(key => {
-                if (key.includes('Slider') || key.includes('Value')) {
-                    const element = elements[key];
-                    if (element) {
-                        element.addEventListener('input', () => {
-                            // Sync slider with input
-                            const baseKey = key.replace('Slider', '').replace('Value', '');
-                            if (key.includes('Slider') && elements[baseKey + 'Value']) {
-                                elements[baseKey + 'Value'].value = element.value;
-                            }
-                            if (key.includes('Value') && elements[baseKey + 'Slider']) {
-                                elements[baseKey + 'Slider'].value = element.value;
-                            }
-                            
-                            // Update words for investment
-                            if (baseKey === 'investment') {
-                                elements.investmentInWords.textContent = numberToWords(parseInt(element.value));
-                            }
-                            
-                            calculateSWP();
-                        });
-                    }
-                }
-            });
-
-            // Initial calculation
-            calculateSWP();
-            elements.investmentInWords.textContent = numberToWords(parseInt(elements.investmentValue.value));
         });
+
+        // Initial calculation
+        calculateSWP();
+        elements.investmentInWords.textContent = numberToWords(parseInt(elements.investmentValue.value));
+    });
     </script>
 
     <!-- AdSense -->

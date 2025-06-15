@@ -26,7 +26,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Preload critical images -->
-    <link rel="preload" as="image" href="logo-ai.webp" type="image/webp">
+    <link rel="preload" as="image" href="logo-ai.png" type="image/png">
     <style>
         *,*::before,*::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
         *::before,*::after{--tw-content:''}
@@ -210,7 +210,7 @@
             <div class="header-content">
                 <div>
                     <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
-                        <img src="logo-ai.webp" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                        <img src="logo-ai.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async" style="width: 32px; height: 32px;">
                         AscentInvestor
                     </a>
                 </div>
@@ -421,19 +421,25 @@
         </div>
     </footer>
 
-    <!-- Load AdSense asynchronously -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818" crossorigin="anonymous"></script>
+    <!-- Load AdSense asynchronously and defer -->
+    <script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818" crossorigin="anonymous"></script>
+    
+    <!-- Defer ad initialization -->
+    <script defer>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize ads after page load
+            setTimeout(function() {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            }, 1000);
+        });
+    </script>
+
     <!-- Responsive_ads -->
     <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
 
     <!-- Display_ads -->
     <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="7595341375" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
 
 </body>
 </html>

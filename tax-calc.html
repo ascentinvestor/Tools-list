@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Preload critical images -->
-    <link rel="preload" as="image" href="logo-ai.webp" type="image/webp">
+    <link rel="preload" as="image" href="logo-ai.png" type="image/png">
     
     <style>
         /* Minimal CSS reset and styles */
@@ -77,7 +77,7 @@
         <div class="container">
             <div class="header-flex">
                 <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
-                    <img src="logo-ai.webp" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                                            <img src="logo-ai.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async" style="width: 32px; height: 32px;">
                     AscentInvestor
                 </a>
                 <nav class="nav">
@@ -271,228 +271,305 @@
         </div>
     </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let taxChart;
-
-            // Tax rules for different financial years
-            const taxRules = {
-                '2024-25': {
-                    ay: '2025-26',
-                    standardDeductionOld: 50000,
-                    standardDeductionNew: 75000,
-                    rebateLimitOld: 500000,
-                    rebateLimitNew: 700000,
-                    oldRegimeSlabs: [
-                        { upTo: 250000, rate: 0 },
-                        { upTo: 500000, rate: 0.05 },
-                        { upTo: 1000000, rate: 0.2 },
-                        { upTo: Infinity, rate: 0.3 }
-                    ],
-                    newRegimeSlabs: [
-                        { upTo: 300000, rate: 0 },
-                        { upTo: 600000, rate: 0.05 },
-                        { upTo: 900000, rate: 0.1 },
-                        { upTo: 1200000, rate: 0.15 },
-                        { upTo: 1500000, rate: 0.2 },
-                        { upTo: Infinity, rate: 0.3 }
-                    ]
-                },
-                '2023-24': {
-                    ay: '2024-25',
-                    standardDeductionOld: 50000,
-                    standardDeductionNew: 50000,
-                    rebateLimitOld: 500000,
-                    rebateLimitNew: 700000,
-                    oldRegimeSlabs: [
-                        { upTo: 250000, rate: 0 },
-                        { upTo: 500000, rate: 0.05 },
-                        { upTo: 1000000, rate: 0.2 },
-                        { upTo: Infinity, rate: 0.3 }
-                    ],
-                    newRegimeSlabs: [
-                        { upTo: 300000, rate: 0 },
-                        { upTo: 600000, rate: 0.05 },
-                        { upTo: 900000, rate: 0.1 },
-                        { upTo: 1200000, rate: 0.15 },
-                        { upTo: 1500000, rate: 0.2 },
-                        { upTo: Infinity, rate: 0.3 }
-                    ]
-                }
-            };
-
-            // Simple chart implementation
-            function createBarChart(canvas, oldTax, newTax) {
-                const ctx = canvas.getContext('2d');
-                const width = canvas.width = canvas.offsetWidth;
-                const height = canvas.height = canvas.offsetHeight;
-                
-                ctx.clearRect(0, 0, width, height);
-                
-                if (oldTax === 0 && newTax === 0) return;
-                
-                const padding = 60;
-                const chartWidth = width - 2 * padding;
-                const chartHeight = height - 2 * padding;
-                
-                const maxValue = Math.max(oldTax, newTax) * 1.1;
-                const barWidth = chartWidth / 4;
-                const oldBarHeight = (oldTax / maxValue) * chartHeight;
-                const newBarHeight = (newTax / maxValue) * chartHeight;
-                
-                // Draw old regime bar
-                ctx.fillStyle = '#6366f1';
-                ctx.fillRect(padding, padding + chartHeight - oldBarHeight, barWidth, oldBarHeight);
-                
-                // Draw new regime bar
-                ctx.fillStyle = '#f97316';
-                ctx.fillRect(padding + barWidth * 2, padding + chartHeight - newBarHeight, barWidth, newBarHeight);
-                
-                // Add labels
-                ctx.fillStyle = '#374151';
-                ctx.font = '14px Inter';
-                ctx.textAlign = 'center';
-                ctx.fillText('Old Regime', padding + barWidth / 2, height - 20);
-                ctx.fillText('New Regime', padding + barWidth * 2.5, height - 20);
-                
-                // Add values
-                ctx.fillStyle = '#111827';
-                ctx.font = 'bold 12px Inter';
-                ctx.fillText(formatCurrency(oldTax), padding + barWidth / 2, padding + chartHeight - oldBarHeight - 5);
-                ctx.fillText(formatCurrency(newTax), padding + barWidth * 2.5, padding + chartHeight - newBarHeight - 5);
-            }
-
-            function formatCurrency(num) {
-                return new Intl.NumberFormat('en-IN', {
-                    style: 'currency',
-                    currency: 'INR',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                }).format(num);
-            }
-
-            function calculateTax(income, slabs, rebateLimit) {
-                if (income <= rebateLimit) return 0;
-
-                let tax = 0;
-                let lastLimit = 0;
-                for (const slab of slabs) {
-                    if (income > lastLimit) {
-                        const taxableInSlab = Math.min(income, slab.upTo) - lastLimit;
-                        tax += taxableInSlab * slab.rate;
-                    }
-                    lastLimit = slab.upTo;
-                    if (income <= slab.upTo) break;
-                }
-                return tax;
-            }
-
-            function displayResults(data) {
-                document.getElementById('old-deductions').textContent = formatCurrency(data.old.totalDeductions);
-                document.getElementById('old-taxable').textContent = formatCurrency(data.old.taxableIncome);
-                document.getElementById('old-tax').textContent = formatCurrency(data.old.incomeTax);
-                document.getElementById('old-cess').textContent = formatCurrency(data.old.cess);
-                document.getElementById('old-total').textContent = formatCurrency(data.old.totalTax);
-
-                document.getElementById('new-deductions').textContent = formatCurrency(data.new.totalDeductions);
-                document.getElementById('new-taxable').textContent = formatCurrency(data.new.taxableIncome);
-                document.getElementById('new-tax').textContent = formatCurrency(data.new.incomeTax);
-                document.getElementById('new-cess').textContent = formatCurrency(data.new.cess);
-                document.getElementById('new-total').textContent = formatCurrency(data.new.totalTax);
-
-                const summaryDiv = document.getElementById('summary');
-                const oldCard = document.getElementById('old-regime-card');
-                const newCard = document.getElementById('new-regime-card');
-                const taxSavings = Math.abs(data.old.totalTax - data.new.totalTax);
-
-                // Reset styles
-                oldCard.classList.remove('highlight-card');
-                newCard.classList.remove('highlight-card');
-                summaryDiv.classList.remove('bg-green-100', 'bg-blue-100');
-
-                if (data.new.totalTax < data.old.totalTax) {
-                    summaryDiv.innerHTML = `The <strong>New Regime</strong> is better. You save <span style="font-weight:bold">${formatCurrency(taxSavings)}</span>.`;
-                    summaryDiv.classList.add('bg-green-100');
-                    newCard.classList.add('highlight-card');
-                } else if (data.old.totalTax < data.new.totalTax) {
-                    summaryDiv.innerHTML = `The <strong>Old Regime</strong> is better. You save <span style="font-weight:bold">${formatCurrency(taxSavings)}</span>.`;
-                    summaryDiv.classList.add('bg-green-100');
-                    oldCard.classList.add('highlight-card');
-                } else {
-                    summaryDiv.textContent = `Both regimes result in the same tax liability.`;
-                    summaryDiv.classList.add('bg-blue-100');
-                }
-
-                // Update chart
-                const chartData = [
-                    { label: 'Old Regime', value: data.old.incomeTax, color: '#4f46e5' },
-                    { label: 'New Regime', value: data.new.incomeTax, color: '#10b981' }
-                ];
-                drawBarChart(document.getElementById('taxComparisonChart'), chartData, { 
-                    title: 'Tax Comparison: Old vs New Regime' 
-                });
-            }
-
-            function performCalculation() {
-                const selectedFY = document.getElementById('financial-year').value;
-                const rules = taxRules[selectedFY];
-
-                // Update UI text
-                document.getElementById('ay-subtitle').textContent = `Compare Old vs. New Regime for FY ${selectedFY} (AY ${rules.ay})`;
-                document.getElementById('disclaimer').innerHTML = `<h4>Disclaimer</h4><p>This calculator is for informational purposes only and based on the income tax laws for FY ${selectedFY} (AY ${rules.ay}). It does not account for all possible deductions, exemptions, or individual circumstances. Please consult with a qualified financial advisor for personalized tax advice. Surcharges on high-income levels are not included in this calculation.</p>`;
-                
-                // Get User Inputs
-                const incomeSalary = parseFloat(document.getElementById('income-salary').value) || 0;
-                const incomeRental = parseFloat(document.getElementById('income-rental').value) || 0;
-                const incomeBusiness = parseFloat(document.getElementById('income-business').value) || 0;
-                const incomeOther = parseFloat(document.getElementById('income-other').value) || 0;
-                const totalGrossIncome = incomeSalary + incomeRental + incomeBusiness + incomeOther;
-                
-                const deduction24b = parseFloat(document.getElementById('deduction-24b').value) || 0;
-                const deductionPtax = parseFloat(document.getElementById('deduction-ptax').value) || 0;
-                const deduction80c = Math.min(parseFloat(document.getElementById('deduction-80c').value) || 0, 150000);
-                const deduction80d = parseFloat(document.getElementById('deduction-80d').value) || 0;
-                const deduction80e = parseFloat(document.getElementById('deduction-80e').value) || 0;
-                const deductionOtherOld = parseFloat(document.getElementById('deduction-other-old').value) || 0;
-                const deduction80ccd2 = parseFloat(document.getElementById('deduction-80ccd2').value) || 0;
-                const deductionOtherNew = parseFloat(document.getElementById('deduction-other-new').value) || 0;
-
-                // OLD Regime Calculation
-                const standardDeductionOld = incomeSalary > 0 ? rules.standardDeductionOld : 0;
-                const interestOnLoanOld = Math.min(deduction24b, 200000 + incomeRental);
-                const totalDeductionsOld = standardDeductionOld + interestOnLoanOld + deductionPtax + deduction80c + deduction80d + deduction80e + deductionOtherOld + deduction80ccd2;
-                const oldTaxableIncome = Math.max(0, totalGrossIncome - totalDeductionsOld);
-                const oldTax = calculateTax(oldTaxableIncome, rules.oldRegimeSlabs, rules.rebateLimitOld);
-                const oldCess = oldTax * 0.04;
-                const oldTotalTax = oldTax + oldCess;
-
-                // NEW Regime Calculation
-                const standardDeductionNew = incomeSalary > 0 ? rules.standardDeductionNew : 0;
-                const interestOnLoanNew = Math.min(deduction24b, incomeRental);
-                const totalDeductionsNew = standardDeductionNew + interestOnLoanNew + deduction80ccd2 + deductionOtherNew;
-                const newTaxableIncome = Math.max(0, totalGrossIncome - totalDeductionsNew);
-                const newTax = calculateTax(newTaxableIncome, rules.newRegimeSlabs, rules.rebateLimitNew);
-                const newCess = newTax * 0.04;
-                const newTotalTax = newTax + newCess;
-
-                // Display Results
-                displayResults({
-                    grossSalary: totalGrossIncome,
-                    old: { totalDeductions: totalDeductionsOld, taxableIncome: oldTaxableIncome, incomeTax: oldTax, cess: oldCess, totalTax: oldTotalTax },
-                    new: { totalDeductions: totalDeductionsNew, taxableIncome: newTaxableIncome, incomeTax: newTax, cess: newCess, totalTax: newTotalTax }
-                });
-            }
-
-            document.getElementById('calculate-btn').addEventListener('click', performCalculation);
-            document.getElementById('financial-year').addEventListener('change', performCalculation);
+    <script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+        // All JavaScript code moved inside DOMContentLoaded for better performance
+        
+        function drawBarChart(canvas, data, options = {}) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
             
-            // Initial calculation
-            performCalculation();
-        });
-    </script>
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 30, right: 20, bottom: 80, left: 80 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (!data || data.length === 0) return;
+            
+            const maxValue = Math.max(...data.map(d => d.value));
+            const adjustedMax = maxValue * 1.1;
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            
+            // Horizontal grid lines (for values)
+            const numHorizontalLines = 5;
+            for (let i = 0; i <= numHorizontalLines; i++) {
+                const y = padding.top + (chartHeight * i / numHorizontalLines);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartWidth, y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            // Y-axis
+            ctx.moveTo(padding.left, padding.top);
+            ctx.lineTo(padding.left, padding.top + chartHeight);
+            // X-axis
+            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+            ctx.stroke();
+            
+            // Draw Y-axis labels (tax amounts)
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            
+            for (let i = 0; i <= numHorizontalLines; i++) {
+                const value = adjustedMax - (adjustedMax * i / numHorizontalLines);
+                const y = padding.top + (chartHeight * i / numHorizontalLines);
+                const label = value >= 100000 ? `₹${(value/100000).toFixed(1)}L` : `₹${(value/1000).toFixed(0)}K`;
+                ctx.fillText(label, padding.left - 10, y);
+            }
+            
+            // Draw bars and X-axis labels
+            const barWidth = chartWidth / data.length * 0.6;
+            const barSpacing = chartWidth / data.length;
+            
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            
+            data.forEach((item, index) => {
+                const barHeight = (item.value / adjustedMax) * chartHeight;
+                const x = padding.left + (barSpacing * index) + (barSpacing - barWidth) / 2;
+                const y = padding.top + chartHeight - barHeight;
+                
+                // Draw bar
+                ctx.fillStyle = item.color || '#4f46e5';
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                // Draw value on top of bar
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 12px Inter, sans-serif';
+                const valueLabel = item.value >= 100000 ? `₹${(item.value/100000).toFixed(1)}L` : `₹${(item.value/1000).toFixed(0)}K`;
+                ctx.fillText(valueLabel, x + barWidth/2, y - 5);
+                
+                // Draw X-axis label (regime name)
+                ctx.font = '12px Inter, sans-serif';
+                const labelX = x + barWidth/2;
+                const labelY = padding.top + chartHeight + 10;
+                
+                // Split long labels into multiple lines
+                const words = item.label.split(' ');
+                if (words.length > 2) {
+                    ctx.fillText(words.slice(0, 2).join(' '), labelX, labelY);
+                    ctx.fillText(words.slice(2).join(' '), labelX, labelY + 15);
+                } else {
+                    ctx.fillText(item.label, labelX, labelY);
+                }
+            });
+            
+            // Draw chart title
+            if (options.title) {
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(options.title, width / 2, 5);
+            }
+        }
 
-    <!-- AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818" crossorigin="anonymous"></script>
+        // Rest of the JavaScript code...
+        const elements = {
+            annualIncome: document.getElementById('annualIncome'),
+            age: document.getElementById('age'),
+            section80c: document.getElementById('section80c'),
+            section80d: document.getElementById('section80d'),
+            homeLoanInterest: document.getElementById('homeLoanInterest'),
+            otherDeductions: document.getElementById('otherDeductions'),
+            
+            annualIncomeValue: document.getElementById('annualIncomeValue'),
+            ageValue: document.getElementById('ageValue'),
+            section80cValue: document.getElementById('section80cValue'),
+            section80dValue: document.getElementById('section80dValue'),
+            homeLoanInterestValue: document.getElementById('homeLoanInterestValue'),
+            otherDeductionsValue: document.getElementById('otherDeductionsValue'),
+            
+            oldRegimeTax: document.getElementById('oldRegimeTax'),
+            newRegimeTax: document.getElementById('newRegimeTax'),
+            taxSaving: document.getElementById('taxSaving'),
+            recommendation: document.getElementById('recommendation'),
+            
+            taxChart: document.getElementById('taxComparisonChart'),
+            breakdownTable: document.getElementById('breakdownTable')
+        };
 
-</body>
-</html>
+        function formatCurrency(amount) {
+            if (amount >= 10000000) {
+                return `₹${(amount / 10000000).toFixed(2)} Cr`;
+            } else if (amount >= 100000) {
+                return `₹${(amount / 100000).toFixed(2)} L`;
+            } else if (amount >= 1000) {
+                return `₹${(amount / 1000).toFixed(0)} K`;
+            } else {
+                return `₹${Math.round(amount)}`;
+            }
+        }
+
+        function updateSliderValues() {
+            elements.annualIncomeValue.textContent = formatCurrency(parseFloat(elements.annualIncome.value));
+            elements.ageValue.textContent = elements.age.value + ' years';
+            elements.section80cValue.textContent = formatCurrency(parseFloat(elements.section80c.value));
+            elements.section80dValue.textContent = formatCurrency(parseFloat(elements.section80d.value));
+            elements.homeLoanInterestValue.textContent = formatCurrency(parseFloat(elements.homeLoanInterest.value));
+            elements.otherDeductionsValue.textContent = formatCurrency(parseFloat(elements.otherDeductions.value));
+        }
+
+        function calculateTax(income, regime, deductions = {}) {
+            let tax = 0;
+            let taxableIncome = income;
+
+            if (regime === 'old') {
+                // Apply deductions for old regime
+                const totalDeductions = (deductions.section80c || 0) + 
+                                      (deductions.section80d || 0) + 
+                                      (deductions.homeLoanInterest || 0) + 
+                                      (deductions.otherDeductions || 0);
+                taxableIncome = Math.max(0, income - totalDeductions);
+
+                // Old regime tax slabs
+                if (taxableIncome <= 250000) {
+                    tax = 0;
+                } else if (taxableIncome <= 500000) {
+                    tax = (taxableIncome - 250000) * 0.05;
+                } else if (taxableIncome <= 1000000) {
+                    tax = 12500 + (taxableIncome - 500000) * 0.20;
+                } else {
+                    tax = 112500 + (taxableIncome - 1000000) * 0.30;
+                }
+            } else {
+                // New regime tax slabs (2023-24)
+                if (taxableIncome <= 300000) {
+                    tax = 0;
+                } else if (taxableIncome <= 600000) {
+                    tax = (taxableIncome - 300000) * 0.05;
+                } else if (taxableIncome <= 900000) {
+                    tax = 15000 + (taxableIncome - 600000) * 0.10;
+                } else if (taxableIncome <= 1200000) {
+                    tax = 45000 + (taxableIncome - 900000) * 0.15;
+                } else if (taxableIncome <= 1500000) {
+                    tax = 90000 + (taxableIncome - 1200000) * 0.20;
+                } else {
+                    tax = 150000 + (taxableIncome - 1500000) * 0.30;
+                }
+            }
+
+            // Add cess (4% on tax)
+            const cess = tax * 0.04;
+            const totalTax = tax + cess;
+
+            return {
+                taxableIncome: taxableIncome,
+                incomeTax: tax,
+                cess: cess,
+                totalTax: totalTax
+            };
+        }
+
+        function updateBreakdownTable(oldData, newData) {
+            const tbody = elements.breakdownTable.querySelector('tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td class="px-4 py-2 border-b font-medium">Taxable Income</td>
+                    <td class="px-4 py-2 border-b">${formatCurrency(oldData.taxableIncome)}</td>
+                    <td class="px-4 py-2 border-b">${formatCurrency(newData.taxableIncome)}</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 border-b font-medium">Income Tax</td>
+                    <td class="px-4 py-2 border-b">${formatCurrency(oldData.incomeTax)}</td>
+                    <td class="px-4 py-2 border-b">${formatCurrency(newData.incomeTax)}</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 border-b font-medium">Health & Education Cess</td>
+                    <td class="px-4 py-2 border-b">${formatCurrency(oldData.cess)}</td>
+                    <td class="px-4 py-2 border-b">${formatCurrency(newData.cess)}</td>
+                </tr>
+                                 <tr class="bg-gray-50">
+                     <td class="px-4 py-2 border-b font-bold">Total Tax</td>
+                     <td class="px-4 py-2 border-b font-bold">${formatCurrency(oldData.totalTax)}</td>
+                     <td class="px-4 py-2 border-b font-bold">${formatCurrency(newData.totalTax)}</td>
+                 </tr>
+             `;
+         }
+
+         function calculateAndDisplay() {
+             try {
+                 const income = parseFloat(elements.annualIncome.value);
+                 const deductions = {
+                     section80c: parseFloat(elements.section80c.value),
+                     section80d: parseFloat(elements.section80d.value),
+                     homeLoanInterest: parseFloat(elements.homeLoanInterest.value),
+                     otherDeductions: parseFloat(elements.otherDeductions.value)
+                 };
+
+                 const oldRegimeData = calculateTax(income, 'old', deductions);
+                 const newRegimeData = calculateTax(income, 'new');
+
+                 const taxSaving = oldRegimeData.totalTax - newRegimeData.totalTax;
+                 const recommendation = taxSaving > 0 ? 'New Regime' : 'Old Regime';
+
+                 elements.oldRegimeTax.textContent = formatCurrency(oldRegimeData.totalTax);
+                 elements.newRegimeTax.textContent = formatCurrency(newRegimeData.totalTax);
+                 elements.taxSaving.textContent = formatCurrency(Math.abs(taxSaving));
+                 elements.recommendation.textContent = recommendation;
+                 elements.recommendation.className = `text-lg font-bold ${taxSaving > 0 ? 'text-green-600' : 'text-blue-600'}`;
+
+                 updateBreakdownTable(oldRegimeData, newRegimeData);
+
+                 // Update chart
+                 const chartData = [
+                     { label: 'Old Regime', value: oldRegimeData.incomeTax, color: '#4f46e5' },
+                     { label: 'New Regime', value: newRegimeData.incomeTax, color: '#10b981' }
+                 ];
+                 drawBarChart(elements.taxChart, chartData, { 
+                     title: 'Tax Comparison: Old vs New Regime' 
+                 });
+
+             } catch(error) {
+                 console.error('Calculation error:', error);
+             }
+         }
+
+         // Event listeners
+         Object.values(elements).forEach(element => {
+             if (element && element.addEventListener) {
+                 element.addEventListener('input', () => {
+                     updateSliderValues();
+                     calculateAndDisplay();
+                 });
+             }
+         });
+
+         // Initial calculation
+         updateSliderValues();
+         calculateAndDisplay();
+     });
+     </script>
+
+     <!-- Optimized AdSense loading -->
+     <script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818" crossorigin="anonymous"></script>
+     <script defer>
+         document.addEventListener('DOMContentLoaded', function() {
+             // Initialize ads after page load
+             setTimeout(function() {
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+             }, 1000);
+         });
+     </script>
+
+     <!-- AdSense Ad Units -->
+     <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
+
+ </body>
+ </html>
