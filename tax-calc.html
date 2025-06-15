@@ -18,23 +18,26 @@
             align-items: center;
             margin-bottom: 1rem;
             flex-wrap: wrap;
+            gap: 0.5rem;
         }
         .input-group label {
             flex-basis: 100%;
             font-weight: 500;
             color: #374151;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
         }
         .input-group .input-wrapper, .input-group .select-wrapper {
             flex-basis: 100%;
             position: relative;
         }
         @media (min-width: 640px) {
-             .input-group label {
+            .input-group label {
                 flex-basis: 50%;
                 margin-bottom: 0;
+                font-size: 1rem;
             }
-             .input-group .input-wrapper, .input-group .select-wrapper {
+            .input-group .input-wrapper, .input-group .select-wrapper {
                 flex-basis: 50%;
             }
         }
@@ -45,10 +48,11 @@
             padding: 0.75rem 1rem;
             transition: border-color 0.2s;
             background-color: white;
+            font-size: 0.95rem;
         }
-         .input-group input {
+        .input-group input {
             padding-left: 2.5rem;
-         }
+        }
         .input-group input:focus, .input-group select:focus {
             outline: none;
             border-color: #4f46e5;
@@ -65,7 +69,7 @@
         .result-card {
             border: 1px solid #e5e7eb;
             border-radius: 0.75rem;
-            padding: 1.5rem;
+            padding: 1.25rem;
             background-color: #ffffff;
             height: 100%;
         }
@@ -77,6 +81,8 @@
         .info-icon {
             cursor: pointer;
             color: #9ca3af;
+            width: 1.25rem;
+            height: 1.25rem;
         }
         .tooltip {
             visibility: hidden;
@@ -119,19 +125,50 @@
         .section-title {
             font-size: 1.25rem;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             padding-bottom: 0.75rem;
             border-bottom: 1px solid #e5e7eb;
             color: #111827;
+        }
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .result-card {
+                padding: 1rem;
+            }
+            .section-title {
+                font-size: 1.125rem;
+                margin-bottom: 1rem;
+            }
+            #calculate-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+            .chart-container {
+                height: 200px !important;
+            }
         }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <div class="container mx-auto px-4 py-8 md:py-12">
-        <div class="text-center mb-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Income Tax Calculator</h1>
-            <p id="ay-subtitle" class="mt-3 text-lg text-gray-600">Compare Old vs. New Regime</p>
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <div class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
+                <a href="/" class="flex items-center">
+                    <img src="logo-ai.webp" alt="AscentInvestor Logo" class="h-8 w-auto mr-2">
+                    AscentInvestor<span class="text-indigo-600">.</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6 md:py-12">
+        <div class="text-center mb-4 md:mb-6">
+            <h1 class="text-2xl md:text-4xl font-bold text-gray-900">Income Tax Calculator</h1>
+            <p id="ay-subtitle" class="mt-2 md:mt-3 text-base md:text-lg text-gray-600">Compare Old vs. New Regime</p>
         </div>
 
         <div class="max-w-xl mx-auto mb-10">
@@ -393,18 +430,38 @@
                     data: [data.old.totalTax, data.new.totalTax],
                     backgroundColor: ['rgba(99, 102, 241, 0.8)', 'rgba(249, 115, 22, 0.8)'],
                     borderColor: ['rgba(79, 70, 229, 1)', 'rgba(234, 88, 12, 1)'],
-                    borderWidth: 1, barPercentage: 0.6, categoryPercentage: 0.7
+                    borderWidth: 1,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7
                 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
                 scales: {
-                    x: { beginAtZero: true, ticks: { callback: (v) => '₹' + (v / 1000) + 'k', font: { size: 10 } }, grid: { display: false } },
-                    y: { ticks: { font: { weight: 'bold' } }, grid: { display: false } }
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => '₹' + (v / 1000) + 'k',
+                            font: { size: window.innerWidth < 640 ? 8 : 10 }
+                        },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: {
+                            font: { weight: 'bold', size: window.innerWidth < 640 ? 10 : 12 }
+                        },
+                        grid: { display: false }
+                    }
                 },
                 plugins: {
                     legend: { display: false },
-                    tooltip: { callbacks: { label: (c) => `Total Tax: ${formatCurrency(c.parsed.x)}` } }
+                    tooltip: {
+                        callbacks: { label: (c) => `Total Tax: ${formatCurrency(c.parsed.x)}` },
+                        titleFont: { size: window.innerWidth < 640 ? 10 : 12 },
+                        bodyFont: { size: window.innerWidth < 640 ? 10 : 12 }
+                    }
                 }
             }
         });

@@ -32,6 +32,7 @@
         /* Custom styles for better visual appeal */
         .tool-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%; /* Ensure all cards have same height */
         }
         .tool-card:hover {
             transform: translateY(-5px);
@@ -54,6 +55,28 @@
         .skip-link:focus {
             top: 0;
         }
+        /* Responsive improvements */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .tool-card {
+                margin-bottom: 1rem;
+            }
+        }
+        /* Coming soon badge */
+        .coming-soon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: #f59e0b;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -63,17 +86,16 @@
 
     <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold text-gray-900">
-                <a href="#">AscentInvestor<span class="text-indigo-600">.</span></a>
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <div class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
+                <a href="/" class="flex items-center">
+                    <img src="logo-ai.webp" alt="AscentInvestor Logo" class="h-8 w-auto mr-2">
+                    AscentInvestor<span class="text-indigo-600">.</span>
+                </a>
             </div>
             <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex items-center space-x-6">
-                <a href="#" class="text-gray-700 hover:text-indigo-600 transition">Membership</a>
-                <a href="#" class="text-gray-700 hover:text-indigo-600 transition">Masterclass</a>
-                <a href="#" class="text-gray-700 hover:text-indigo-600 transition">Newsletter</a>
-                <a href="#" class="text-indigo-600 font-semibold" aria-current="page">Tools</a>
-                <a href="#" class="text-gray-700 hover:text-indigo-600 transition">Log In</a>
-                <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Join the Club</a>
+                <a href="/" class="text-gray-700 hover:text-indigo-600 transition">Home</a>
+                <a href="/tools" class="text-indigo-600 font-semibold" aria-current="page">Tools</a>
             </nav>
             <div class="md:hidden">
                 <button aria-label="Open main menu" class="text-gray-700 hover:text-gray-900 focus:outline-none">
@@ -84,152 +106,163 @@
     </header>
 
     <!-- Main Content -->
-    <main id="main-content" role="main" class="container mx-auto px-6 py-12 md:py-20">
+    <main id="main-content" role="main" class="container mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-20">
         <!-- Title Section -->
-        <div class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Tools & Calculators</h1>
-            <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto">A suite of free financial calculators to help you plan your financial freedom journey.</p>
+        <div class="text-center mb-8 sm:mb-12">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">Tools & Calculators</h1>
+            <p class="mt-4 text-base sm:text-lg text-gray-700 max-w-2xl mx-auto">A suite of free financial calculators to help you plan your financial freedom journey.</p>
         </div>
 
         <!-- Tools Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
 
             <!-- Tool Card: Advanced SWP Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>SWP Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01V5M12 20v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1V9m0-1V7m0-1V5m0-1V4"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Advanced SWP Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Advanced SWP Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate your Systematic Withdrawal Plan with inflation adjustment and tax implications.</p>
                 <a href="swp-calc.html" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium">Open Calculator →</a>
             </div>
 
             <!-- Tool Card: Advanced Retirement Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Retirement Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Advanced Retirement Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Advanced Retirement Calculator</h3>
                 <p class="text-gray-700 flex-grow">Plan your retirement with detailed analysis of corpus, expenses, and investment returns.</p>
                 <a href="retirement-calc.html" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium">Open Calculator →</a>
             </div>
 
             <!-- Tool Card: Tax Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Tax Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Tax Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Tax Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate your income tax and plan your tax-saving investments.</p>
                 <a href="tax-calc.html" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium">Open Calculator →</a>
             </div>
 
             <!-- Tool Card: FD Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>FD Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">FD Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">FD Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate the maturity amount and interest earned on your Fixed Deposits.</p>
                 <a href="fd-calc.html" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium">Open Calculator →</a>
             </div>
 
             <!-- Tool Card: NPS Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                      <svg class="w-8 h-8 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>NPS Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01V5M12 20v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1V9m0-1V7m0-1V5m0-1V4"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">NPS Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">NPS Calculator</h3>
                 <p class="text-gray-700 flex-grow">Estimate your pension wealth and returns with the National Pension System.</p>
             </div>
 
             <!-- Tool Card: RD Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>RD Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">RD Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">RD Calculator</h3>
                 <p class="text-gray-700 flex-grow">Find out the maturity amount on your Recurring Deposit investments.</p>
             </div>
 
             <!-- Tool Card: CAGR Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>CAGR Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">CAGR Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">CAGR Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate the Compound Annual Growth Rate of your investments.</p>
             </div>
             
             <!-- Tool Card: NSC Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>NSC Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">NSC Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">NSC Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate the returns on your National Savings Certificate investment.</p>
             </div>
             
             <!-- Tool Card: HRA Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>HRA Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">HRA Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">HRA Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate your House Rent Allowance exemption with ease.</p>
             </div>
             
             <!-- Tool Card: MF Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                      <svg class="w-8 h-8 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Mutual Fund Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">MF Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">MF Calculator</h3>
                 <p class="text-gray-700 flex-grow">Estimate the returns on your Mutual Fund investments.</p>
             </div>
             
             <!-- Tool Card: SSY Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>SSY Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 016-6h6a6 6 0 016 6v1h-3z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">SSY Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">SSY Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate returns for the Sukanya Samriddhi Yojana scheme.</p>
             </div>
 
             <!-- Tool Card: IRR Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>IRR Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M12 21a9 9 0 110-18 9 9 0 010 18zM12 3v1.5M12 19.5V21M4 12H2.5M21.5 12H20"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">IRR Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">IRR Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate the Internal Rate of Return for a series of cash flows.</p>
             </div>
             
             <!-- Tool Card: SIP Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-lime-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>SIP Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">SIP Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">SIP Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate the future value of your Systematic Investment Plan.</p>
             </div>
 
             <!-- Tool Card: Goal SIP Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                     <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Goal SIP Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Goal SIP Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Goal SIP Calculator</h3>
                 <p class="text-gray-700 flex-grow">Plan your investments to achieve specific financial goals.</p>
             </div>
 
             <!-- Tool Card: FIRE Calculator -->
-            <div class="tool-card bg-white p-6 rounded-xl border border-gray-200 flex flex-col items-start">
+            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
+                <span class="coming-soon">Coming Soon</span>
                 <div class="icon-bg p-3 rounded-lg mb-4">
                      <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>FIRE Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7.014A8.003 8.003 0 0122 12c0 3.771-2.59 6.957-6.028 7.857-1.12.264-2.288.42-3.472.434-.23.003-.46.004-.69.004-.236 0-.47-.002-.705-.005A8.004 8.004 0 0112 20c-1.046 0-2.044-.204-2.94-.576-1.554-.64-2.898-1.63-3.9-2.885"></path></svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">FIRE Calculator</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">FIRE Calculator</h3>
                 <p class="text-gray-700 flex-grow">Calculate your corpus for Financial Independence, Retire Early.</p>
             </div>
 
@@ -238,7 +271,7 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 mt-16">
-        <div class="container mx-auto px-6 py-12">
+        <div class="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- About -->
                 <div class="col-span-1">
@@ -251,8 +284,8 @@
                 <div role="navigation" aria-label="Footer Quick Links">
                     <h5 class="font-semibold text-gray-800 mb-4">Quick Links</h5>
                     <ul class="space-y-3 text-gray-700">
-                        <li><a href="#" class="hover:text-indigo-600">Home</a></li>
-                        <li><a href="#" class="hover:text-indigo-600">Tools</a></li>
+                        <li><a href="/" class="hover:text-indigo-600">Home</a></li>
+                        <li><a href="/tools" class="hover:text-indigo-600">Tools</a></li>
                     </ul>
                 </div>
                 
@@ -260,8 +293,8 @@
                 <div role="navigation" aria-label="Footer Support Links">
                     <h5 class="font-semibold text-gray-800 mb-4">Support</h5>
                     <ul class="space-y-3 text-gray-700">
-                        <li><a href="#" class="hover:text-indigo-600">About Us</a></li>
-                        <li><a href="#" class="hover:text-indigo-600">Career</a></li>
+                        <li><a href="/about" class="hover:text-indigo-600">About Us</a></li>
+                        <li><a href="/career" class="hover:text-indigo-600">Career</a></li>
                     </ul>
                 </div>
 
@@ -269,14 +302,14 @@
                 <div role="navigation" aria-label="Footer Legal Links">
                     <h5 class="font-semibold text-gray-800 mb-4">Legal</h5>
                     <ul class="space-y-3 text-gray-700">
-                        <li><a href="#" class="hover:text-indigo-600">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:text-indigo-600">Refund Policy</a></li>
-                        <li><a href="#" class="hover:text-indigo-600">Terms & Conditions</a></li>
-                        <li><a href="#" class="hover:text-indigo-600">FB Disclaimer</a></li>
+                        <li><a href="/privacy-policy" class="hover:text-indigo-600">Privacy Policy</a></li>
+                        <li><a href="/refund-policy" class="hover:text-indigo-600">Refund Policy</a></li>
+                        <li><a href="/terms-conditions" class="hover:text-indigo-600">Terms & Conditions</a></li>
+                        <li><a href="/fb-disclaimer" class="hover:text-indigo-600">FB Disclaimer</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="mt-12 border-t pt-8 text-center text-gray-600">
+            <div class="mt-8 sm:mt-12 border-t pt-8 text-center text-gray-600">
                 <p>&copy; 2024 AscentInvestor Ventures Private Limited. All Rights Reserved.</p>
             </div>
         </div>
