@@ -23,6 +23,7 @@
         body {
             font-family: 'Inter', sans-serif;
             scroll-behavior: smooth;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* Custom styling for the range sliders */
@@ -45,8 +46,8 @@
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 24px; /* Increased for better touch target */
+            height: 24px; /* Increased for better touch target */
             background: #3b82f6; /* blue-500 */
             cursor: pointer;
             border-radius: 50%;
@@ -55,8 +56,8 @@
         }
 
         input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 24px; /* Increased for better touch target */
+            height: 24px; /* Increased for better touch target */
             background: #3b82f6; /* blue-500 */
             cursor: pointer;
             border-radius: 50%;
@@ -67,28 +68,100 @@
         /* Responsive chart containers */
         .chart-container {
             position: relative;
-            height: 200px; /* Default height for mobile */
+            height: 250px; /* Increased default height for better visibility */
             width: 100%;
+            margin: 1rem 0;
         }
         
         .line-chart-container {
              position: relative;
-             height: 300px; /* Default height for mobile */
+             height: 350px; /* Increased default height for better visibility */
              width: 100%;
+             margin: 1rem 0;
         }
 
         /* Taller charts on medium screens and up */
         @media (min-width: 768px) {
             .chart-container {
-                height: 250px;
+                height: 300px;
             }
             .line-chart-container {
-                height: 400px;
+                height: 450px;
+            }
+        }
+
+        /* Mobile-friendly input styles */
+        input[type="number"], input[type="date"], select {
+            font-size: 16px; /* Prevents iOS zoom on focus */
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        input[type="number"]:focus, input[type="date"]:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Mobile-friendly table styles */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -1rem;
+            padding: 0 1rem;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .grid {
+                gap: 1.5rem;
+            }
+
+            /* Adjust text sizes for mobile */
+            h1 {
+                font-size: 1.5rem !important;
+            }
+
+            h2 {
+                font-size: 1.25rem !important;
+            }
+
+            h3 {
+                font-size: 1.125rem !important;
+            }
+
+            /* Make input labels more touch-friendly */
+            label {
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+
+            /* Adjust spacing for mobile */
+            .space-y-6 > * + * {
+                margin-top: 1.25rem;
             }
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <div class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
+                <a href="/" class="flex items-center">
+                    <img src="logo-ai.webp" alt="AscentInvestor Logo" class="h-8 w-auto mr-2">
+                    AscentInvestor<span class="text-indigo-600">.</span>
+                </a>
+            </div>
+        </div>
+    </header>
 
     <div class="container mx-auto p-4 md:p-8">
         <!-- Main Calculator Card -->
@@ -98,7 +171,7 @@
                 <p class="text-gray-500 mt-2">Estimate your returns with detailed growth analysis.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-8">
 
                 <!-- Left Side: Input Controls -->
                 <div class="md:col-span-3 space-y-6">
@@ -148,7 +221,7 @@
                 </div>
 
                 <!-- Right Side: Results & Chart -->
-                <div class="md:col-span-2 flex flex-col justify-between items-center bg-blue-50/50 rounded-lg p-6">
+                <div class="md:col-span-2 flex flex-col justify-between items-center bg-blue-50/50 rounded-lg p-4 md:p-6">
                     <div class="w-full">
                         <!-- Results Display -->
                         <div class="space-y-3 text-center">
@@ -192,7 +265,7 @@
                 <!-- Year-wise Table -->
                 <div>
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Year-wise Breakdown</h3>
-                    <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <div class="table-container">
                         <table class="w-full text-sm text-left text-gray-600">
                             <thead class="bg-gray-100 text-xs text-gray-700 uppercase">
                                 <tr>
@@ -304,13 +377,18 @@
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             fill: true,
                             tension: 0.3,
-                            pointRadius: 4,
+                            pointRadius: window.innerWidth < 768 ? 3 : 4, // Smaller points on mobile
                             pointBackgroundColor: '#3b82f6'
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        },
                         scales: {
                              x: {
                                 type: 'time',
@@ -318,17 +396,42 @@
                                     unit: 'year',
                                     tooltipFormat: 'MMM yyyy'
                                 },
-                                title: { display: true, text: 'Date' }
+                                title: { 
+                                    display: true, 
+                                    text: 'Date',
+                                    font: {
+                                        size: window.innerWidth < 768 ? 12 : 14
+                                    }
+                                }
                             },
                             y: {
-                                title: { display: true, text: 'Value (₹)' },
+                                title: { 
+                                    display: true, 
+                                    text: 'Value (₹)',
+                                    font: {
+                                        size: window.innerWidth < 768 ? 12 : 14
+                                    }
+                                },
                                 ticks: {
-                                    callback: (value) => new Intl.NumberFormat('en-IN', { notation: 'compact', compactDisplay: 'short'}).format(value)
+                                    callback: (value) => new Intl.NumberFormat('en-IN', { notation: 'compact', compactDisplay: 'short'}).format(value),
+                                    font: {
+                                        size: window.innerWidth < 768 ? 10 : 12
+                                    }
                                 }
                             }
                         },
                         plugins: {
-                            tooltip: { callbacks: { label: (c) => ` Value: ${formatCurrency(c.parsed.y)}` } }
+                            tooltip: { 
+                                callbacks: { 
+                                    label: (c) => ` Value: ${formatCurrency(c.parsed.y)}` 
+                                },
+                                titleFont: {
+                                    size: window.innerWidth < 768 ? 12 : 14
+                                },
+                                bodyFont: {
+                                    size: window.innerWidth < 768 ? 12 : 14
+                                }
+                            }
                         }
                     }
                 });
