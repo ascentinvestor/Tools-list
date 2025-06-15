@@ -3,615 +3,565 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Apple Touch Icon for iOS PWA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon-192x192.png">
     <title>Advanced FD Calculator</title>
     <meta name="description" content="Calculate your Fixed Deposit (FD) maturity amount, total interest, and visualize your investment growth with our advanced FD calculator. Features a year-wise breakdown table and interactive charts.">
-    
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js for data visualization -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+    
+    <!-- Preload critical images -->
+    <link rel="preload" as="image" href="logo-ai.webp" type="image/webp">
+    
     <style>
-        /* Custom styles to enhance the UI */
-        body {
-            font-family: 'Inter', sans-serif;
-            scroll-behavior: smooth;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Custom styling for the range sliders */
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 8px;
-            background: #e5e7eb; /* gray-200 */
-            border-radius: 9999px;
-            outline: none;
-            opacity: 0.9;
-            transition: opacity .2s;
-        }
-
-        input[type="range"]:hover {
-            opacity: 1;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px; /* Increased for better touch target */
-            height: 24px; /* Increased for better touch target */
-            background: #3b82f6; /* blue-500 */
-            cursor: pointer;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(0,0,0,0.2);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 24px; /* Increased for better touch target */
-            height: 24px; /* Increased for better touch target */
-            background: #3b82f6; /* blue-500 */
-            cursor: pointer;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(0,0,0,0.2);
-        }
-        
-        /* Responsive chart containers */
-        .chart-container {
-            position: relative;
-            height: 250px; /* Increased default height for better visibility */
-            width: 100%;
-            margin: 1rem 0;
-        }
-        
-        .line-chart-container {
-             position: relative;
-             height: 350px; /* Increased default height for better visibility */
-             width: 100%;
-             margin: 1rem 0;
-        }
-
-        /* Taller charts on medium screens and up */
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 300px;
-            }
-            .line-chart-container {
-                height: 450px;
-            }
-        }
-
-        /* Mobile-friendly input styles */
-        input[type="number"], input[type="date"], select {
-            font-size: 16px; /* Prevents iOS zoom on focus */
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #e5e7eb;
-            background-color: #f9fafb;
-            width: 100%;
-            transition: all 0.2s;
-        }
-
-        input[type="number"]:focus, input[type="date"]:focus, select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        /* Mobile-friendly table styles */
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin: 0 -1rem;
-            padding: 0 1rem;
-        }
-
-        @media (max-width: 640px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .grid {
-                gap: 1.5rem;
-            }
-
-            /* Adjust text sizes for mobile */
-            h1 {
-                font-size: 1.5rem !important;
-            }
-
-            h2 {
-                font-size: 1.25rem !important;
-            }
-
-            h3 {
-                font-size: 1.125rem !important;
-            }
-
-            /* Make input labels more touch-friendly */
-            label {
-                margin-bottom: 0.5rem;
-                display: block;
-            }
-
-            /* Adjust spacing for mobile */
-            .space-y-6 > * + * {
-                margin-top: 1.25rem;
-            }
+        /* Minimal CSS reset and styles */
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Inter',sans-serif;line-height:1.6;color:#374151;background:#f9fafb}
+        .container{max-width:1200px;margin:0 auto;padding:0 1rem}
+        .header{background:white;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:1rem 0}
+        .header-flex{display:flex;justify-content:space-between;align-items:center}
+        .logo{display:flex;align-items:center;font-size:1.5rem;font-weight:700;color:#111827;text-decoration:none}
+        .logo:hover{color:#4f46e5}
+        .logo img{height:2rem;margin-right:0.5rem}
+        .nav{display:flex;gap:1.5rem}
+        .nav a{color:#6b7280;text-decoration:none}
+        .nav a:hover{color:#4f46e5}
+        .main{padding:2rem 0}
+        .title{text-align:center;margin-bottom:2rem}
+        .title h1{font-size:2.5rem;font-weight:700;color:#111827;margin-bottom:0.5rem}
+        .title p{font-size:1.125rem;color:#6b7280}
+        .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem}
+        @media (max-width:768px){.calc-grid{grid-template-columns:1fr}}
+        .card{background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .form-group{margin-bottom:1.5rem}
+        .form-group label{display:block;font-weight:600;margin-bottom:0.5rem;color:#374151}
+        .form-group input,.form-group select{width:100%;padding:0.75rem;border:1px solid #d1d5db;border-radius:0.5rem;font-size:1rem}
+        .form-group input:focus,.form-group select:focus{outline:none;border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,0.1)}
+        .slider-container{display:flex;align-items:center;gap:1rem;margin-top:0.5rem}
+        .slider{flex:1;height:0.5rem;border-radius:0.25rem;background:#e5e7eb;outline:none;appearance:none}
+        .slider::-webkit-slider-thumb{appearance:none;width:1.25rem;height:1.25rem;border-radius:50%;background:#4f46e5;cursor:pointer}
+        .slider::-moz-range-thumb{width:1.25rem;height:1.25rem;border-radius:50%;background:#4f46e5;cursor:pointer;border:none}
+        .results{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:2rem}
+        .result-item{text-align:center;padding:1rem;background:#f8fafc;border-radius:0.5rem}
+        .result-label{font-size:0.875rem;color:#6b7280;margin-bottom:0.25rem}
+        .result-value{font-size:1.25rem;font-weight:700;color:#4f46e5}
+        .chart-container{width:100%;height:250px;margin:1rem 0;background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .chart{width:100%;height:100%}
+        .table-container{overflow-x:auto;margin-top:2rem}
+        .table{width:100%;border-collapse:collapse;background:white;border-radius:0.75rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .table th,.table td{padding:0.75rem;text-align:left;border-bottom:1px solid #e5e7eb}
+        .table th{background:#f9fafb;font-weight:600;color:#374151}
+        .table tr:hover{background:#f9fafb}
+        .footer{background:white;border-top:1px solid #e5e7eb;margin-top:4rem;padding:2rem 0}
+        .footer-content{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem}
+        .footer-title{font-weight:700;margin-bottom:1rem;color:#111827}
+        .footer-links{list-style:none}
+        .footer-links li{margin-bottom:0.5rem}
+        .footer-links a{color:#6b7280;text-decoration:none;display:flex;align-items:center}
+        .footer-links a:hover{color:#4f46e5}
+        .footer-links svg{width:1rem;height:1rem;margin-right:0.5rem}
+        .footer-bottom{text-align:center;margin-top:2rem;padding-top:2rem;border-top:1px solid #e5e7eb;color:#6b7280}
+        @media (max-width:640px){
+            .title h1{font-size:2rem}
+            .calc-grid{grid-template-columns:1fr}
+            .results{grid-template-columns:1fr}
+            .slider-container{flex-direction:column;align-items:stretch}
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
-
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-            <div class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
-                <div class="flex items-center">
-                    <img src="logo-ai.webp" alt="AscentInvestor Logo" class="h-8 w-auto mr-2">
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-flex">
+                <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
+                    <img src="logo-ai.webp" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
                     AscentInvestor
-                </div>
-            </div>
-            <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex items-center space-x-6">
-                <a href="index.html" class="text-gray-700 hover:text-indigo-600 transition">Tools</a>
-            </nav>
-            <div class="md:hidden">
-                <button aria-label="Open main menu" class="text-gray-700 hover:text-gray-900 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Menu Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
+                </a>
+                <nav class="nav">
+                    <a href="index.html">Tools</a>
+                </nav>
             </div>
         </div>
     </header>
 
-    <div class="container mx-auto p-4 md:p-8">
-        <!-- Main Calculator Card -->
-        <div class="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
-            <div class="text-center mb-8">
-                <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Advanced Fixed Deposit (FD) Calculator</h1>
-                <p class="text-gray-500 mt-2">Estimate your returns with detailed growth analysis.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-8">
-
-                <!-- Left Side: Input Controls -->
-                <div class="md:col-span-3 space-y-6">
-                    <!-- Investment Amount -->
-                    <div>
-                        <label for="investment" class="flex justify-between items-center text-lg font-medium text-gray-700 mb-2">
-                            <span>Investment Amount</span>
-                            <span class="text-blue-600 font-bold">₹ <input type="number" id="investmentValue" class="w-28 md:w-32 bg-gray-100 p-1 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-blue-500" value="100000"></span>
-                        </label>
-                        <input type="range" id="investmentSlider" min="1000" max="10000000" step="1000" value="100000" class="w-full">
-                    </div>
-
-                    <!-- Rate of Interest -->
-                    <div>
-                        <label for="interestRate" class="flex justify-between items-center text-lg font-medium text-gray-700 mb-2">
-                            <span>Rate of Interest (% p.a.)</span>
-                            <span class="text-blue-600 font-bold"><input type="number" id="interestRateValue" class="w-20 md:w-24 bg-gray-100 p-1 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-blue-500" value="7.0" step="0.1"> %</span>
-                        </label>
-                        <input type="range" id="interestRateSlider" min="1" max="15" step="0.1" value="7.0" class="w-full">
-                    </div>
-
-                    <!-- Time Period & Date -->
-                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                         <div>
-                            <label for="timePeriod" class="flex justify-between items-center text-lg font-medium text-gray-700 mb-2">
-                                <span>Time Period (Yrs)</span>
-                                <span class="text-blue-600 font-bold"><input type="number" id="timePeriodValue" class="w-20 md:w-24 bg-gray-100 p-1 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-blue-500" value="5"></span>
-                            </label>
-                            <input type="range" id="timePeriodSlider" min="1" max="30" step="1" value="5" class="w-full">
-                        </div>
-                        <div>
-                            <label for="investmentDate" class="block text-lg font-medium text-gray-700 mb-2">Investment Date</label>
-                            <input type="date" id="investmentDate" class="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                        </div>
-                    </div>
-
-                    <!-- Compounding Frequency -->
-                    <div>
-                         <label for="compoundingFrequency" class="block text-lg font-medium text-gray-700 mb-2">Compounding Frequency</label>
-                         <select id="compoundingFrequency" class="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                             <option value="12">Monthly</option>
-                             <option value="4" selected>Quarterly</option>
-                             <option value="2">Half-Yearly</option>
-                             <option value="1">Annually</option>
-                         </select>
-                    </div>
-                </div>
-
-                <!-- Right Side: Results & Chart -->
-                <div class="md:col-span-2 flex flex-col justify-between items-center bg-blue-50/50 rounded-lg p-4 md:p-6">
-                    <div class="w-full">
-                        <!-- Results Display -->
-                        <div class="space-y-3 text-center">
-                             <div>
-                                <p class="text-sm text-gray-500">Maturity Date</p>
-                                <p id="maturityDate" class="text-xl font-semibold text-gray-800">-</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Invested Amount</p>
-                                <p id="investedAmount" class="text-2xl font-semibold text-gray-800">₹ 1,00,000</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Total Interest</p>
-                                <p id="totalInterest" class="text-2xl font-semibold text-green-600">₹ 41,612</p>
-                            </div>
-                             <div>
-                                <p class="text-sm text-gray-500">Maturity Value</p>
-                                <p id="maturityValue" class="text-3xl font-bold text-blue-600">₹ 1,41,612</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Doughnut Chart Container -->
-                    <div class="chart-container mt-4 w-full">
-                        <canvas id="fdDoughnutChart"></canvas>
-                    </div>
-                </div>
-            </div>
+    <!-- Main Content -->
+    <main class="container main">
+        <div class="title">
+            <h1>Advanced FD Calculator</h1>
+            <p>Calculate your Fixed Deposit maturity amount, total interest, and visualize your investment growth</p>
         </div>
 
-        <!-- Detailed Analysis Section -->
-        <div id="analysisSection" class="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8 mt-8">
-            <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">Investment Growth Analysis</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <div class="calc-grid">
+            <!-- Left Side: Input Controls -->
+            <div class="card">
+                <div class="form-group">
+                    <label for="investmentValue">Principal Amount (₹)</label>
+                    <input type="number" id="investmentValue" value="100000" min="1000" max="10000000" step="1000">
+                    <div class="slider-container">
+                        <input type="range" id="investmentSlider" min="10000" max="1000000" value="100000" step="5000" class="slider">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="interestRateValue">Interest Rate (% per annum)</label>
+                    <input type="number" id="interestRateValue" value="7.5" min="1" max="15" step="0.1">
+                    <div class="slider-container">
+                        <input type="range" id="interestRateSlider" min="1" max="15" value="7.5" step="0.1" class="slider">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="timePeriodValue">Time Period (Years)</label>
+                    <input type="number" id="timePeriodValue" value="3" min="1" max="10" step="1">
+                    <div class="slider-container">
+                        <input type="range" id="timePeriodSlider" min="1" max="10" value="3" step="1" class="slider">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="investmentDate">Investment Date</label>
+                    <input type="date" id="investmentDate" value="2024-01-01">
+                </div>
+
+                <div class="form-group">
+                    <label for="compoundingFrequency">Compounding Frequency</label>
+                    <select id="compoundingFrequency">
+                        <option value="1">Annually</option>
+                        <option value="2">Half-Yearly</option>
+                        <option value="4" selected>Quarterly</option>
+                        <option value="12">Monthly</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Right Side: Results & Charts -->
+            <div class="card">
+                <div class="results">
+                    <div class="result-item">
+                        <div class="result-label">Invested Amount</div>
+                        <div id="investedAmount" class="result-value">₹ 0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Total Interest</div>
+                        <div id="totalInterest" class="result-value">₹ 0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Maturity Value</div>
+                        <div id="maturityValue" class="result-value">₹ 0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Maturity Date</div>
+                        <div id="maturityDate" class="result-value">-</div>
+                    </div>
+                </div>
+                
+                <!-- Simple Pie Chart -->
+                <div class="chart-container">
+                    <canvas id="fdDoughnutChart" class="chart"></canvas>
+                </div>
+                
                 <!-- Line Chart -->
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Growth Over Time</h3>
-                    <div class="line-chart-container">
-                        <canvas id="fdLineChart"></canvas>
-                    </div>
-                </div>
-                <!-- Year-wise Table -->
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Year-wise Breakdown</h3>
-                    <div class="table-container">
-                        <table class="w-full text-sm text-left text-gray-600">
-                            <thead class="bg-gray-100 text-xs text-gray-700 uppercase">
-                                <tr>
-                                    <th scope="col" class="px-4 py-3">Year</th>
-                                    <th scope="col" class="px-4 py-3 text-right">Opening Balance</th>
-                                    <th scope="col" class="px-4 py-3 text-right">Interest Earned</th>
-                                    <th scope="col" class="px-4 py-3 text-right">Closing Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody id="yearlyBreakdownBody">
-                                <!-- Rows will be injected by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="chart-container">
+                    <canvas id="fdLineChart" class="chart"></canvas>
                 </div>
             </div>
         </div>
 
-    </div>
+        <!-- Year-wise Breakdown Table -->
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Opening Balance</th>
+                        <th>Interest Earned</th>
+                        <th>Closing Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="yearlyBreakdownBody">
+                    <tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <h4 class="footer-title">AscentInvestor</h4>
+                    <p>AscentInvestor Ventures Private Limited</p>
+                    <p style="margin-top:1rem">support@ascentinvestor.in</p>
+                </div>
+                <div>
+                    <h5 class="footer-title">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Tools</a></li>
+                        <li><a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer">
+                            <svg fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube Channel
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AscentInvestor Ventures Private Limited. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // DOM element references
-        const investmentSlider = document.getElementById('investmentSlider');
-        const investmentValue = document.getElementById('investmentValue');
-        const interestRateSlider = document.getElementById('interestRateSlider');
-        const interestRateValue = document.getElementById('interestRateValue');
-        const timePeriodSlider = document.getElementById('timePeriodSlider');
-        const timePeriodValue = document.getElementById('timePeriodValue');
-        const investmentDateEl = document.getElementById('investmentDate');
-        const compoundingFrequency = document.getElementById('compoundingFrequency');
-
-        const maturityDateEl = document.getElementById('maturityDate');
-        const investedAmountEl = document.getElementById('investedAmount');
-        const totalInterestEl = document.getElementById('totalInterest');
-        const maturityValueEl = document.getElementById('maturityValue');
-        const yearlyBreakdownBody = document.getElementById('yearlyBreakdownBody');
-
-        const doughnutChartCanvas = document.getElementById('fdDoughnutChart');
-        const lineChartCanvas = document.getElementById('fdLineChart');
-        let fdDoughnutChart, fdLineChart;
-
-        // --- Helper Functions ---
-        
-        function formatCurrency(num) {
-            return new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-            }).format(num);
+        // Lightweight chart implementations
+        function drawPieChart(canvas, data, options = {}) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 2 - 60;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (!data || data.length === 0) return;
+            
+            const total = data.reduce((sum, item) => sum + item.value, 0);
+            let currentAngle = -Math.PI / 2;
+            
+            const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444'];
+            
+            // Draw pie slices
+            data.forEach((item, index) => {
+                const sliceAngle = (item.value / total) * 2 * Math.PI;
+                
+                ctx.fillStyle = colors[index % colors.length];
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw labels
+                const labelAngle = currentAngle + sliceAngle / 2;
+                const labelX = centerX + Math.cos(labelAngle) * (radius + 30);
+                const labelY = centerY + Math.sin(labelAngle) * (radius + 30);
+                
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                const percentage = ((item.value / total) * 100).toFixed(1);
+                const valueText = item.value >= 100000 ? `₹${(item.value/100000).toFixed(1)}L` : `₹${(item.value/1000).toFixed(0)}K`;
+                ctx.fillText(`${item.label}`, labelX, labelY - 8);
+                ctx.fillText(`${valueText} (${percentage}%)`, labelX, labelY + 8);
+                
+                currentAngle += sliceAngle;
+            });
+            
+            // Draw title
+            if (options.title) {
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(options.title, width / 2, 5);
+            }
         }
 
-        function formatDate(date) {
-            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        function drawLineChart(canvas, data, options = {}) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 20, bottom: 60, left: 80 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (!data || data.length === 0) return;
+            
+            // Find min/max values
+            const maxValue = Math.max(...data.map(d => d.value));
+            const minValue = Math.min(...data.map(d => d.value));
+            const valueRange = maxValue - minValue;
+            const adjustedMax = maxValue + (valueRange * 0.1);
+            const adjustedMin = Math.max(0, minValue - (valueRange * 0.1));
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            
+            // Horizontal grid lines (for values)
+            const numHorizontalLines = 5;
+            for (let i = 0; i <= numHorizontalLines; i++) {
+                const y = padding.top + (chartHeight * i / numHorizontalLines);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartWidth, y);
+                ctx.stroke();
+            }
+            
+            // Vertical grid lines (for years)
+            const numVerticalLines = Math.min(data.length - 1, 10);
+            for (let i = 0; i <= numVerticalLines; i++) {
+                const x = padding.left + (chartWidth * i / numVerticalLines);
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, padding.top + chartHeight);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            // Y-axis
+            ctx.moveTo(padding.left, padding.top);
+            ctx.lineTo(padding.left, padding.top + chartHeight);
+            // X-axis
+            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+            ctx.stroke();
+            
+            // Draw Y-axis labels (values)
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            
+            for (let i = 0; i <= numHorizontalLines; i++) {
+                const value = adjustedMax - ((adjustedMax - adjustedMin) * i / numHorizontalLines);
+                const y = padding.top + (chartHeight * i / numHorizontalLines);
+                const label = value >= 10000000 ? `₹${(value/10000000).toFixed(1)}Cr` : 
+                             value >= 100000 ? `₹${(value/100000).toFixed(1)}L` : 
+                             `₹${(value/1000).toFixed(0)}K`;
+                ctx.fillText(label, padding.left - 10, y);
+            }
+            
+            // Draw X-axis labels (years)
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            
+            const labelStep = Math.max(1, Math.floor(data.length / 10));
+            for (let i = 0; i < data.length; i += labelStep) {
+                const x = padding.left + (chartWidth * i / (data.length - 1));
+                const year = data[i].year || (new Date().getFullYear() + i);
+                ctx.fillText(year.toString(), x, padding.top + chartHeight + 10);
+            }
+            
+            // Add last year if not already shown
+            if ((data.length - 1) % labelStep !== 0) {
+                const x = padding.left + chartWidth;
+                const year = data[data.length - 1].year || (new Date().getFullYear() + data.length - 1);
+                ctx.fillText(year.toString(), x, padding.top + chartHeight + 10);
+            }
+            
+            // Draw chart title
+            if (options.title) {
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(options.title, width / 2, 5);
+            }
+            
+            // Draw the line
+            ctx.strokeStyle = options.color || '#4f46e5';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            data.forEach((point, index) => {
+                const x = padding.left + (chartWidth * index / (data.length - 1));
+                const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+            
+            // Draw data points
+            ctx.fillStyle = options.color || '#4f46e5';
+            data.forEach((point, index) => {
+                const x = padding.left + (chartWidth * index / (data.length - 1));
+                const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            });
         }
 
-
-        // --- Chart Initialization and Updates ---
-        
-        function createOrUpdateDoughnutChart(principal, interest) {
-            const chartData = {
-                labels: ['Principal Amount', 'Total Interest'],
-                datasets: [{
-                    data: [principal, interest],
-                    backgroundColor: ['#3b82f6', '#22c55e'],
-                    borderColor: '#ffffff',
-                    borderWidth: 2,
-                    hoverOffset: 4
-                }]
+        // Main calculation logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = {
+                investmentSlider: document.getElementById('investmentSlider'),
+                investmentValue: document.getElementById('investmentValue'),
+                interestRateSlider: document.getElementById('interestRateSlider'),
+                interestRateValue: document.getElementById('interestRateValue'),
+                timePeriodSlider: document.getElementById('timePeriodSlider'),
+                timePeriodValue: document.getElementById('timePeriodValue'),
+                investmentDate: document.getElementById('investmentDate'),
+                compoundingFrequency: document.getElementById('compoundingFrequency'),
+                maturityDate: document.getElementById('maturityDate'),
+                investedAmount: document.getElementById('investedAmount'),
+                totalInterest: document.getElementById('totalInterest'),
+                maturityValue: document.getElementById('maturityValue'),
+                yearlyBreakdownBody: document.getElementById('yearlyBreakdownBody'),
+                fdDoughnutChart: document.getElementById('fdDoughnutChart'),
+                fdLineChart: document.getElementById('fdLineChart')
             };
 
-            if (fdDoughnutChart) {
-                fdDoughnutChart.data.datasets[0].data = [principal, interest];
-                fdDoughnutChart.update();
-            } else {
-                fdDoughnutChart = new Chart(doughnutChartCanvas, {
-                    type: 'doughnut',
-                    data: chartData,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '60%',
-                        plugins: {
-                            legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 20 } },
-                            tooltip: { callbacks: { label: (c) => ` ${c.label}: ${formatCurrency(c.parsed)}` } }
-                        }
-                    }
-                });
-            }
-        }
-
-        function createOrUpdateLineChart(yearlyData) {
-            const labels = yearlyData.map(d => d.date);
-            const data = yearlyData.map(d => d.closingBalance);
-
-            if (fdLineChart) {
-                fdLineChart.data.labels = labels;
-                fdLineChart.data.datasets[0].data = data;
-                fdLineChart.update();
-            } else {
-                fdLineChart = new Chart(lineChartCanvas, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Investment Value',
-                            data: data,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: window.innerWidth < 768 ? 3 : 4, // Smaller points on mobile
-                            pointBackgroundColor: '#3b82f6'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'nearest',
-                            axis: 'x',
-                            intersect: false
-                        },
-                        scales: {
-                             x: {
-                                type: 'time',
-                                time: {
-                                    unit: 'year',
-                                    tooltipFormat: 'MMM yyyy'
-                                },
-                                title: { 
-                                    display: true, 
-                                    text: 'Date',
-                                    font: {
-                                        size: window.innerWidth < 768 ? 12 : 14
-                                    }
-                                }
-                            },
-                            y: {
-                                title: { 
-                                    display: true, 
-                                    text: 'Value (₹)',
-                                    font: {
-                                        size: window.innerWidth < 768 ? 12 : 14
-                                    }
-                                },
-                                ticks: {
-                                    callback: (value) => new Intl.NumberFormat('en-IN', { notation: 'compact', compactDisplay: 'short'}).format(value),
-                                    font: {
-                                        size: window.innerWidth < 768 ? 10 : 12
-                                    }
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: { 
-                                callbacks: { 
-                                    label: (c) => ` Value: ${formatCurrency(c.parsed.y)}` 
-                                },
-                                titleFont: {
-                                    size: window.innerWidth < 768 ? 12 : 14
-                                },
-                                bodyFont: {
-                                    size: window.innerWidth < 768 ? 12 : 14
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        // --- Table Generation ---
-        function updateBreakdownTable(yearlyData) {
-            yearlyBreakdownBody.innerHTML = ''; // Clear previous data
-            if (yearlyData.length === 0) {
-                 yearlyBreakdownBody.innerHTML = `<tr><td colspan="4" class="text-center p-4">Enter details to see breakdown.</td></tr>`;
-                 return;
+            function formatCurrency(num) {
+                return new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2,
+                }).format(num);
             }
 
-            yearlyData.forEach(item => {
-                const row = document.createElement('tr');
-                row.className = 'bg-white border-b hover:bg-gray-50';
-                row.innerHTML = `
-                    <td class="px-4 py-3 font-medium">${item.year}</td>
-                    <td class="px-4 py-3 text-right">${formatCurrency(item.openingBalance)}</td>
-                    <td class="px-4 py-3 text-right text-green-600">${formatCurrency(item.interestEarned)}</td>
-                    <td class="px-4 py-3 text-right font-semibold">${formatCurrency(item.closingBalance)}</td>
-                `;
-                yearlyBreakdownBody.appendChild(row);
-            });
-        }
+            function formatDate(date) {
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
 
-
-        // --- Main Calculation Logic ---
-
-        function calculateFD() {
-            try {
-                // Get values
-                const P = parseFloat(investmentValue.value) || 0;
-                const r = parseFloat(interestRateValue.value) / 100 || 0;
-                const t = parseFloat(timePeriodValue.value) || 0;
-                const n = parseInt(compoundingFrequency.value, 10) || 4;
-                const startDate = new Date(investmentDateEl.value);
-
-                if (P <= 0 || r <= 0 || t <= 0 || !investmentDateEl.value) {
-                    updateBreakdownTable([]);
+            function updateBreakdownTable(yearlyData) {
+                elements.yearlyBreakdownBody.innerHTML = '';
+                if (yearlyData.length === 0) {
+                    elements.yearlyBreakdownBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>`;
                     return;
-                };
-
-                // Main calculation
-                const totalAmount = P * Math.pow((1 + r / n), (n * t));
-                const totalInterest = totalAmount - P;
-
-                // Update summary display
-                investedAmountEl.textContent = formatCurrency(P);
-                totalInterestEl.textContent = formatCurrency(totalInterest);
-                maturityValueEl.textContent = formatCurrency(totalAmount);
-                
-                const maturityDate = new Date(startDate);
-                maturityDate.setFullYear(maturityDate.getFullYear() + t);
-                maturityDateEl.textContent = formatDate(maturityDate);
-
-                // Yearly breakdown calculation
-                let yearlyData = [];
-                let currentBalance = P;
-                
-                // Add initial point for chart
-                 yearlyData.push({
-                    year: 'Start',
-                    date: startDate,
-                    openingBalance: 0,
-                    interestEarned: 0,
-                    closingBalance: P
-                });
-
-                for (let year = 1; year <= t; year++) {
-                    let openingBalance = currentBalance;
-                    let interestThisYear = 0;
-                    
-                    // Compound interest calculation for the year
-                    let balanceAtYearEnd = openingBalance * Math.pow((1 + r / n), n);
-                    interestThisYear = balanceAtYearEnd - openingBalance;
-                    currentBalance = balanceAtYearEnd;
-
-                    const yearEndDate = new Date(startDate);
-                    yearEndDate.setFullYear(startDate.getFullYear() + year);
-                    
-                    yearlyData.push({
-                        year: `Year ${year}`,
-                        date: yearEndDate,
-                        openingBalance: openingBalance,
-                        interestEarned: interestThisYear,
-                        closingBalance: currentBalance
-                    });
                 }
-                
-                // Update UI Components
-                createOrUpdateDoughnutChart(P, totalInterest);
-                updateBreakdownTable(yearlyData);
-                createOrUpdateLineChart(yearlyData);
 
-            } catch(error) {
-                console.error("Error in calculation:", error);
-            }
-        }
-        
-        // --- Event Listeners ---
-        
-        function setupEventListeners() {
-            const inputs = [investmentSlider, interestRateSlider, timePeriodSlider, investmentValue, interestRateValue, timePeriodValue, compoundingFrequency, investmentDateEl];
-            inputs.forEach(input => {
-                input.addEventListener('input', () => {
-                     if(input.id === 'investmentValue') investmentSlider.value = input.value;
-                     if(input.id === 'investmentSlider') investmentValue.value = input.value;
-                     if(input.id === 'interestRateValue') interestRateSlider.value = input.value;
-                     if(input.id === 'interestRateSlider') interestRateValue.value = input.value;
-                     if(input.id === 'timePeriodValue') timePeriodSlider.value = input.value;
-                     if(input.id === 'timePeriodSlider') timePeriodValue.value = input.value;
-                     calculateFD();
+                yearlyData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="font-weight:600">${item.year}</td>
+                        <td style="text-align:right">${formatCurrency(item.openingBalance)}</td>
+                        <td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td>
+                        <td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>
+                    `;
+                    elements.yearlyBreakdownBody.appendChild(row);
                 });
+            }
+
+            function calculateFD() {
+                try {
+                    const P = parseFloat(elements.investmentValue.value) || 0;
+                    const r = parseFloat(elements.interestRateValue.value) / 100 || 0;
+                    const t = parseFloat(elements.timePeriodValue.value) || 0;
+                    const n = parseInt(elements.compoundingFrequency.value, 10) || 4;
+                    const startDate = new Date(elements.investmentDate.value);
+
+                    if (P <= 0 || r <= 0 || t <= 0 || !elements.investmentDate.value) {
+                        updateBreakdownTable([]);
+                        return;
+                    }
+
+                    // Main calculation
+                    const totalAmount = P * Math.pow((1 + r / n), (n * t));
+                    const totalInterest = totalAmount - P;
+
+                    // Update summary display
+                    elements.investedAmount.textContent = formatCurrency(P);
+                    elements.totalInterest.textContent = formatCurrency(totalInterest);
+                    elements.maturityValue.textContent = formatCurrency(totalAmount);
+                    
+                    const maturityDate = new Date(startDate);
+                    maturityDate.setFullYear(maturityDate.getFullYear() + t);
+                    elements.maturityDate.textContent = formatDate(maturityDate);
+
+                    // Yearly breakdown calculation
+                    let yearlyData = [];
+                    let currentBalance = P;
+                    
+                    for (let year = 1; year <= t; year++) {
+                        let openingBalance = currentBalance;
+                        let balanceAtYearEnd = openingBalance * Math.pow((1 + r / n), n);
+                        let interestThisYear = balanceAtYearEnd - openingBalance;
+                        currentBalance = balanceAtYearEnd;
+
+                        yearlyData.push({
+                            year: `Year ${year}`,
+                            openingBalance: openingBalance,
+                            interestEarned: interestThisYear,
+                            closingBalance: currentBalance
+                        });
+                    }
+                    
+                    // Update UI Components
+                    const pieData = [
+                        { label: 'Principal', value: P },
+                        { label: 'Interest', value: totalInterest }
+                    ];
+                    drawPieChart(elements.fdDoughnutChart, pieData, { title: 'FD Breakdown' });
+                    
+                    const lineData = yearlyData.map((data, index) => ({
+                        value: data.closingBalance,
+                        year: new Date().getFullYear() + index
+                    }));
+                    drawLineChart(elements.fdLineChart, lineData, { 
+                        title: 'FD Growth Over Time', 
+                        color: '#10b981' 
+                    });
+
+                } catch(error) {
+                    console.error("Error in calculation:", error);
+                }
+            }
+
+            // Event listeners for sliders and inputs
+            Object.keys(elements).forEach(key => {
+                if (key.includes('Slider') || key.includes('Value') || key === 'investmentDate' || key === 'compoundingFrequency') {
+                    const element = elements[key];
+                    if (element) {
+                        element.addEventListener('input', () => {
+                            // Sync slider with input
+                            const baseKey = key.replace('Slider', '').replace('Value', '');
+                            if (key.includes('Slider') && elements[baseKey + 'Value']) {
+                                elements[baseKey + 'Value'].value = element.value;
+                            }
+                            if (key.includes('Value') && elements[baseKey + 'Slider']) {
+                                elements[baseKey + 'Slider'].value = element.value;
+                            }
+                            
+                            calculateFD();
+                        });
+                    }
+                }
             });
-        }
-        
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set default investment date to today
-            investmentDateEl.valueAsDate = new Date();
-            setupEventListeners();
+
+            // Set initial date
+            const today = new Date();
+            elements.investmentDate.value = today.toISOString().split('T')[0];
+            
+            // Initial calculation
             calculateFD();
         });
     </script>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-16">
-        <div class="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- About -->
-                <div class="col-span-1">
-                    <h4 class="text-lg font-bold text-gray-900 mb-4">AscentInvestor</h4>
-                    <p class="text-gray-700">AscentInvestor Ventures Private Limited</p>
-                    <p class="text-gray-700 mt-4">support@ascentinvestor.in</p>
-                </div>
-                
-                <!-- Links -->
-                <div role="navigation" aria-label="Footer Quick Links">
-                    <h5 class="font-semibold text-gray-800 mb-4">Quick Links</h5>
-                    <ul class="space-y-3 text-gray-700">
-                        <li><a href="index.html" class="hover:text-indigo-600">Tools</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="mt-8 sm:mt-12 border-t pt-8 text-center text-gray-600">
-                <p>&copy; 2024 AscentInvestor Ventures Private Limited. All Rights Reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <!-- AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818" crossorigin="anonymous"></script>
+
 </body>
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818"
-        crossorigin="anonymous"></script>
-    <!-- Responsive_ads -->
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637"
-        data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818"
-     crossorigin="anonymous"></script>
-<!-- Display_ads -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-4584710287882818"
-     data-ad-slot="7595341375"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
 </html>

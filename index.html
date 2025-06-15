@@ -23,25 +23,156 @@
     <meta property="twitter:title" content="Financial Tools & Calculators - AscentInvestor">
     <meta property="twitter:description" content="A suite of free financial calculators (FD, NPS, SIP, FIRE, etc.) to help you plan your financial freedom journey.">
 
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Preload critical images -->
+    <link rel="preload" as="image" href="logo-ai.webp" type="image/webp">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
+        *,*::before,*::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
+        *::before,*::after{--tw-content:''}
+        html,:host{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}
+        body{margin:0;line-height:inherit}
+        hr{height:0;color:inherit;border-top-width:1px}
+        abbr:where([title]){text-decoration:underline dotted}
+        h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}
+        a{color:inherit;text-decoration:inherit}
+        b,strong{font-weight:bolder}
+        code,kbd,samp,pre{font-family:ui-monospace,SFMono-Regular,"Menlo",Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}
+        small{font-size:80%}
+        sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+        sub{bottom:-.25em}
+        sup{top:-.5em}
+        table{text-indent:0;border-color:inherit;border-collapse:collapse}
+        button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}
+        button,select{text-transform:none}
+        button,[type='button'],[type='reset'],[type='submit']{-webkit-appearance:button;background-color:transparent;background-image:none}
+        :-moz-focusring{outline:auto}
+        :-moz-ui-invalid{box-shadow:none}
+        progress{vertical-align:baseline}
+        ::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}
+        [type='search']{-webkit-appearance:textfield;outline-offset:-2px}
+        ::-webkit-search-decoration{-webkit-appearance:none}
+        ::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}
+        summary{display:list-item}
+        blockquote,dl,dd,h1,h2,h3,h4,h5,h6,hr,figure,p,pre{margin:0}
+        fieldset{margin:0;padding:0}
+        legend{padding:0}
+        ol,ul,menu{list-style:none;margin:0;padding:0}
+        dialog{padding:0}
+        textarea{resize:vertical}
+        input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}
+        button,[role="button"]{cursor:pointer}
+        :disabled{cursor:default}
+        img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}
+        img,video{max-width:100%;height:auto}
+        [hidden]{display:none}
+        
+        /* Critical styles only */
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; color: #111827; }
+        .container { width: 100%; margin: 0 auto; padding: 0 1rem; }
+        @media (min-width: 640px) { .container { max-width: 640px; padding: 0 1.5rem; } }
+        @media (min-width: 768px) { .container { max-width: 768px; } }
+        @media (min-width: 1024px) { .container { max-width: 1024px; } }
+        @media (min-width: 1280px) { .container { max-width: 1280px; } }
+        @media (min-width: 1536px) { .container { max-width: 1536px; } }
+        
+        .header { background: white; box-shadow: 0 1px 3px 0 rgba(0,0,0,.1); position: sticky; top: 0; z-index: 50; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
+        .logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: #111827; text-decoration: none; }
+        .logo:hover { color: #4f46e5; transition: color 0.2s; }
+        .logo img { height: 2rem; width: auto; margin-right: 0.5rem; }
+        .nav { display: none; align-items: center; gap: 1.5rem; }
+        @media (min-width: 768px) { .nav { display: flex; } }
+        .nav-link { color: #4f46e5; font-weight: 600; text-decoration: none; }
+        .menu-btn { color: #374151; }
+        @media (min-width: 768px) { .menu-btn { display: none; } }
+        
+        .main { padding: 2rem 0; }
+        @media (min-width: 640px) { .main { padding: 3rem 0; } }
+        @media (min-width: 768px) { .main { padding: 5rem 0; } }
+        
+        .title-section { text-align: center; margin-bottom: 2rem; }
+        @media (min-width: 640px) { .title-section { margin-bottom: 3rem; } }
+        .title { font-size: 2.25rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
+        @media (min-width: 640px) { .title { font-size: 3rem; } }
+        @media (min-width: 768px) { .title { font-size: 3.75rem; } }
+        .subtitle { font-size: 1.125rem; color: #374151; max-width: 42rem; margin: 0 auto; }
+        
+        .grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; } }
+        @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 2rem; } }
+        @media (min-width: 1280px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+        
+        .tool-card { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 0.75rem; 
+            border: 1px solid #e5e7eb; 
+            display: flex; 
+            flex-direction: column; 
+            transition: all 0.3s ease;
+            height: 100%;
         }
-        /* Custom styles for better visual appeal */
-        .tool-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%; /* Ensure all cards have same height */
+        .tool-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
         }
-        .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        @media (min-width: 640px) { .tool-card { padding: 1.5rem; } }
+        
+        .icon-bg { 
+            background-color: #e5e7eb; 
+            padding: 0.75rem; 
+            border-radius: 0.5rem; 
+            margin-bottom: 1rem; 
+            width: fit-content;
         }
-        .icon-bg {
-            background-color: #e5e7eb; /* A slightly darker gray for better icon contrast */
+        .card-title { font-size: 1.25rem; font-weight: 600; color: #111827; margin-bottom: 0.5rem; }
+        @media (min-width: 640px) { .card-title { font-size: 1.25rem; } }
+        .card-text { color: #374151; flex-grow: 1; }
+        .card-link { 
+            margin-top: 1rem; 
+            color: #4f46e5; 
+            font-weight: 500; 
+            text-decoration: none; 
         }
-        /* Accessibility: Style for skip link */
+        .card-link:hover { color: #4338ca; }
+        
+        .footer { 
+            background: white; 
+            border-top: 1px solid #e5e7eb; 
+            margin-top: 4rem; 
+        }
+        .footer-content { 
+            padding: 2rem 0; 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 2rem; 
+        }
+        @media (min-width: 640px) { .footer-content { padding: 3rem 0; } }
+        @media (min-width: 768px) { .footer-content { grid-template-columns: repeat(4, 1fr); } }
+        
+        .footer-title { font-size: 1.125rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
+        .footer-text { color: #374151; }
+        .footer-links { list-style: none; margin: 0; padding: 0; }
+        .footer-links li { margin-bottom: 0.75rem; }
+        .footer-links a { 
+            color: #374151; 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+        }
+        .footer-links a:hover { color: #4f46e5; }
+        .footer-links svg { width: 1rem; height: 1rem; margin-right: 0.5rem; }
+        .footer-bottom { 
+            margin-top: 2rem; 
+            border-top: 1px solid #e5e7eb; 
+            padding-top: 2rem; 
+            text-align: center; 
+            color: #6b7280; 
+        }
+        @media (min-width: 640px) { .footer-bottom { margin-top: 3rem; } }
+        
+        /* Accessibility */
         .skip-link {
             position: absolute;
             top: -40px;
@@ -51,108 +182,99 @@
             padding: 8px;
             z-index: 100;
             transition: top 0.3s;
+            text-decoration: none;
         }
-        .skip-link:focus {
-            top: 0;
-        }
+        .skip-link:focus { top: 0; }
+        
         /* Responsive improvements */
-        @media (max-width: 640px) {
-            .container {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            .tool-card {
-                margin-bottom: 1rem;
-            }
+        @media (max-width: 640px) { 
+            .tool-card { margin-bottom: 1rem; } 
         }
-        /* Coming soon badge */
-        .coming-soon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: #f59e0b;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
+        
+        /* SVG icons */
+        .icon { width: 2rem; height: 2rem; }
+        .icon-purple { color: #8b5cf6; }
+        .icon-rose { color: #f43f5e; }
+        .icon-emerald { color: #10b981; }
+        .icon-indigo { color: #6366f1; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body>
     
     <!-- Accessibility: Skip Link -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-            <div class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center">
-                <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="flex items-center hover:text-indigo-600 transition-colors">
-                    <img src="logo-ai.webp" alt="AscentInvestor Logo" class="h-8 w-auto mr-2">
-                    AscentInvestor
-                </a>
-            </div>
-            <nav role="navigation" aria-label="Main Navigation" class="hidden md:flex items-center space-x-6">
-                <a href="index.html" class="text-indigo-600 font-semibold" aria-current="page">Tools</a>
-            </nav>
-            <div class="md:hidden">
-                <button aria-label="Open main menu" class="text-gray-700 hover:text-gray-900 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Menu Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
+                        <img src="logo-ai.webp" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                        AscentInvestor
+                    </a>
+                </div>
+                <nav role="navigation" aria-label="Main Navigation" class="nav">
+                    <a href="index.html" class="nav-link" aria-current="page">Tools</a>
+                </nav>
+                <div class="menu-btn">
+                    <button aria-label="Open main menu">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Menu Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main id="main-content" role="main" class="container mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-20">
+    <main id="main-content" role="main" class="container main">
         <!-- Title Section -->
-        <div class="text-center mb-8 sm:mb-12">
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">Tools & Calculators</h1>
-            <p class="mt-4 text-base sm:text-lg text-gray-700 max-w-2xl mx-auto">A suite of free financial calculators to help you plan your financial freedom journey.</p>
+        <div class="title-section">
+            <h1 class="title">Tools & Calculators</h1>
+            <p class="subtitle">A suite of free financial calculators to help you plan your financial freedom journey.</p>
         </div>
 
         <!-- Tools Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+        <div class="grid">
 
             <!-- Tool Card: Advanced SWP Calculator -->
-            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>SWP Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01V5M12 20v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1V9m0-1V7m0-1V5m0-1V4"></path></svg>
+            <div class="tool-card">
+                <div class="icon-bg">
+                    <svg class="icon icon-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>SWP Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01V5M12 20v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1V9m0-1V7m0-1V5m0-1V4"></path></svg>
                 </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Advanced SWP Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate your Systematic Withdrawal Plan with inflation adjustment and tax implications.</p>
-                <a href="swp-calc.html" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium">Open Calculator →</a>
+                <h3 class="card-title">Advanced SWP Calculator</h3>
+                <p class="card-text">Calculate your Systematic Withdrawal Plan with inflation adjustment and tax implications.</p>
+                <a href="swp-calc.html" class="card-link">Open Calculator →</a>
             </div>
 
             <!-- Tool Card: Advanced Retirement Calculator -->
-            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Retirement Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div class="tool-card">
+                <div class="icon-bg">
+                    <svg class="icon icon-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Retirement Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Advanced Retirement Calculator</h3>
-                <p class="text-gray-700 flex-grow">Plan your retirement with detailed analysis of corpus, expenses, and investment returns.</p>
-                <a href="retirement-calc.html" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium">Open Calculator →</a>
+                <h3 class="card-title">Advanced Retirement Calculator</h3>
+                <p class="card-text">Plan your retirement with detailed analysis of corpus, expenses, and investment returns.</p>
+                <a href="retirement-calc.html" class="card-link">Open Calculator →</a>
             </div>
 
             <!-- Tool Card: Tax Calculator -->
-            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Tax Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <div class="tool-card">
+                <div class="icon-bg">
+                    <svg class="icon icon-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Tax Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Tax Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate your income tax and plan your tax-saving investments.</p>
-                <a href="tax-calc.html" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium">Open Calculator →</a>
+                <h3 class="card-title">Tax Calculator</h3>
+                <p class="card-text">Calculate your income tax and plan your tax-saving investments.</p>
+                <a href="tax-calc.html" class="card-link">Open Calculator →</a>
             </div>
 
             <!-- Tool Card: FD Calculator -->
-            <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>FD Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <div class="tool-card">
+                <div class="icon-bg">
+                    <svg class="icon icon-indigo" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>FD Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">FD Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate the maturity amount and interest earned on your Fixed Deposits.</p>
-                <a href="fd-calc.html" class="mt-4 text-indigo-600 hover:text-indigo-700 font-medium">Open Calculator →</a>
+                <h3 class="card-title">FD Calculator</h3>
+                <p class="card-text">Calculate the maturity amount and interest earned on your Fixed Deposits.</p>
+                <a href="fd-calc.html" class="card-link">Open Calculator →</a>
             </div>
 
             <!-- Tool Card: NPS Calculator -->
@@ -269,23 +391,23 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-16">
-        <div class="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
                 <!-- About -->
-                <div class="col-span-1">
-                    <h4 class="text-lg font-bold text-gray-900 mb-4">AscentInvestor</h4>
-                    <p class="text-gray-700">AscentInvestor Ventures Private Limited</p>
-                    <p class="text-gray-700 mt-4">support@ascentinvestor.in</p>
+                <div>
+                    <h4 class="footer-title">AscentInvestor</h4>
+                    <p class="footer-text">AscentInvestor Ventures Private Limited</p>
+                    <p class="footer-text" style="margin-top: 1rem;">support@ascentinvestor.in</p>
                 </div>
                 
                 <!-- Links -->
                 <div role="navigation" aria-label="Footer Quick Links">
-                    <h5 class="font-semibold text-gray-800 mb-4">Quick Links</h5>
-                    <ul class="space-y-3 text-gray-700">
-                        <li><a href="index.html" class="hover:text-indigo-600">Tools</a></li>
-                        <li><a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <h5 class="footer-title">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Tools</a></li>
+                        <li><a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer">
+                            <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                             </svg>
                             YouTube Channel
@@ -293,34 +415,26 @@
                     </ul>
                 </div>
             </div>
-            <div class="mt-8 sm:mt-12 border-t pt-8 text-center text-gray-600">
+            <div class="footer-bottom">
                 <p>&copy; 2025 AscentInvestor Ventures Private Limited. All Rights Reserved.</p>
             </div>
         </div>
     </footer>
 
-</body>
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818"
-        crossorigin="anonymous"></script>
+    <!-- Load AdSense asynchronously -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818" crossorigin="anonymous"></script>
     <!-- Responsive_ads -->
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637"
-        data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <script>
         (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
-</html>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818"
-     crossorigin="anonymous"></script>
-<!-- Display_ads -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-4584710287882818"
-     data-ad-slot="7595341375"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+    <!-- Display_ads -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="7595341375" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
+</body>
+</html>
 
