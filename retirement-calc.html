@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Apple Touch Icon for iOS PWA -->
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180x180.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon-192x192.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="logo-ai.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="logo-ai.png">
+    <meta name="msapplication-TileImage" content="logo-ai.png">
+    <meta name="theme-color" content="#4f46e5">
+    
     <title>Advanced Retirement Calculator - AscentInvestor</title>
     <meta name="description" content="Plan your retirement with inflation-adjusted calculations, multiple portfolio options, and comprehensive analysis. Calculate your FIRE number and retirement corpus.">
     
@@ -729,18 +734,39 @@
             }
         }
 
-                 // Event listeners for sliders and inputs
-         Object.keys(elements).forEach(key => {
-             if (key.includes('Slider') || key.includes('Value')) {
-                 const element = elements[key];
-                 if (element && element.addEventListener) {
-                     element.addEventListener('input', calculateRetirement);
-                 }
-             }
-         });
+                         // Function to sync slider and input values
+        function syncSliderAndInput(sliderElement, inputElement) {
+            // When slider changes, update input
+            sliderElement.addEventListener('input', function() {
+                inputElement.value = sliderElement.value;
+                calculateRetirement();
+            });
+            
+            // When input changes, update slider (if within slider range)
+            inputElement.addEventListener('input', function() {
+                const value = parseFloat(inputElement.value);
+                const min = parseFloat(sliderElement.min);
+                const max = parseFloat(sliderElement.max);
+                
+                if (value >= min && value <= max) {
+                    sliderElement.value = value;
+                }
+                calculateRetirement();
+            });
+        }
 
-         // Initial calculation
-         calculateRetirement();
+        // Set up synchronization for all slider-input pairs
+        syncSliderAndInput(elements.currentAgeSlider, elements.currentAgeValue);
+        syncSliderAndInput(elements.retirementAgeSlider, elements.retirementAgeValue);
+        syncSliderAndInput(elements.currentExpensesSlider, elements.currentExpensesValue);
+        syncSliderAndInput(elements.currentSavingsSlider, elements.currentSavingsValue);
+        syncSliderAndInput(elements.monthlySavingsSlider, elements.monthlySavingsValue);
+        syncSliderAndInput(elements.expectedReturnSlider, elements.expectedReturnValue);
+        syncSliderAndInput(elements.inflationSlider, elements.inflationValue);
+        syncSliderAndInput(elements.lifeExpectancySlider, elements.lifeExpectancyValue);
+
+        // Initial calculation
+        calculateRetirement();
      });
      </script>
 
