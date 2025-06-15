@@ -23,15 +23,26 @@
     <meta property="twitter:title" content="Financial Tools & Calculators - AscentInvestor">
     <meta property="twitter:description" content="A suite of free financial calculators (FD, NPS, SIP, FIRE, etc.) to help you plan your financial freedom journey.">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Preconnect for faster font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Preload critical images -->
-    <link rel="preload" as="image" href="logo-ai.png" type="image/png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="logo-ai.png">
+    <meta name="msapplication-TileImage" content="logo-ai.png">
+    <meta name="theme-color" content="#4f46e5">
+    
+    <!-- Preload critical images with proper sizing -->
+    <link rel="preload" as="image" href="logo-ai-32.png" type="image/png">
+    
+    <!-- Modern CSS with optimizations -->
     <style>
         *,*::before,*::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
         *::before,*::after{--tw-content:''}
-        html,:host{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}
-        body{margin:0;line-height:inherit}
+        html,:host{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}
+        body{margin:0;line-height:inherit;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background-color:#f9fafb;color:#111827}
         hr{height:0;color:inherit;border-top-width:1px}
         abbr:where([title]){text-decoration:underline dotted}
         h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}
@@ -66,141 +77,68 @@
         img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}
         img,video{max-width:100%;height:auto}
         [hidden]{display:none}
-        
-        /* Critical styles only */
-        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; color: #111827; }
-        .container { width: 100%; margin: 0 auto; padding: 0 1rem; }
-        @media (min-width: 640px) { .container { max-width: 640px; padding: 0 1.5rem; } }
-        @media (min-width: 768px) { .container { max-width: 768px; } }
-        @media (min-width: 1024px) { .container { max-width: 1024px; } }
-        @media (min-width: 1280px) { .container { max-width: 1280px; } }
-        @media (min-width: 1536px) { .container { max-width: 1536px; } }
-        
-        .header { background: white; box-shadow: 0 1px 3px 0 rgba(0,0,0,.1); position: sticky; top: 0; z-index: 50; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
-        .logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: 700; color: #111827; text-decoration: none; }
-        .logo:hover { color: #4f46e5; transition: color 0.2s; }
-        .logo img { height: 2rem; width: auto; margin-right: 0.5rem; }
-        .nav { display: none; align-items: center; gap: 1.5rem; }
-        @media (min-width: 768px) { .nav { display: flex; } }
-        .nav-link { color: #4f46e5; font-weight: 600; text-decoration: none; }
-        .menu-btn { color: #374151; }
-        @media (min-width: 768px) { .menu-btn { display: none; } }
-        
-        .main { padding: 2rem 0; }
-        @media (min-width: 640px) { .main { padding: 3rem 0; } }
-        @media (min-width: 768px) { .main { padding: 5rem 0; } }
-        
-        .title-section { text-align: center; margin-bottom: 2rem; }
-        @media (min-width: 640px) { .title-section { margin-bottom: 3rem; } }
-        .title { font-size: 2.25rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
-        @media (min-width: 640px) { .title { font-size: 3rem; } }
-        @media (min-width: 768px) { .title { font-size: 3.75rem; } }
-        .subtitle { font-size: 1.125rem; color: #374151; max-width: 42rem; margin: 0 auto; }
-        
-        .grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-        @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; } }
-        @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 2rem; } }
-        @media (min-width: 1280px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-        
-        .tool-card { 
-            background: white; 
-            padding: 1.5rem; 
-            border-radius: 0.75rem; 
-            border: 1px solid #e5e7eb; 
-            display: flex; 
-            flex-direction: column; 
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-        .tool-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
-        }
-        @media (min-width: 640px) { .tool-card { padding: 1.5rem; } }
-        
-        .icon-bg { 
-            background-color: #e5e7eb; 
-            padding: 0.75rem; 
-            border-radius: 0.5rem; 
-            margin-bottom: 1rem; 
-            width: fit-content;
-        }
-        .card-title { font-size: 1.25rem; font-weight: 600; color: #111827; margin-bottom: 0.5rem; }
-        @media (min-width: 640px) { .card-title { font-size: 1.25rem; } }
-        .card-text { color: #374151; flex-grow: 1; }
-        .card-link { 
-            margin-top: 1rem; 
-            color: #4f46e5; 
-            font-weight: 500; 
-            text-decoration: none; 
-        }
-        .card-link:hover { color: #4338ca; }
-        
-        .footer { 
-            background: white; 
-            border-top: 1px solid #e5e7eb; 
-            margin-top: 4rem; 
-        }
-        .footer-content { 
-            padding: 2rem 0; 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 2rem; 
-        }
-        @media (min-width: 640px) { .footer-content { padding: 3rem 0; } }
-        @media (min-width: 768px) { .footer-content { grid-template-columns: repeat(4, 1fr); } }
-        
-        .footer-title { font-size: 1.125rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
-        .footer-text { color: #374151; }
-        .footer-links { list-style: none; margin: 0; padding: 0; }
-        .footer-links li { margin-bottom: 0.75rem; }
-        .footer-links a { 
-            color: #374151; 
-            text-decoration: none; 
-            display: flex; 
-            align-items: center; 
-        }
-        .footer-links a:hover { color: #4f46e5; }
-        .footer-links svg { width: 1rem; height: 1rem; margin-right: 0.5rem; }
-        .footer-bottom { 
-            margin-top: 2rem; 
-            border-top: 1px solid #e5e7eb; 
-            padding-top: 2rem; 
-            text-align: center; 
-            color: #6b7280; 
-        }
-        @media (min-width: 640px) { .footer-bottom { margin-top: 3rem; } }
-        
-        /* Accessibility */
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 0;
-            background: #111827;
-            color: white;
-            padding: 8px;
-            z-index: 100;
-            transition: top 0.3s;
-            text-decoration: none;
-        }
-        .skip-link:focus { top: 0; }
-        
-        /* Responsive improvements */
-        @media (max-width: 640px) { 
-            .tool-card { margin-bottom: 1rem; } 
-        }
-        
-        /* SVG icons */
-        .icon { width: 2rem; height: 2rem; }
-        .icon-purple { color: #8b5cf6; }
-        .icon-rose { color: #f43f5e; }
-        .icon-emerald { color: #10b981; }
-        .icon-indigo { color: #6366f1; }
+        .container{width:100%;margin:0 auto;padding:0 1rem}
+        @media (min-width:640px){.container{max-width:640px;padding:0 1.5rem}}
+        @media (min-width:768px){.container{max-width:768px}}
+        @media (min-width:1024px){.container{max-width:1024px}}
+        @media (min-width:1280px){.container{max-width:1280px}}
+        @media (min-width:1536px){.container{max-width:1536px}}
+        .header{background:white;box-shadow:0 1px 3px 0 rgba(0,0,0,.1);position:sticky;top:0;z-index:50}
+        .header-content{display:flex;justify-content:space-between;align-items:center;padding:1rem 0}
+        .logo{display:flex;align-items:center;font-size:1.5rem;font-weight:700;color:#111827;text-decoration:none}
+        .logo:hover{color:#4f46e5;transition:color 0.2s}
+        .logo img{height:2rem;width:2rem;margin-right:0.5rem}
+        .nav{display:none;align-items:center;gap:1.5rem}
+        @media (min-width:768px){.nav{display:flex}}
+        .nav-link{color:#4f46e5;font-weight:600;text-decoration:none}
+        .menu-btn{color:#374151}
+        @media (min-width:768px){.menu-btn{display:none}}
+        .main{padding:2rem 0}
+        @media (min-width:640px){.main{padding:3rem 0}}
+        @media (min-width:768px){.main{padding:5rem 0}}
+        .title-section{text-align:center;margin-bottom:2rem}
+        @media (min-width:640px){.title-section{margin-bottom:3rem}}
+        .title{font-size:2.25rem;font-weight:700;color:#111827;margin-bottom:1rem}
+        @media (min-width:640px){.title{font-size:3rem}}
+        @media (min-width:768px){.title{font-size:3.75rem}}
+        .subtitle{font-size:1.125rem;color:#374151;max-width:42rem;margin:0 auto}
+        .grid{display:grid;grid-template-columns:1fr;gap:1rem}
+        @media (min-width:640px){.grid{grid-template-columns:repeat(2,1fr);gap:1.5rem}}
+        @media (min-width:1024px){.grid{grid-template-columns:repeat(3,1fr);gap:2rem}}
+        @media (min-width:1280px){.grid{grid-template-columns:repeat(4,1fr)}}
+        .tool-card{background:white;padding:1.5rem;border-radius:0.75rem;border:1px solid #e5e7eb;display:flex;flex-direction:column;transition:all 0.3s ease;height:100%}
+        .tool-card:hover{transform:translateY(-5px);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)}
+        @media (min-width:640px){.tool-card{padding:1.5rem}}
+        .icon-bg{background-color:#e5e7eb;padding:0.75rem;border-radius:0.5rem;margin-bottom:1rem;width:fit-content}
+        .card-title{font-size:1.25rem;font-weight:600;color:#111827;margin-bottom:0.5rem}
+        @media (min-width:640px){.card-title{font-size:1.25rem}}
+        .card-text{color:#374151;flex-grow:1}
+        .card-link{margin-top:1rem;color:#4f46e5;font-weight:500;text-decoration:none}
+        .card-link:hover{color:#4338ca}
+        .footer{background:white;border-top:1px solid #e5e7eb;margin-top:4rem}
+        .footer-content{padding:2rem 0;display:grid;grid-template-columns:1fr;gap:2rem}
+        @media (min-width:640px){.footer-content{padding:3rem 0}}
+        @media (min-width:768px){.footer-content{grid-template-columns:repeat(4,1fr)}}
+        .footer-title{font-size:1.125rem;font-weight:700;color:#111827;margin-bottom:1rem}
+        .footer-text{color:#374151}
+        .footer-links{list-style:none;margin:0;padding:0}
+        .footer-links li{margin-bottom:0.75rem}
+        .footer-links a{color:#374151;text-decoration:none;display:flex;align-items:center}
+        .footer-links a:hover{color:#4f46e5}
+        .footer-links svg{width:1rem;height:1rem;margin-right:0.5rem}
+        .footer-bottom{margin-top:2rem;border-top:1px solid #e5e7eb;padding-top:2rem;text-align:center;color:#6b7280}
+        @media (min-width:640px){.footer-bottom{margin-top:3rem}}
+        .skip-link{position:absolute;top:-40px;left:0;background:#111827;color:white;padding:8px;z-index:100;transition:top 0.3s;text-decoration:none}
+        .skip-link:focus{top:0}
+        @media (max-width:640px){.tool-card{margin-bottom:1rem}}
+        .icon{width:2rem;height:2rem}
+        .icon-purple{color:#8b5cf6}
+        .icon-rose{color:#f43f5e}
+        .icon-emerald{color:#10b981}
+        .icon-indigo{color:#6366f1}
     </style>
 </head>
 <body>
-    
     <!-- Accessibility: Skip Link -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -210,7 +148,7 @@
             <div class="header-content">
                 <div>
                     <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
-                        <img src="logo-ai.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async" style="width: 32px; height: 32px;">
+                        <img src="logo-ai-32.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
                         AscentInvestor
                     </a>
                 </div>
@@ -277,116 +215,6 @@
                 <a href="fd-calc.html" class="card-link">Open Calculator →</a>
             </div>
 
-            <!-- Tool Card: NPS Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                     <svg class="w-8 h-8 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>NPS Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01V5M12 20v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1V9m0-1V7m0-1V5m0-1V4"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">NPS Calculator</h3>
-                <p class="text-gray-700 flex-grow">Estimate your pension wealth and returns with the National Pension System.</p>
-            </div> -->
-
-            <!-- Tool Card: RD Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>RD Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">RD Calculator</h3>
-                <p class="text-gray-700 flex-grow">Find out the maturity amount on your Recurring Deposit investments.</p>
-            </div> -->
-
-            <!-- Tool Card: CAGR Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>CAGR Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">CAGR Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate the Compound Annual Growth Rate of your investments.</p>
-            </div> -->
-            
-            <!-- Tool Card: NSC Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>NSC Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">NSC Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate the returns on your National Savings Certificate investment.</p>
-            </div> -->
-            
-            <!-- Tool Card: HRA Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>HRA Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">HRA Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate your House Rent Allowance exemption with ease.</p>
-            </div> -->
-            
-            <!-- Tool Card: MF Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                     <svg class="w-8 h-8 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Mutual Fund Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">MF Calculator</h3>
-                <p class="text-gray-700 flex-grow">Estimate the returns on your Mutual Fund investments.</p>
-            </div> -->
-            
-            <!-- Tool Card: SSY Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>SSY Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 016-6h6a6 6 0 016 6v1h-3z"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">SSY Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate returns for the Sukanya Samriddhi Yojana scheme.</p>
-            </div> -->
-
-            <!-- Tool Card: IRR Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>IRR Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M12 21a9 9 0 110-18 9 9 0 010 18zM12 3v1.5M12 19.5V21M4 12H2.5M21.5 12H20"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">IRR Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate the Internal Rate of Return for a series of cash flows.</p>
-            </div> -->
-            
-            <!-- Tool Card: SIP Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-lime-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>SIP Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">SIP Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate the future value of your Systematic Investment Plan.</p>
-            </div> -->
-
-            <!-- Tool Card: Goal SIP Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                    <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Goal SIP Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Goal SIP Calculator</h3>
-                <p class="text-gray-700 flex-grow">Plan your investments to achieve specific financial goals.</p>
-            </div> -->
-
-            <!-- Tool Card: FIRE Calculator -->
-            <!-- <div class="tool-card bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col items-start relative">
-                <span class="coming-soon">Coming Soon</span>
-                <div class="icon-bg p-3 rounded-lg mb-4">
-                     <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>FIRE Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7.014A8.003 8.003 0 0122 12c0 3.771-2.59 6.957-6.028 7.857-1.12.264-2.288.42-3.472.434-.23.003-.46.004-.69.004-.236 0-.47-.002-.705-.005A8.004 8.004 0 0112 20c-1.046 0-2.044-.204-2.94-.576-1.554-.64-2.898-1.63-3.9-2.885"></path></svg>
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">FIRE Calculator</h3>
-                <p class="text-gray-700 flex-grow">Calculate your corpus for Financial Independence, Retire Early.</p>
-            </div> -->
-
         </div>
     </main>
 
@@ -421,18 +249,28 @@
         </div>
     </footer>
 
-    <!-- Load AdSense asynchronously and defer -->
-    <script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818" crossorigin="anonymous"></script>
-    
-    <!-- Defer ad initialization -->
-    <script defer>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize ads after page load
-            setTimeout(function() {
-                (adsbygoogle = window.adsbygoogle || []).push({});
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            }, 1000);
-        });
+    <!-- Load Google Fonts asynchronously -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+
+    <!-- Load AdSense asynchronously and defer with modern loading -->
+    <script>
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818';
+            script.crossOrigin = 'anonymous';
+            script.async = true;
+            document.head.appendChild(script);
+            
+            script.onload = function() {
+                setTimeout(function() {
+                    try {
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    } catch(e) {}
+                }, 1000);
+            };
+        })();
     </script>
 
     <!-- Responsive_ads -->
