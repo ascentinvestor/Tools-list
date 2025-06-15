@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Preload critical images -->
-    <link rel="preload" as="image" href="logo-ai.webp" type="image/webp">
+    <link rel="preload" as="image" href="logo-ai.png" type="image/png">
     
     <style>
         /* Minimal CSS reset and styles */
@@ -80,7 +80,7 @@
         <div class="container">
             <div class="header-flex">
                 <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
-                    <img src="logo-ai.webp" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                                            <img src="logo-ai.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async" style="width: 32px; height: 32px;">
                     AscentInvestor
                 </a>
                 <nav class="nav">
@@ -219,8 +219,10 @@
         </div>
     </footer>
 
-    <script>
-        // Lightweight chart implementations
+    <script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+        // All JavaScript code moved inside DOMContentLoaded for better performance
+        
         function drawPieChart(canvas, data, options = {}) {
             const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
@@ -413,151 +415,150 @@
             });
         }
 
-        // Main calculation logic
-        document.addEventListener('DOMContentLoaded', function() {
-            const elements = {
-                investmentSlider: document.getElementById('investmentSlider'),
-                investmentValue: document.getElementById('investmentValue'),
-                interestRateSlider: document.getElementById('interestRateSlider'),
-                interestRateValue: document.getElementById('interestRateValue'),
-                timePeriodSlider: document.getElementById('timePeriodSlider'),
-                timePeriodValue: document.getElementById('timePeriodValue'),
-                investmentDate: document.getElementById('investmentDate'),
-                compoundingFrequency: document.getElementById('compoundingFrequency'),
-                maturityDate: document.getElementById('maturityDate'),
-                investedAmount: document.getElementById('investedAmount'),
-                totalInterest: document.getElementById('totalInterest'),
-                maturityValue: document.getElementById('maturityValue'),
-                yearlyBreakdownBody: document.getElementById('yearlyBreakdownBody'),
-                fdDoughnutChart: document.getElementById('fdDoughnutChart'),
-                fdLineChart: document.getElementById('fdLineChart')
-            };
+        // Rest of the JavaScript code...
+        const elements = {
+            investmentSlider: document.getElementById('investmentSlider'),
+            investmentValue: document.getElementById('investmentValue'),
+            interestRateSlider: document.getElementById('interestRateSlider'),
+            interestRateValue: document.getElementById('interestRateValue'),
+            timePeriodSlider: document.getElementById('timePeriodSlider'),
+            timePeriodValue: document.getElementById('timePeriodValue'),
+            investmentDate: document.getElementById('investmentDate'),
+            compoundingFrequency: document.getElementById('compoundingFrequency'),
+            maturityDate: document.getElementById('maturityDate'),
+            investedAmount: document.getElementById('investedAmount'),
+            totalInterest: document.getElementById('totalInterest'),
+            maturityValue: document.getElementById('maturityValue'),
+            yearlyBreakdownBody: document.getElementById('yearlyBreakdownBody'),
+            fdDoughnutChart: document.getElementById('fdDoughnutChart'),
+            fdLineChart: document.getElementById('fdLineChart')
+        };
 
-            function formatCurrency(num) {
-                return new Intl.NumberFormat('en-IN', {
-                    style: 'currency',
-                    currency: 'INR',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2,
-                }).format(num);
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+            }).format(num);
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function updateBreakdownTable(yearlyData) {
+            elements.yearlyBreakdownBody.innerHTML = '';
+            if (yearlyData.length === 0) {
+                elements.yearlyBreakdownBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>`;
+                return;
             }
 
-            function formatDate(date) {
-                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-            }
+            yearlyData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight:600">${item.year}</td>
+                    <td style="text-align:right">${formatCurrency(item.openingBalance)}</td>
+                    <td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td>
+                    <td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>
+                `;
+                elements.yearlyBreakdownBody.appendChild(row);
+            });
+        }
 
-            function updateBreakdownTable(yearlyData) {
-                elements.yearlyBreakdownBody.innerHTML = '';
-                if (yearlyData.length === 0) {
-                    elements.yearlyBreakdownBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>`;
+        function calculateFD() {
+            try {
+                const P = parseFloat(elements.investmentValue.value) || 0;
+                const r = parseFloat(elements.interestRateValue.value) / 100 || 0;
+                const t = parseFloat(elements.timePeriodValue.value) || 0;
+                const n = parseInt(elements.compoundingFrequency.value, 10) || 4;
+                const startDate = new Date(elements.investmentDate.value);
+
+                if (P <= 0 || r <= 0 || t <= 0 || !elements.investmentDate.value) {
+                    updateBreakdownTable([]);
                     return;
                 }
 
-                yearlyData.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td style="font-weight:600">${item.year}</td>
-                        <td style="text-align:right">${formatCurrency(item.openingBalance)}</td>
-                        <td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td>
-                        <td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>
-                    `;
-                    elements.yearlyBreakdownBody.appendChild(row);
-                });
-            }
+                // Main calculation
+                const totalAmount = P * Math.pow((1 + r / n), (n * t));
+                const totalInterest = totalAmount - P;
 
-            function calculateFD() {
-                try {
-                    const P = parseFloat(elements.investmentValue.value) || 0;
-                    const r = parseFloat(elements.interestRateValue.value) / 100 || 0;
-                    const t = parseFloat(elements.timePeriodValue.value) || 0;
-                    const n = parseInt(elements.compoundingFrequency.value, 10) || 4;
-                    const startDate = new Date(elements.investmentDate.value);
+                // Update summary display
+                elements.investedAmount.textContent = formatCurrency(P);
+                elements.totalInterest.textContent = formatCurrency(totalInterest);
+                elements.maturityValue.textContent = formatCurrency(totalAmount);
+                
+                const maturityDate = new Date(startDate);
+                maturityDate.setFullYear(maturityDate.getFullYear() + t);
+                elements.maturityDate.textContent = formatDate(maturityDate);
 
-                    if (P <= 0 || r <= 0 || t <= 0 || !elements.investmentDate.value) {
-                        updateBreakdownTable([]);
-                        return;
-                    }
+                // Yearly breakdown calculation
+                let yearlyData = [];
+                let currentBalance = P;
+                
+                for (let year = 1; year <= t; year++) {
+                    let openingBalance = currentBalance;
+                    let balanceAtYearEnd = openingBalance * Math.pow((1 + r / n), n);
+                    let interestThisYear = balanceAtYearEnd - openingBalance;
+                    currentBalance = balanceAtYearEnd;
 
-                    // Main calculation
-                    const totalAmount = P * Math.pow((1 + r / n), (n * t));
-                    const totalInterest = totalAmount - P;
-
-                    // Update summary display
-                    elements.investedAmount.textContent = formatCurrency(P);
-                    elements.totalInterest.textContent = formatCurrency(totalInterest);
-                    elements.maturityValue.textContent = formatCurrency(totalAmount);
-                    
-                    const maturityDate = new Date(startDate);
-                    maturityDate.setFullYear(maturityDate.getFullYear() + t);
-                    elements.maturityDate.textContent = formatDate(maturityDate);
-
-                    // Yearly breakdown calculation
-                    let yearlyData = [];
-                    let currentBalance = P;
-                    
-                    for (let year = 1; year <= t; year++) {
-                        let openingBalance = currentBalance;
-                        let balanceAtYearEnd = openingBalance * Math.pow((1 + r / n), n);
-                        let interestThisYear = balanceAtYearEnd - openingBalance;
-                        currentBalance = balanceAtYearEnd;
-
-                        yearlyData.push({
-                            year: `Year ${year}`,
-                            openingBalance: openingBalance,
-                            interestEarned: interestThisYear,
-                            closingBalance: currentBalance
-                        });
-                    }
-                    
-                    // Update UI Components
-                    const pieData = [
-                        { label: 'Principal', value: P },
-                        { label: 'Interest', value: totalInterest }
-                    ];
-                    drawPieChart(elements.fdDoughnutChart, pieData, { title: 'FD Breakdown' });
-                    
-                    const lineData = yearlyData.map((data, index) => ({
-                        value: data.closingBalance,
-                        year: new Date().getFullYear() + index
-                    }));
-                    drawLineChart(elements.fdLineChart, lineData, { 
-                        title: 'FD Growth Over Time', 
-                        color: '#10b981' 
+                    yearlyData.push({
+                        year: `Year ${year}`,
+                        openingBalance: openingBalance,
+                        interestEarned: interestThisYear,
+                        closingBalance: currentBalance
                     });
+                }
+                
+                // Update UI Components
+                const pieData = [
+                    { label: 'Principal', value: P },
+                    { label: 'Interest', value: totalInterest }
+                ];
+                drawPieChart(elements.fdDoughnutChart, pieData, { title: 'FD Breakdown' });
+                
+                const lineData = yearlyData.map((data, index) => ({
+                    value: data.closingBalance,
+                    year: new Date().getFullYear() + index
+                }));
+                drawLineChart(elements.fdLineChart, lineData, { 
+                    title: 'FD Growth Over Time', 
+                    color: '#10b981' 
+                });
 
-                } catch(error) {
-                    console.error("Error in calculation:", error);
+            } catch(error) {
+                console.error("Error in calculation:", error);
+            }
+        }
+
+        // Event listeners for sliders and inputs
+        Object.keys(elements).forEach(key => {
+            if (key.includes('Slider') || key.includes('Value') || key === 'investmentDate' || key === 'compoundingFrequency') {
+                const element = elements[key];
+                if (element) {
+                    element.addEventListener('input', () => {
+                        // Sync slider with input
+                        const baseKey = key.replace('Slider', '').replace('Value', '');
+                        if (key.includes('Slider') && elements[baseKey + 'Value']) {
+                            elements[baseKey + 'Value'].value = element.value;
+                        }
+                        if (key.includes('Value') && elements[baseKey + 'Slider']) {
+                            elements[baseKey + 'Slider'].value = element.value;
+                        }
+                        
+                        calculateFD();
+                    });
                 }
             }
-
-            // Event listeners for sliders and inputs
-            Object.keys(elements).forEach(key => {
-                if (key.includes('Slider') || key.includes('Value') || key === 'investmentDate' || key === 'compoundingFrequency') {
-                    const element = elements[key];
-                    if (element) {
-                        element.addEventListener('input', () => {
-                            // Sync slider with input
-                            const baseKey = key.replace('Slider', '').replace('Value', '');
-                            if (key.includes('Slider') && elements[baseKey + 'Value']) {
-                                elements[baseKey + 'Value'].value = element.value;
-                            }
-                            if (key.includes('Value') && elements[baseKey + 'Slider']) {
-                                elements[baseKey + 'Slider'].value = element.value;
-                            }
-                            
-                            calculateFD();
-                        });
-                    }
-                }
-            });
-
-            // Set initial date
-            const today = new Date();
-            elements.investmentDate.value = today.toISOString().split('T')[0];
-            
-            // Initial calculation
-            calculateFD();
         });
+
+        // Set initial date
+        const today = new Date();
+        elements.investmentDate.value = today.toISOString().split('T')[0];
+        
+        // Initial calculation
+        calculateFD();
+    });
     </script>
 
     <!-- AdSense -->
