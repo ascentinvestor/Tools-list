@@ -6,22 +6,22 @@
     <meta name="google-adsense-account" content="ca-pub-4584710287882818">
 
     <!-- SEO Meta Tags -->
-    <title>Financial Tools & Calculators - AscentInvestor</title>
-    <meta name="description" content="A suite of free financial calculators (FD, NPS, SIP, FIRE, etc.) to help you plan your financial freedom journey. Built for accessibility and ease of use.">
-    <link rel="canonical" href="http://www.ascentinvestor.in/tools">
+    <title>Financial Blogs & Articles - AscentInvestor</title>
+    <meta name="description" content="Expert insights on personal finance, investing, and wealth building. Learn about SIPs, retirement planning, tax strategies, and more from AscentInvestor.">
+    <link rel="canonical" href="http://www.ascentinvestor.in/blogs">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="http://www.ascentinvestor.in/tools">
-    <meta property="og:title" content="Financial Tools & Calculators - AscentInvestor">
-    <meta property="og:description" content="A suite of free financial calculators (FD, NPS, SIP, FIRE, etc.) to help you plan your financial freedom journey.">
+    <meta property="og:url" content="http://www.ascentinvestor.in/blogs">
+    <meta property="og:title" content="Financial Blogs & Articles - AscentInvestor">
+    <meta property="og:description" content="Expert insights on personal finance, investing, and wealth building. Learn about SIPs, retirement planning, tax strategies, and more.">
     <meta property="og:site_name" content="AscentInvestor">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="http://www.ascentinvestor.in/tools">
-    <meta property="twitter:title" content="Financial Tools & Calculators - AscentInvestor">
-    <meta property="twitter:description" content="A suite of free financial calculators (FD, NPS, SIP, FIRE, etc.) to help you plan your financial freedom journey.">
+    <meta property="twitter:url" content="http://www.ascentinvestor.in/blogs">
+    <meta property="twitter:title" content="Financial Blogs & Articles - AscentInvestor">
+    <meta property="twitter:description" content="Expert insights on personal finance, investing, and wealth building.">
 
     <!-- Preconnect for faster font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +34,7 @@
     <meta name="msapplication-TileImage" content="logo-ai.png">
     <meta name="theme-color" content="#4f46e5">
     
-    <!-- Preload critical images with proper sizing -->
+    <!-- Preload critical images -->
     <link rel="preload" as="image" href="logo-ai-32.png" type="image/png">
     
     <!-- Modern CSS with optimizations -->
@@ -91,6 +91,7 @@
         .nav{display:none;align-items:center;gap:1.5rem}
         @media (min-width:768px){.nav{display:flex}}
         .nav-link{color:#4f46e5;font-weight:600;text-decoration:none}
+        .nav-link:hover{color:#4338ca}
         .menu-btn{color:#374151}
         @media (min-width:768px){.menu-btn{display:none}}
         .main{padding:2rem 0}
@@ -102,19 +103,20 @@
         @media (min-width:640px){.title{font-size:3rem}}
         @media (min-width:768px){.title{font-size:3.75rem}}
         .subtitle{font-size:1.125rem;color:#374151;max-width:42rem;margin:0 auto}
-        .grid{display:grid;grid-template-columns:1fr;gap:1rem}
-        @media (min-width:640px){.grid{grid-template-columns:repeat(2,1fr);gap:1.5rem}}
-        @media (min-width:1024px){.grid{grid-template-columns:repeat(3,1fr);gap:2rem}}
-        @media (min-width:1280px){.grid{grid-template-columns:repeat(4,1fr)}}
-        .tool-card{background:white;padding:1.5rem;border-radius:0.75rem;border:1px solid #e5e7eb;display:flex;flex-direction:column;transition:all 0.3s ease;height:100%}
-        .tool-card:hover{transform:translateY(-5px);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)}
-        @media (min-width:640px){.tool-card{padding:1.5rem}}
-        .icon-bg{background-color:#e5e7eb;padding:0.75rem;border-radius:0.5rem;margin-bottom:1rem;width:fit-content}
-        .card-title{font-size:1.25rem;font-weight:600;color:#111827;margin-bottom:0.5rem}
-        @media (min-width:640px){.card-title{font-size:1.25rem}}
-        .card-text{color:#374151;flex-grow:1}
-        .card-link{margin-top:1rem;color:#4f46e5;font-weight:500;text-decoration:none}
-        .card-link:hover{color:#4338ca}
+        .blog-grid{display:grid;grid-template-columns:1fr;gap:2rem}
+        @media (min-width:768px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
+        @media (min-width:1024px){.blog-grid{grid-template-columns:repeat(3,1fr)}}
+        .blog-card{background:white;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);overflow:hidden;transition:all 0.3s ease;height:100%}
+        .blog-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+        .blog-image{width:100%;height:12rem;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:1.125rem}
+        .blog-content{padding:1.5rem}
+        .blog-meta{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;font-size:0.875rem;color:#6b7280}
+        .blog-date{display:flex;align-items:center;gap:0.5rem}
+        .blog-read-time{display:flex;align-items:center;gap:0.5rem}
+        .blog-title{font-size:1.25rem;font-weight:700;color:#111827;margin-bottom:0.75rem;line-height:1.4}
+        .blog-excerpt{color:#374151;line-height:1.6;margin-bottom:1rem}
+        .blog-link{color:#4f46e5;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem}
+        .blog-link:hover{color:#4338ca}
         .footer{background:white;border-top:1px solid #e5e7eb;margin-top:4rem}
         .footer-content{padding:2rem 0;display:grid;grid-template-columns:1fr;gap:2rem}
         @media (min-width:640px){.footer-content{padding:3rem 0}}
@@ -130,12 +132,7 @@
         @media (min-width:640px){.footer-bottom{margin-top:3rem}}
         .skip-link{position:absolute;top:-40px;left:0;background:#111827;color:white;padding:8px;z-index:100;transition:top 0.3s;text-decoration:none}
         .skip-link:focus{top:0}
-        @media (max-width:640px){.tool-card{margin-bottom:1rem}}
-        .icon{width:2rem;height:2rem}
-        .icon-purple{color:#8b5cf6}
-        .icon-rose{color:#f43f5e}
-        .icon-emerald{color:#10b981}
-        .icon-indigo{color:#6366f1}
+        .icon{width:1rem;height:1rem}
     </style>
 </head>
 <body>
@@ -153,8 +150,8 @@
                     </a>
                 </div>
                 <nav role="navigation" aria-label="Main Navigation" class="nav">
-                    <a href="index.html" class="nav-link" aria-current="page">Tools</a>
-                    <a href="blogs.html" class="nav-link">Blogs</a>
+                    <a href="index.html" class="nav-link">Tools</a>
+                    <a href="blogs.html" class="nav-link" aria-current="page">Blogs</a>
                 </nav>
                 <div class="menu-btn">
                     <button aria-label="Open main menu">
@@ -169,52 +166,98 @@
     <main id="main-content" role="main" class="container main">
         <!-- Title Section -->
         <div class="title-section">
-            <h1 class="title">Tools & Calculators</h1>
-            <p class="subtitle">A suite of free financial calculators to help you plan your financial freedom journey.</p>
+            <h1 class="title">Financial Insights & Articles</h1>
+            <p class="subtitle">Expert guidance on investing, wealth building, and financial planning to help you achieve your financial goals.</p>
         </div>
 
-        <!-- Tools Grid -->
-        <div class="grid">
+        <!-- Blog Articles Grid -->
+        <div class="blog-grid">
 
-            <!-- Tool Card: Advanced SWP Calculator -->
-            <div class="tool-card">
-                <div class="icon-bg">
-                    <svg class="icon icon-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>SWP Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01V5M12 20v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1v-1m0-1V9m0-1V7m0-1V5m0-1V4"></path></svg>
+            <!-- Featured Article: SIP Guide -->
+            <article class="blog-card">
+                <div class="blog-image">
+                    <span>SIP Investment Guide</span>
                 </div>
-                <h3 class="card-title">Advanced SWP Calculator</h3>
-                <p class="card-text">Calculate your Systematic Withdrawal Plan with inflation adjustment and tax implications.</p>
-                <a href="swp-calc.html" class="card-link">Open Calculator →</a>
-            </div>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <div class="blog-date">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>December 2024</span>
+                        </div>
+                        <div class="blog-read-time">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>10 min read</span>
+                        </div>
+                    </div>
+                    <h2 class="blog-title">The Unstoppable Rise of the SIP: Your Guide to Building Wealth in the Indian Market</h2>
+                    <p class="blog-excerpt">Discover how Systematic Investment Plans (SIPs) can help you build wealth through disciplined investing. Learn about rupee cost averaging, compounding, and practical steps to start your investment journey.</p>
+                    <a href="blog-sip-guide.html" class="blog-link">
+                        Read Full Article
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </article>
 
-            <!-- Tool Card: Advanced Retirement Calculator -->
-            <div class="tool-card">
-                <div class="icon-bg">
-                    <svg class="icon icon-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Retirement Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <!-- Placeholder for future articles -->
+            <article class="blog-card">
+                <div class="blog-image">
+                    <span>Coming Soon</span>
                 </div>
-                <h3 class="card-title">Advanced Retirement Calculator</h3>
-                <p class="card-text">Plan your retirement with detailed analysis of corpus, expenses, and investment returns.</p>
-                <a href="retirement-calc.html" class="card-link">Open Calculator →</a>
-            </div>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <div class="blog-date">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Coming Soon</span>
+                        </div>
+                        <div class="blog-read-time">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>8 min read</span>
+                        </div>
+                    </div>
+                    <h2 class="blog-title">Tax Planning Strategies for the New Financial Year</h2>
+                    <p class="blog-excerpt">Comprehensive guide to optimize your tax savings and maximize your investments under both old and new tax regimes.</p>
+                    <span class="blog-link" style="opacity:0.6;cursor:not-allowed">
+                        Article Coming Soon
+                    </span>
+                </div>
+            </article>
 
-            <!-- Tool Card: Tax Calculator -->
-            <div class="tool-card">
-                <div class="icon-bg">
-                    <svg class="icon icon-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Tax Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <article class="blog-card">
+                <div class="blog-image">
+                    <span>Coming Soon</span>
                 </div>
-                <h3 class="card-title">Tax Calculator</h3>
-                <p class="card-text">Calculate your income tax and plan your tax-saving investments.</p>
-                <a href="tax-calc.html" class="card-link">Open Calculator →</a>
-            </div>
-
-            <!-- Tool Card: FD Calculator -->
-            <div class="tool-card">
-                <div class="icon-bg">
-                    <svg class="icon icon-indigo" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>FD Calculator Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <div class="blog-date">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Coming Soon</span>
+                        </div>
+                        <div class="blog-read-time">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>12 min read</span>
+                        </div>
+                    </div>
+                    <h2 class="blog-title">FIRE Movement in India: Financial Independence Made Simple</h2>
+                    <p class="blog-excerpt">Learn how to achieve Financial Independence and Retire Early (FIRE) with practical strategies tailored for the Indian market and lifestyle.</p>
+                    <span class="blog-link" style="opacity:0.6;cursor:not-allowed">
+                        Article Coming Soon
+                    </span>
                 </div>
-                <h3 class="card-title">FD Calculator</h3>
-                <p class="card-text">Calculate the maturity amount and interest earned on your Fixed Deposits.</p>
-                <a href="fd-calc.html" class="card-link">Open Calculator →</a>
-            </div>
+            </article>
 
         </div>
     </main>
@@ -255,7 +298,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
 
-    <!-- Load AdSense asynchronously and defer with modern loading -->
+    <!-- Load AdSense asynchronously -->
     <script>
         (function() {
             const script = document.createElement('script');
@@ -268,19 +311,14 @@
                 setTimeout(function() {
                     try {
                         (adsbygoogle = window.adsbygoogle || []).push({});
-                        (adsbygoogle = window.adsbygoogle || []).push({});
                     } catch(e) {}
                 }, 1000);
             };
         })();
     </script>
 
-    <!-- Responsive_ads -->
+    <!-- AdSense Ad Unit -->
     <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
 
-    <!-- Display_ads -->
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="7595341375" data-ad-format="auto" data-full-width-responsive="true"></ins>
-
 </body>
-</html>
-
+</html> 
