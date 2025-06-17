@@ -56,12 +56,12 @@
         table{text-indent:0;border-color:inherit;border-collapse:collapse}
         button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}
         button,select{text-transform:none}
-        button,[type='button'],[type='reset'],[type='submit']{-webkit-appearance:button;background-color:transparent;background-image:none}
+        button,[type='button'],[type='reset'],[type='submit']{-webkit-appearance:button;appearance:button;background-color:transparent;background-image:none}
         :-moz-focusring{outline:auto}
         :-moz-ui-invalid{box-shadow:none}
         progress{vertical-align:baseline}
         ::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}
-        [type='search']{-webkit-appearance:textfield;outline-offset:-2px}
+        [type='search']{-webkit-appearance:textfield;appearance:textfield;outline-offset:-2px}
         ::-webkit-search-decoration{-webkit-appearance:none}
         ::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}
         summary{display:list-item}
@@ -97,12 +97,14 @@
         .main{padding:2rem 0}
         @media (min-width:640px){.main{padding:3rem 0}}
         @media (min-width:768px){.main{padding:5rem 0}}
-        .title-section{text-align:center;margin-bottom:2rem}
-        @media (min-width:640px){.title-section{margin-bottom:3rem}}
-        .title{font-size:2.25rem;font-weight:700;color:#111827;margin-bottom:1rem}
+        .title-section{text-align:center;margin-bottom:2rem;position:relative;padding:4rem 0;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);border-radius:1rem;color:white;overflow:hidden}
+        .title-section::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:0.3}
+        .title-section *{position:relative;z-index:1}
+        @media (min-width:640px){.title-section{margin-bottom:3rem;padding:5rem 0}}
+        .title{font-size:2.25rem;font-weight:700;color:white;margin-bottom:1rem;text-shadow:0 2px 4px rgba(0,0,0,0.3)}
         @media (min-width:640px){.title{font-size:3rem}}
         @media (min-width:768px){.title{font-size:3.75rem}}
-        .subtitle{font-size:1.125rem;color:#374151;max-width:42rem;margin:0 auto}
+        .subtitle{font-size:1.125rem;color:rgba(255,255,255,0.9);max-width:42rem;margin:0 auto;text-shadow:0 1px 2px rgba(0,0,0,0.2)}
         .blog-grid{display:grid;grid-template-columns:1fr;gap:2rem}
         @media (min-width:768px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
         @media (min-width:1024px){.blog-grid{grid-template-columns:repeat(3,1fr)}}
@@ -173,7 +175,38 @@
         <!-- Blog Articles Grid -->
         <div class="blog-grid">
 
-            <!-- Featured Article: SIP Guide -->
+            <!-- Featured Article: Interactive SIP Guide -->
+            <article class="blog-card">
+                <div class="blog-image">
+                    <span>Interactive SIP Guide</span>
+                </div>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <div class="blog-date">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>December 2024</span>
+                        </div>
+                        <div class="blog-read-time">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>5 min read</span>
+                        </div>
+                    </div>
+                    <h2 class="blog-title">The Unstoppable Rise of the SIP: An Interactive Guide to Building Wealth</h2>
+                    <p class="blog-excerpt">Discover the power of SIPs with our comprehensive interactive guide. Learn about compounding, rupee cost averaging, and practical steps to start your wealth-building journey.</p>
+                    <a href="blog-interactive-sip-guide.html" class="blog-link">
+                        Read Full Article
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </article>
+
+            <!-- SIP Guide Article -->
             <article class="blog-card">
                 <div class="blog-image">
                     <span>SIP Investment Guide</span>
@@ -235,6 +268,7 @@
                 </div>
             </article>
 
+            <!-- FIRE Movement Guide Article -->
             <article class="blog-card">
                 <div class="blog-image">
                     <span>FIRE Movement Guide</span>
