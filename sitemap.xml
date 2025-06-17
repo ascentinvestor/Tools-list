@@ -2,83 +2,83 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <!-- Main Pages -->
     <url>
-        <loc>http://www.ascentinvestor.in/</loc>
+        <loc>https://ascentinvestor.netlify.app/</loc>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/tools</loc>
+        <loc>https://ascentinvestor.netlify.app/tools</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/blogs</loc>
+        <loc>https://ascentinvestor.netlify.app/blogs</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
 
     <!-- Calculator Pages -->
     <url>
-        <loc>http://www.ascentinvestor.in/swp-calc</loc>
+        <loc>https://ascentinvestor.netlify.app/swp-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/retirement-calc</loc>
+        <loc>https://ascentinvestor.netlify.app/retirement-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/tax-calc</loc>
+        <loc>https://ascentinvestor.netlify.app/tax-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/fd-calc</loc>
+        <loc>https://ascentinvestor.netlify.app/fd-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
 
     <!-- Blog Pages -->
     <url>
-        <loc>http://www.ascentinvestor.in/blog-fire-movement-guide</loc>
+        <loc>https://ascentinvestor.netlify.app/blog-fire-movement-guide</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/blog-interactive-sip-guide</loc>
+        <loc>https://ascentinvestor.netlify.app/blog-interactive-sip-guide</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/blog-sip-guide</loc>
+        <loc>https://ascentinvestor.netlify.app/blog-sip-guide</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/blog-tax-planning-guide</loc>
+        <loc>https://ascentinvestor.netlify.app/blog-tax-planning-guide</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <!-- Legal Pages -->
     <url>
-        <loc>http://www.ascentinvestor.in/privacy-policy</loc>
+        <loc>https://ascentinvestor.netlify.app/privacy-policy</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/refund-policy</loc>
+        <loc>https://ascentinvestor.netlify.app/refund-policy</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/terms-conditions</loc>
+        <loc>https://ascentinvestor.netlify.app/terms-conditions</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>http://www.ascentinvestor.in/fb-disclaimer</loc>
+        <loc>https://ascentinvestor.netlify.app/fb-disclaimer</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
