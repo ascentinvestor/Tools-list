@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-4584710287882818">
+
+    <!-- SEO Meta Tags -->
+    <title>Portfolio Tracker - AscentInvestor</title>
+    <meta name="description" content="Upload and track your mutual funds portfolio screenshots on a daily basis. Monitor your investment journey with AscentInvestor.">
+    <link rel="canonical" href="http://www.ascentinvestor.in/portfolio">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://www.ascentinvestor.in/portfolio">
+    <meta property="og:title" content="Portfolio Tracker - AscentInvestor">
+    <meta property="og:description" content="Upload and track your mutual funds portfolio screenshots on a daily basis.">
+    <meta property="og:site_name" content="AscentInvestor">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="http://www.ascentinvestor.in/portfolio">
+    <meta property="twitter:title" content="Portfolio Tracker - AscentInvestor">
+    <meta property="twitter:description" content="Upload and track your mutual funds portfolio screenshots on a daily basis.">
+
+    <!-- Preconnect for faster font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="logo-ai.png">
+    <meta name="msapplication-TileImage" content="logo-ai.png">
+    <meta name="theme-color" content="#4f46e5">
+    
+    <!-- Preload critical images -->
+    <link rel="preload" as="image" href="logo-ai-32.png" type="image/png">
+    
+    <!-- Modern CSS with optimizations -->
+    <style>
+        *,*::before,*::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
+        *::before,*::after{--tw-content:''}
+        html,:host{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}
+        body{margin:0;line-height:inherit;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background-color:#f9fafb;color:#111827}
+        hr{height:0;color:inherit;border-top-width:1px}
+        abbr:where([title]){text-decoration:underline dotted}
+        h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}
+        a{color:inherit;text-decoration:inherit}
+        b,strong{font-weight:bolder}
+        code,kbd,samp,pre{font-family:ui-monospace,SFMono-Regular,"Menlo",Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}
+        small{font-size:80%}
+        sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+        sub{bottom:-.25em}
+        sup{top:-.5em}
+        table{text-indent:0;border-color:inherit;border-collapse:collapse}
+        button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}
+        button,select{text-transform:none}
+        button,[type='button'],[type='reset'],[type='submit']{-webkit-appearance:button;appearance:button;background-color:transparent;background-image:none}
+        :-moz-focusring{outline:auto}
+        :-moz-ui-invalid{box-shadow:none}
+        progress{vertical-align:baseline}
+        ::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}
+        [type='search']{-webkit-appearance:textfield;appearance:textfield;outline-offset:-2px}
+        ::-webkit-search-decoration{-webkit-appearance:none;appearance:none}
+        ::-webkit-file-upload-button{-webkit-appearance:button;appearance:button;font:inherit}
+        summary{display:list-item}
+        blockquote,dl,dd,h1,h2,h3,h4,h5,h6,hr,figure,p,pre{margin:0}
+        fieldset{margin:0;padding:0}
+        legend{padding:0}
+        ol,ul,menu{list-style:none;margin:0;padding:0}
+        dialog{padding:0}
+        textarea{resize:vertical}
+        input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}
+        button,[role="button"]{cursor:pointer}
+        :disabled{cursor:default}
+        img,svg,video,canvas,audio,iframe,embed,object{display:block}
+        img,video{max-width:100%;height:auto}
+        [hidden]{display:none}
+        .container{width:100%;margin:0 auto;padding:0 1rem}
+        @media (min-width:640px){.container{max-width:640px;padding:0 1.5rem}}
+        @media (min-width:768px){.container{max-width:768px}}
+        @media (min-width:1024px){.container{max-width:1024px}}
+        @media (min-width:1280px){.container{max-width:1280px}}
+        @media (min-width:1536px){.container{max-width:1536px}}
+        .header{background:white;box-shadow:0 1px 3px 0 rgba(0,0,0,.1);position:sticky;top:0;z-index:50}
+        .header-content{display:flex;justify-content:space-between;align-items:center;padding:1rem 0}
+        .logo{display:flex;align-items:center;font-size:1.5rem;font-weight:700;color:#111827;text-decoration:none}
+        .logo:hover{color:#4f46e5;transition:color 0.2s}
+        .logo img{height:2rem;width:2rem;margin-right:0.5rem}
+        .nav{display:none;align-items:center;gap:1.5rem}
+        @media (min-width:768px){.nav{display:flex}}
+        .nav-link{color:#4f46e5;font-weight:600;text-decoration:none}
+        .nav-link:hover{color:#4338ca}
+        .menu-btn{color:#374151}
+        @media (min-width:768px){.menu-btn{display:none}}
+        .main{padding:2rem 0}
+        @media (min-width:640px){.main{padding:3rem 0}}
+        @media (min-width:768px){.main{padding:5rem 0}}
+        .title-section{text-align:center;margin-bottom:2rem;position:relative;padding:4rem 0;background:linear-gradient(135deg,#10b981 0%,#059669 50%,#047857 100%);border-radius:1rem;color:white;overflow:hidden}
+        .title-section::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:0.3}
+        .title-section *{position:relative;z-index:1}
+        @media (min-width:640px){.title-section{margin-bottom:3rem;padding:5rem 0}}
+        .title{font-size:2.25rem;font-weight:700;color:white;margin-bottom:1rem;text-shadow:0 2px 4px rgba(0,0,0,0.3)}
+        @media (min-width:640px){.title{font-size:3rem}}
+        @media (min-width:768px){.title{font-size:3.75rem}}
+        .subtitle{font-size:1.125rem;color:rgba(255,255,255,0.9);max-width:42rem;margin:0 auto;text-shadow:0 1px 2px rgba(0,0,0,0.2)}
+        .upload-section{background:white;padding:2rem;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);margin-bottom:2rem}
+        .upload-area{border:2px dashed #d1d5db;border-radius:0.75rem;padding:3rem 2rem;text-align:center;transition:all 0.3s ease;background:#f9fafb}
+        .upload-area:hover{border-color:#4f46e5;background:#f3f4f6}
+        .upload-area.dragover{border-color:#4f46e5;background:#eef2ff}
+        .upload-icon{width:4rem;height:4rem;margin:0 auto 1rem;color:#9ca3af}
+        .upload-text{font-size:1.125rem;font-weight:600;color:#111827;margin-bottom:0.5rem}
+        .upload-subtext{color:#6b7280;margin-bottom:1.5rem}
+        .upload-btn{background:#4f46e5;color:white;padding:0.75rem 1.5rem;border-radius:0.5rem;font-weight:600;border:none;cursor:pointer;transition:background 0.2s}
+        .upload-btn:hover{background:#4338ca}
+        .file-input{display:none}
+        .portfolio-grid{display:grid;grid-template-columns:1fr;gap:1.5rem}
+        @media (min-width:768px){.portfolio-grid{grid-template-columns:repeat(2,1fr)}}
+        @media (min-width:1024px){.portfolio-grid{grid-template-columns:repeat(3,1fr)}}
+        .portfolio-card{background:white;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);overflow:hidden;transition:all 0.3s ease}
+        .portfolio-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+        .portfolio-image{width:100%;height:16rem;object-fit:contain;background:#f3f4f6;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;image-rendering:high-quality}
+        .portfolio-info{padding:1rem}
+        .portfolio-date{font-weight:600;color:#111827;margin-bottom:0.5rem}
+        .portfolio-actions{display:flex;gap:0.5rem}
+        .action-btn{padding:0.5rem 1rem;border-radius:0.375rem;font-size:0.875rem;font-weight:500;border:none;cursor:pointer;transition:all 0.2s}
+        .view-btn{background:#10b981;color:white}
+        .view-btn:hover{background:#059669}
+        .delete-btn{background:#ef4444;color:white}
+        .delete-btn:hover{background:#dc2626}
+        .empty-state{text-align:center;padding:4rem 2rem;color:#6b7280}
+        .empty-icon{width:6rem;height:6rem;margin:0 auto 1rem;color:#d1d5db}
+        .footer{background:white;border-top:1px solid #e5e7eb;margin-top:4rem}
+        .footer-content{padding:2rem 0;display:grid;grid-template-columns:1fr;gap:2rem}
+        @media (min-width:640px){.footer-content{padding:3rem 0}}
+        @media (min-width:768px){.footer-content{grid-template-columns:repeat(4,1fr)}}
+        .footer-title{font-size:1.125rem;font-weight:700;color:#111827;margin-bottom:1rem}
+        .footer-text{color:#374151}
+        .footer-links{list-style:none;margin:0;padding:0}
+        .footer-links li{margin-bottom:0.75rem}
+        .footer-links a{color:#374151;text-decoration:none;display:flex;align-items:center}
+        .footer-links a:hover{color:#4f46e5}
+        .footer-links svg{width:1rem;height:1rem;margin-right:0.5rem}
+        .footer-bottom{margin-top:2rem;border-top:1px solid #e5e7eb;padding-top:2rem;text-align:center;color:#6b7280}
+        @media (min-width:640px){.footer-bottom{margin-top:3rem}}
+        .skip-link{position:absolute;top:-40px;left:0;background:#111827;color:white;padding:8px;z-index:100;transition:top 0.3s;text-decoration:none}
+        .skip-link:focus{top:0}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;padding:1rem}
+        .modal.active{display:flex}
+        .modal-content{background:white;border-radius:0.75rem;max-width:90%;max-height:90%;overflow:auto;position:relative}
+        .modal-close{position:absolute;top:1rem;right:1rem;background:white;border-radius:50%;width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:1}
+        .modal-close:hover{background:#f3f4f6}
+        .modal-image{width:100%;height:auto;display:block;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;image-rendering:high-quality;max-width:100%;object-fit:contain}
+    </style>
+</head>
+<body>
+    <!-- Accessibility: Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
+                        <img src="logo-ai-32.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                        AscentInvestor
+                    </a>
+                </div>
+                <nav role="navigation" aria-label="Main Navigation" class="nav">
+                    <a href="index.html" class="nav-link">Tools</a>
+                    <a href="blogs.html" class="nav-link">Blogs</a>
+                    <a href="portfolio.html" class="nav-link" aria-current="page">Portfolio</a>
+                </nav>
+                <div class="menu-btn">
+                    <button aria-label="Open main menu">
+                        <svg style="width:2rem;height:2rem" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Menu Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" role="main" class="container main">
+        <!-- Title Section -->
+        <div class="title-section">
+            <h1 class="title">Portfolio Tracker</h1>
+            <p class="subtitle">Upload and track your mutual funds portfolio screenshots. Monitor your investment journey over time.</p>
+        </div>
+
+        <!-- Upload Section -->
+        <section class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <p class="upload-text">Upload Portfolio Screenshot</p>
+                <p class="upload-subtext">Drag and drop or click to browse</p>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
+            </div>
+        </section>
+
+        <!-- Portfolio Gallery -->
+        <section id="portfolioGallery">
+            <!-- Portfolio cards will be dynamically added here -->
+        </section>
+    </main>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-close" onclick="closeModal()">
+                <svg style="width:1.5rem;height:1.5rem" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <img id="modalImage" class="modal-image" src="" alt="Portfolio Screenshot">
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- About -->
+                <div>
+                    <h4 class="footer-title">AscentInvestor</h4>
+                    <p class="footer-text">AscentInvestor Ventures Private Limited</p>
+                    <p class="footer-text" style="margin-top: 1rem;">ascentinvestor@gmail.com</p>
+                </div>
+                
+                <!-- Links -->
+                <div role="navigation" aria-label="Footer Quick Links">
+                    <h5 class="footer-title">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Tools</a></li>
+                        <li><a href="blogs.html">Blogs</a></li>
+                        <li><a href="portfolio.html">Portfolio</a></li>
+                        <li><a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer">
+                            <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube Channel
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AscentInvestor Ventures Private Limited. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize portfolio storage with pre-loaded portfolio from 28 Jan 2026
+        let portfolioData = JSON.parse(localStorage.getItem('portfolioData')) || [];
+        
+        // Check if we need to add the 28 Jan 2026 portfolio
+        const jan28Portfolio = {
+            id: 'portfolio-28-jan-2026',
+            date: '2026-01-28T00:00:00.000Z',
+            image: 'portfolio-28-jan-2026.png',
+            name: 'Mutual Fund Portfolio - 28 Jan 2026',
+            isExternal: true // Flag to indicate this is an external file reference
+        };
+        
+        // Add if not already present
+        if (!portfolioData.find(p => p.id === 'portfolio-28-jan-2026')) {
+            portfolioData.unshift(jan28Portfolio);
+            localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+        }
+
+        // Load existing portfolio on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderPortfolio();
+        });
+
+        // File input change event
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            handleFiles(e.target.files);
+        });
+
+        // Drag and drop functionality
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // Handle file upload
+        function handleFiles(files) {
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const portfolioItem = {
+                            id: Date.now() + Math.random(),
+                            date: new Date().toISOString(),
+                            image: e.target.result,
+                            name: file.name
+                        };
+                        portfolioData.unshift(portfolioItem);
+                        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+                        renderPortfolio();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        // Render portfolio gallery
+        function renderPortfolio() {
+            const gallery = document.getElementById('portfolioGallery');
+            
+            if (portfolioData.length === 0) {
+                gallery.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.5rem">No Portfolio Screenshots Yet</h3>
+                        <p>Upload your first portfolio screenshot to start tracking your investment journey.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            gallery.innerHTML = `<div class="portfolio-grid">${portfolioData.map(item => `
+                <div class="portfolio-card">
+                    <img src="${item.image}" alt="Portfolio ${new Date(item.date).toLocaleDateString()}" class="portfolio-image">
+                    <div class="portfolio-info">
+                        <p class="portfolio-date">${formatDate(item.date)}</p>
+                        <div class="portfolio-actions">
+                            <button class="action-btn view-btn" onclick="viewImage('${item.id}')">View Full</button>
+                            <button class="action-btn delete-btn" onclick="deleteImage('${item.id}')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}</div>`;
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric'
+            };
+            // For the specific 28 Jan 2026 entry, return custom format
+            if (dateString === '2026-01-28T00:00:00.000Z') {
+                return '28 Jan 2026 - Mutual Fund Portfolio';
+            }
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // View image in modal
+        function viewImage(id) {
+            const item = portfolioData.find(p => p.id == id);
+            if (item) {
+                document.getElementById('modalImage').src = item.image;
+                document.getElementById('imageModal').classList.add('active');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        // Close modal on background click
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Delete image
+        function deleteImage(id) {
+            if (confirm('Are you sure you want to delete this portfolio screenshot?')) {
+                portfolioData = portfolioData.filter(p => p.id != id);
+                localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+                renderPortfolio();
+            }
+        }
+    </script>
+
+    <!-- Load Google Fonts asynchronously -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+
+    <!-- Load AdSense asynchronously -->
+    <script>
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818';
+            script.crossOrigin = 'anonymous';
+            script.async = true;
+            document.head.appendChild(script);
+            
+            script.onload = function() {
+                setTimeout(function() {
+                    try {
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    } catch(e) {}
+                }, 1000);
+            };
+        })();
+    </script>
+
+    <!-- AdSense Ad Unit -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
+
+</body>
+</html>
