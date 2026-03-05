@@ -28,18 +28,19 @@
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#374151;background:#f9fafb}
         .container{max-width:1200px;margin:0 auto;padding:0 1rem}
-        .header{background:white;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:1rem 0}
+        .header{background:white;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:1rem 0;position:sticky;top:0;z-index:50}
         .header-flex{display:flex;justify-content:space-between;align-items:center}
         .logo{display:flex;align-items:center;font-size:1.5rem;font-weight:700;color:#111827;text-decoration:none}
         .logo:hover{color:#4f46e5}
         .logo img{height:2rem;width:2rem;margin-right:0.5rem}
-        .nav{display:flex;gap:1.5rem}
-        .nav a{color:#6b7280;text-decoration:none}
-        .nav a:hover{color:#4f46e5}
+        .nav{display:flex;gap:0.25rem}
+        .nav a{color:#4f46e5;font-weight:600;text-decoration:none;padding:0.375rem 0.75rem;border-radius:0.5rem;transition:background 0.15s}
+        .nav a:hover{background:#ede9fe;color:#4338ca}
         .main{padding:2rem 0}
-        .title{text-align:center;margin-bottom:2rem}
-        .title h1{font-size:2.5rem;font-weight:700;color:#111827;margin-bottom:0.5rem}
-        .title p{font-size:1.125rem;color:#6b7280}
+        .title{text-align:center;margin-bottom:2rem;position:relative;padding:3rem 1.5rem;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0ea5e9 100%);border-radius:1rem;overflow:hidden}
+        .title::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+        .title h1{font-size:2.5rem;font-weight:800;color:white;margin-bottom:0.5rem;position:relative;z-index:1;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
+        .title p{font-size:1.125rem;color:rgba(255,255,255,0.9);position:relative;z-index:1}
         .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem}
         @media (max-width:768px){.calc-grid{grid-template-columns:1fr}}
         .card{background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
@@ -54,7 +55,7 @@
         .result-title{font-weight:600;color:#6b7280;margin-bottom:1rem}
         .result-item{margin-bottom:0.5rem}
         .result-label{font-size:0.875rem;color:#6b7280}
-        .result-value{font-size:1.25rem;font-weight:700;color:#111827}
+        .result-value{font-size:1.25rem;font-weight:700;color:#4f46e5}
         .highlight-card{border:2px solid #10b981;background:#ecfdf5}
         .summary{background:#f0f9ff;border:1px solid #0ea5e9;border-radius:0.5rem;padding:1rem;margin-bottom:2rem;text-align:center;font-weight:600}
         .summary.bg-green-100{background:#dcfce7;border-color:#22c55e;color:#166534}
@@ -85,13 +86,14 @@
     <header class="header">
         <div class="container">
             <div class="header-flex">
-                <a href="https://www.youtube.com/@AscentInvestor" target="_blank" rel="noopener noreferrer" class="logo">
-                                            <img src="logo-ai-32.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                <a href="index.html" class="logo">
+                    <img src="logo-ai-32.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
                     AscentInvestor
                 </a>
                 <nav class="nav">
                     <a href="index.html">Tools</a>
                     <a href="blogs.html">Blogs</a>
+                    <a href="portfolio.html">Portfolio</a>
                 </nav>
             </div>
         </div>
@@ -284,8 +286,8 @@
 
     <script defer>
     document.addEventListener('DOMContentLoaded', function() {
-        // All JavaScript code moved inside DOMContentLoaded for better performance
-        
+        const $ = id => document.getElementById(id);
+
         function drawBarChart(canvas, data, options = {}) {
             const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
@@ -391,180 +393,127 @@
             }
         }
 
-        // Rest of the JavaScript code...
-        const elements = {
-            annualIncome: document.getElementById('annualIncome'),
-            age: document.getElementById('age'),
-            section80c: document.getElementById('section80c'),
-            section80d: document.getElementById('section80d'),
-            homeLoanInterest: document.getElementById('homeLoanInterest'),
-            otherDeductions: document.getElementById('otherDeductions'),
-            
-            annualIncomeValue: document.getElementById('annualIncomeValue'),
-            ageValue: document.getElementById('ageValue'),
-            section80cValue: document.getElementById('section80cValue'),
-            section80dValue: document.getElementById('section80dValue'),
-            homeLoanInterestValue: document.getElementById('homeLoanInterestValue'),
-            otherDeductionsValue: document.getElementById('otherDeductionsValue'),
-            
-            oldRegimeTax: document.getElementById('oldRegimeTax'),
-            newRegimeTax: document.getElementById('newRegimeTax'),
-            taxSaving: document.getElementById('taxSaving'),
-            recommendation: document.getElementById('recommendation'),
-            
-            taxChart: document.getElementById('taxComparisonChart'),
-            breakdownTable: document.getElementById('breakdownTable')
-        };
+        function getVal(id) { return parseFloat($( id)?.value) || 0; }
 
-        function formatCurrency(amount) {
-            if (amount >= 10000000) {
-                return `₹${(amount / 10000000).toFixed(2)} Cr`;
-            } else if (amount >= 100000) {
-                return `₹${(amount / 100000).toFixed(2)} L`;
-            } else if (amount >= 1000) {
-                return `₹${(amount / 1000).toFixed(0)} K`;
-            } else {
-                return `₹${Math.round(amount)}`;
+        function fmt(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency', currency: 'INR',
+                minimumFractionDigits: 0, maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function calcSlabs(taxable, slabs) {
+            let tax = 0, prev = 0;
+            for (const { limit, rate } of slabs) {
+                if (taxable <= prev) break;
+                tax += (Math.min(taxable, limit) - prev) * rate;
+                prev = limit;
+            }
+            return tax;
+        }
+
+        function calculateAndDisplay() {
+            try {
+                const fy = $('financial-year')?.value || '2024-25';
+                const gross = getVal('income-salary') + getVal('income-rental') +
+                              getVal('income-business') + getVal('income-other');
+
+                // ── Old regime ──────────────────────────────────────────────
+                const oldStdDed = 50000;
+                const oldDeds = oldStdDed +
+                    Math.min(getVal('deduction-24b'), 200000) +
+                    getVal('deduction-ptax') +
+                    Math.min(getVal('deduction-80c'), 150000) +
+                    getVal('deduction-80d') +
+                    getVal('deduction-80e') +
+                    getVal('deduction-other-old') +
+                    getVal('deduction-80ccd2');
+                const oldTaxable = Math.max(0, gross - oldDeds);
+                const oldSlabs = [
+                    { limit: 250000, rate: 0 }, { limit: 500000, rate: 0.05 },
+                    { limit: 1000000, rate: 0.20 }, { limit: Infinity, rate: 0.30 }
+                ];
+                let oldTax = calcSlabs(oldTaxable, oldSlabs);
+                // Rebate u/s 87A: ≤5L → rebate up to ₹12,500
+                if (oldTaxable <= 500000) oldTax = Math.max(0, oldTax - 12500);
+                const oldCess = oldTax * 0.04;
+                const oldTotal = oldTax + oldCess;
+
+                // ── New regime ───────────────────────────────────────────────
+                const newStdDed = fy === '2024-25' ? 75000 : 50000;
+                const newDeds = newStdDed + getVal('deduction-80ccd2') + getVal('deduction-other-new');
+                const newTaxable = Math.max(0, gross - newDeds);
+                const newSlabs = fy === '2024-25'
+                    ? [{ limit: 400000, rate: 0 }, { limit: 800000, rate: 0.05 },
+                       { limit: 1200000, rate: 0.10 }, { limit: 1600000, rate: 0.15 },
+                       { limit: 2000000, rate: 0.20 }, { limit: 2400000, rate: 0.25 },
+                       { limit: Infinity, rate: 0.30 }]
+                    : [{ limit: 300000, rate: 0 }, { limit: 600000, rate: 0.05 },
+                       { limit: 900000, rate: 0.10 }, { limit: 1200000, rate: 0.15 },
+                       { limit: 1500000, rate: 0.20 }, { limit: Infinity, rate: 0.30 }];
+                let newTax = calcSlabs(newTaxable, newSlabs);
+                // Rebate u/s 87A: ≤7L → full rebate (new regime)
+                if (newTaxable <= 700000) newTax = 0;
+                const newCess = newTax * 0.04;
+                const newTotal = newTax + newCess;
+
+                // ── Update result DOM ────────────────────────────────────────
+                $('old-deductions').textContent = fmt(oldDeds);
+                $('old-taxable').textContent    = fmt(oldTaxable);
+                $('old-tax').textContent        = fmt(oldTax);
+                $('old-cess').textContent       = fmt(oldCess);
+                $('old-total').textContent      = fmt(oldTotal);
+
+                $('new-deductions').textContent = fmt(newDeds);
+                $('new-taxable').textContent    = fmt(newTaxable);
+                $('new-tax').textContent        = fmt(newTax);
+                $('new-cess').textContent       = fmt(newCess);
+                $('new-total').textContent      = fmt(newTotal);
+
+                // ── Summary ──────────────────────────────────────────────────
+                const summaryEl = $('summary');
+                const saving = Math.abs(oldTotal - newTotal);
+                if (oldTotal < newTotal) {
+                    summaryEl.textContent = `Old Regime saves you ${fmt(saving)} compared to New Regime.`;
+                    summaryEl.className = 'summary bg-blue-100';
+                    $('old-regime-card').className = 'result-card highlight-card';
+                    $('new-regime-card').className = 'result-card';
+                } else if (newTotal < oldTotal) {
+                    summaryEl.textContent = `New Regime saves you ${fmt(saving)} compared to Old Regime.`;
+                    summaryEl.className = 'summary bg-green-100';
+                    $('new-regime-card').className = 'result-card highlight-card';
+                    $('old-regime-card').className = 'result-card';
+                } else {
+                    summaryEl.textContent = 'Both regimes result in equal tax. Prefer New Regime for simplicity.';
+                    summaryEl.className = 'summary';
+                    $('old-regime-card').className = 'result-card';
+                    $('new-regime-card').className = 'result-card';
+                }
+
+                // ── AY subtitle ──────────────────────────────────────────────
+                const fyParts = fy.split('-');
+                $('ay-subtitle').textContent =
+                    `Compare Old vs. New Regime for FY ${fy} (AY ${parseInt(fyParts[0])+1}-${parseInt(fyParts[1])+1})`;
+
+                // ── Chart ────────────────────────────────────────────────────
+                drawBarChart($('taxComparisonChart'), [
+                    { label: 'Old Regime', value: oldTotal || 1, color: '#4f46e5' },
+                    { label: 'New Regime', value: newTotal || 1, color: '#10b981' }
+                ], { title: 'Total Tax: Old vs New Regime' });
+
+            } catch (err) {
+                console.error('Tax calculation error:', err);
             }
         }
 
-        function updateSliderValues() {
-            elements.annualIncomeValue.textContent = formatCurrency(parseFloat(elements.annualIncome.value));
-            elements.ageValue.textContent = elements.age.value + ' years';
-            elements.section80cValue.textContent = formatCurrency(parseFloat(elements.section80c.value));
-            elements.section80dValue.textContent = formatCurrency(parseFloat(elements.section80d.value));
-            elements.homeLoanInterestValue.textContent = formatCurrency(parseFloat(elements.homeLoanInterest.value));
-            elements.otherDeductionsValue.textContent = formatCurrency(parseFloat(elements.otherDeductions.value));
-        }
+        // Wire up all inputs
+        document.querySelectorAll('input[type="number"], select').forEach(el => {
+            el.addEventListener('input', calculateAndDisplay);
+        });
+        $('calculate-btn')?.addEventListener('click', calculateAndDisplay);
 
-        function calculateTax(income, regime, deductions = {}) {
-            let tax = 0;
-            let taxableIncome = income;
-
-            if (regime === 'old') {
-                // Apply deductions for old regime
-                const totalDeductions = (deductions.section80c || 0) + 
-                                      (deductions.section80d || 0) + 
-                                      (deductions.homeLoanInterest || 0) + 
-                                      (deductions.otherDeductions || 0);
-                taxableIncome = Math.max(0, income - totalDeductions);
-
-                // Old regime tax slabs
-                if (taxableIncome <= 250000) {
-                    tax = 0;
-                } else if (taxableIncome <= 500000) {
-                    tax = (taxableIncome - 250000) * 0.05;
-                } else if (taxableIncome <= 1000000) {
-                    tax = 12500 + (taxableIncome - 500000) * 0.20;
-                } else {
-                    tax = 112500 + (taxableIncome - 1000000) * 0.30;
-                }
-            } else {
-                // New regime tax slabs (2023-24)
-                if (taxableIncome <= 300000) {
-                    tax = 0;
-                } else if (taxableIncome <= 600000) {
-                    tax = (taxableIncome - 300000) * 0.05;
-                } else if (taxableIncome <= 900000) {
-                    tax = 15000 + (taxableIncome - 600000) * 0.10;
-                } else if (taxableIncome <= 1200000) {
-                    tax = 45000 + (taxableIncome - 900000) * 0.15;
-                } else if (taxableIncome <= 1500000) {
-                    tax = 90000 + (taxableIncome - 1200000) * 0.20;
-                } else {
-                    tax = 150000 + (taxableIncome - 1500000) * 0.30;
-                }
-            }
-
-            // Add cess (4% on tax)
-            const cess = tax * 0.04;
-            const totalTax = tax + cess;
-
-            return {
-                taxableIncome: taxableIncome,
-                incomeTax: tax,
-                cess: cess,
-                totalTax: totalTax
-            };
-        }
-
-        function updateBreakdownTable(oldData, newData) {
-            const tbody = elements.breakdownTable.querySelector('tbody');
-            tbody.innerHTML = `
-                <tr>
-                    <td class="px-4 py-2 border-b font-medium">Taxable Income</td>
-                    <td class="px-4 py-2 border-b">${formatCurrency(oldData.taxableIncome)}</td>
-                    <td class="px-4 py-2 border-b">${formatCurrency(newData.taxableIncome)}</td>
-                </tr>
-                <tr>
-                    <td class="px-4 py-2 border-b font-medium">Income Tax</td>
-                    <td class="px-4 py-2 border-b">${formatCurrency(oldData.incomeTax)}</td>
-                    <td class="px-4 py-2 border-b">${formatCurrency(newData.incomeTax)}</td>
-                </tr>
-                <tr>
-                    <td class="px-4 py-2 border-b font-medium">Health & Education Cess</td>
-                    <td class="px-4 py-2 border-b">${formatCurrency(oldData.cess)}</td>
-                    <td class="px-4 py-2 border-b">${formatCurrency(newData.cess)}</td>
-                </tr>
-                                 <tr class="bg-gray-50">
-                     <td class="px-4 py-2 border-b font-bold">Total Tax</td>
-                     <td class="px-4 py-2 border-b font-bold">${formatCurrency(oldData.totalTax)}</td>
-                     <td class="px-4 py-2 border-b font-bold">${formatCurrency(newData.totalTax)}</td>
-                 </tr>
-             `;
-         }
-
-         function calculateAndDisplay() {
-             try {
-                 const income = parseFloat(elements.annualIncome.value);
-                 const deductions = {
-                     section80c: parseFloat(elements.section80c.value),
-                     section80d: parseFloat(elements.section80d.value),
-                     homeLoanInterest: parseFloat(elements.homeLoanInterest.value),
-                     otherDeductions: parseFloat(elements.otherDeductions.value)
-                 };
-
-                 const oldRegimeData = calculateTax(income, 'old', deductions);
-                 const newRegimeData = calculateTax(income, 'new');
-
-                 const taxSaving = oldRegimeData.totalTax - newRegimeData.totalTax;
-                 const recommendation = taxSaving > 0 ? 'New Regime' : 'Old Regime';
-
-                 elements.oldRegimeTax.textContent = formatCurrency(oldRegimeData.totalTax);
-                 elements.newRegimeTax.textContent = formatCurrency(newRegimeData.totalTax);
-                 elements.taxSaving.textContent = formatCurrency(Math.abs(taxSaving));
-                 elements.recommendation.textContent = recommendation;
-                 elements.recommendation.className = `text-lg font-bold ${taxSaving > 0 ? 'text-green-600' : 'text-blue-600'}`;
-
-                 updateBreakdownTable(oldRegimeData, newRegimeData);
-
-                 // Update chart
-                 const chartData = [
-                     { label: 'Old Regime', value: oldRegimeData.incomeTax, color: '#4f46e5' },
-                     { label: 'New Regime', value: newRegimeData.incomeTax, color: '#10b981' }
-                 ];
-                 drawBarChart(elements.taxChart, chartData, { 
-                     title: 'Tax Comparison: Old vs New Regime' 
-                 });
-
-             } catch(error) {
-                 console.error('Calculation error:', error);
-             }
-         }
-
-         // Event listeners
-         Object.values(elements).forEach(element => {
-             if (element && element.addEventListener) {
-                 element.addEventListener('input', () => {
-                     updateSliderValues();
-                     calculateAndDisplay();
-                 });
-             }
-         });
-
-         // Initial calculation
-         updateSliderValues();
-         calculateAndDisplay();
+        // Run on load
+        calculateAndDisplay();
      });
      </script>
 
