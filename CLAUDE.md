@@ -23,10 +23,8 @@ python3 -m http.server 8080
 | `swp-calc.html` | `/swp-calc` | Systematic Withdrawal Plan calculator |
 | `retirement-calc.html` | `/retirement-calc` | Retirement planning calculator |
 | `portfolio.html` | `/portfolio` | Mutual fund portfolio screenshot tracker |
-| `itrstats.html` | `/itrstats` | India ITR filing statistics dashboard |
 | `blogs.html` | `/blogs` | Blog listing page |
 | `blog-*.html` | `/blog-*` | Individual blog articles |
-| `itr-stats.json` | — | Data file consumed by `itrstats.html` — **manually updated** |
 
 Legal pages: `privacy-policy.html`, `refund-policy.html`, `terms-conditions.html`, `fb-disclaimer.html`.
 
@@ -46,6 +44,3 @@ SEO/verification files: `sitemap.xml`, `BingSiteAuth.xml`, `google28730d30145fb2
 2. Add a `<url>` entry to `sitemap.xml`.
 3. Add a card/link in the appropriate listing page (`index.html` for calculators, `blogs.html` for articles).
 
-## When Updating ITR Stats
-
-Edit `itr-stats.json` directly — `itrstats.html` fetches this file at runtime to populate the dashboard.
