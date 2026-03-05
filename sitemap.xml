@@ -23,6 +23,11 @@
     </url>
     <!-- Calculator Pages -->
     <url>
+        <loc>https://ascentinvestor.netlify.app/fire-calc</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>https://ascentinvestor.netlify.app/swp-calc</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
