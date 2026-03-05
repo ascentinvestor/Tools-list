@@ -20,13 +20,17 @@
         .skip-link:focus{top:0}
         .container{width:100%;max-width:1200px;margin:0 auto;padding:0 1rem}
         @media (min-width:768px){.container{padding:0 1.5rem}}
-        header{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(0,0,0,.06);position:sticky;top:0;z-index:50}
-        .header-inner{display:flex;justify-content:space-between;align-items:center;padding:1rem 0}
-        .site-title{font-size:1.25rem;font-weight:700;color:#1e1b4b}
-        .site-title:hover{color:#4f46e5}
-        nav{display:flex;align-items:center;gap:1.5rem}
-        .nav-link{font-weight:500;color:#6366f1}
+        header{background:white;box-shadow:0 1px 3px 0 rgba(0,0,0,.1);position:sticky;top:0;z-index:50}
+        .header-content{display:flex;justify-content:space-between;align-items:center;padding:1rem 0}
+        .logo{display:flex;align-items:center;font-size:1.25rem;font-weight:700;color:#111827;text-decoration:none}
+        .logo:hover{color:#4f46e5;transition:color .2s}
+        .logo img{height:2rem;width:2rem;margin-right:0.5rem}
+        .nav{display:none;align-items:center;gap:1.5rem}
+        @media (min-width:768px){.nav{display:flex}}
+        .nav-link{color:#4f46e5;font-weight:600;text-decoration:none}
         .nav-link:hover{color:#4338ca}
+        .menu-btn{color:#374151}
+        @media (min-width:768px){.menu-btn{display:none}}
         main{flex:1;padding:1.5rem 0 4rem}
         @media (min-width:768px){main{padding:2.5rem 0 5rem}}
         .hero-stats{position:relative;border-radius:24px;overflow:hidden;margin-bottom:2rem;padding:2.5rem 1.5rem;text-align:center;background:linear-gradient(135deg,#4f46e5 0%,#6366f1 40%,#818cf8 100%);box-shadow:0 25px 50px -12px rgba(79,70,229,.35),0 0 0 1px rgba(255,255,255,.1) inset}
@@ -103,20 +107,32 @@
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <!-- Loading overlay: shown while API is fetching -->
-    <div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite" aria-label="Loading ITR data">
+    <!-- Loading overlay: shown while dashboard is loading -->
+    <div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite" aria-label="Loading ITR dashboard">
         <div class="loading-spinner" aria-hidden="true"></div>
-        <p class="loading-overlay-text">Fetching ITR data from eportal.incometax.gov.in…</p>
-        <p class="loading-overlay-sub">This may take a few seconds</p>
+        <p class="loading-overlay-text">Loading dashboard…</p>
+        <p class="loading-overlay-sub">Using published statistics from Income Tax Department</p>
     </div>
 
-    <header>
+    <header class="header">
         <div class="container">
-            <div class="header-inner">
-                <a href="itrstats.html" class="site-title">ITR Portal Stats</a>
-                <nav>
-                    <a href="blogs.html" class="nav-link">Blog</a>
+            <div class="header-content">
+                <div>
+                    <a href="index.html" class="logo">
+                        <img src="logo-ai-32.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                        AscentInvestor
+                    </a>
+                </div>
+                <nav role="navigation" aria-label="Main Navigation" class="nav">
+                    <a href="index.html" class="nav-link">Tools</a>
+                    <a href="blogs.html" class="nav-link">Blogs</a>
+                    <a href="portfolio.html" class="nav-link">Portfolio</a>
                 </nav>
+                <div class="menu-btn">
+                    <button aria-label="Open main menu">
+                        <svg style="width:2rem;height:2rem" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Menu Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -338,48 +354,8 @@
                     yLabels;
             }
 
-            // Try to fetch stats from eportal / incometax (CORS may block; then we use fallback)
-            var API_ENDPOINTS = [
-                'https://eportal.incometax.gov.in/iec/foservices/api/public/statistics',
-                'https://www.incometax.gov.in/iec/foportal/api/statistics',
-                'https://eportal.incometax.gov.in/iec/foservices/api/statistics'
-            ];
-
-            function tryFetchStats() {
-                var idx = 0;
-                function attempt() {
-                    if (idx >= API_ENDPOINTS.length) {
-                        apiStatusEl.textContent = 'Using published statistics (source: Income Tax Department). Live API from eportal.incometax.gov.in is not publicly accessible or CORS-restricted.';
-                        apiStatusEl.className = 'api-status fallback';
-                        renderStats(FALLBACK_STATS);
-                        showContent();
-                        return;
-                    }
-                    fetch(API_ENDPOINTS[idx], { method: 'GET', mode: 'cors' })
-                        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-                        .then(function(json) {
-                            apiStatusEl.textContent = 'Data from eportal.incometax.gov.in (live). Last updated: ' + (json.lastUpdated || 'today');
-                            apiStatusEl.className = 'api-status live';
-                            var d = {
-                                itrsFiledToday: json.itrsFiledToday != null ? json.itrsFiledToday : FALLBACK_STATS.itrsFiledToday,
-                                totalITRsAY: json.totalITRsAY != null ? json.totalITRsAY : FALLBACK_STATS.totalITRsAY,
-                                totalITRsAYUnit: json.totalITRsAYUnit || 'Cr',
-                                formsFiled: json.formsFiled != null ? json.formsFiled : FALLBACK_STATS.formsFiled,
-                                formsFiledUnit: json.formsFiledUnit || 'Cr',
-                                refundsIssued: json.refundsIssued != null ? json.refundsIssued : FALLBACK_STATS.refundsIssued,
-                                refundsUnit: json.refundsUnit || 'Cr'
-                            };
-                            renderStats(d, true);
-                            showContent();
-                        })
-                        .catch(function() {
-                            idx++;
-                            attempt();
-                        });
-                }
-                attempt();
-            }
-
+            // Replicate itrstats.in flow: show loading, fetch data, then display.
+            // Use same-origin JSON (itr-stats.json) so we avoid 404s from non-existent govt APIs.
             function showContent() {
                 var overlay = document.getElementById('loadingOverlay');
                 if (overlay) overlay.classList.add('hidden');
@@ -391,41 +367,39 @@
                 drawChart('all');
             }
 
-            // Start: try API first with short timeout, then show fallback
-            var apiTimeout = setTimeout(function() {
-                apiStatusEl.textContent = 'Using published statistics (source: Income Tax Department). Live API from eportal.incometax.gov.in is not publicly accessible or CORS-restricted.';
-                apiStatusEl.className = 'api-status fallback';
-                renderStats(FALLBACK_STATS);
-                showContent();
-            }, 2500);
-
-            Promise.race([
-                fetch('https://eportal.incometax.gov.in/iec/foservices/api/public/statistics', { method: 'GET', mode: 'cors' }).then(function(r) { return r.ok ? r.json() : Promise.reject(); }),
-                fetch('https://www.incometax.gov.in/iec/foportal/api/statistics', { method: 'GET', mode: 'cors' }).then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-            ]).then(function(json) {
-                clearTimeout(apiTimeout);
-                var hasData = json && (json.totalITRsAY != null || json.itrsFiledToday != null || json.formsFiled != null);
-                if (!hasData) {
-                    tryFetchStats();
-                    return;
-                }
-                apiStatusEl.textContent = 'Data from eportal.incometax.gov.in (live).';
-                apiStatusEl.className = 'api-status live';
+            function applyData(data, isLive) {
                 var d = {
-                    itrsFiledToday: json.itrsFiledToday != null ? json.itrsFiledToday : FALLBACK_STATS.itrsFiledToday,
-                    totalITRsAY: json.totalITRsAY != null ? json.totalITRsAY : FALLBACK_STATS.totalITRsAY,
-                    totalITRsAYUnit: json.totalITRsAYUnit || 'Cr',
-                    formsFiled: json.formsFiled != null ? json.formsFiled : FALLBACK_STATS.formsFiled,
-                    formsFiledUnit: json.formsFiledUnit || 'Cr',
-                    refundsIssued: json.refundsIssued != null ? json.refundsIssued : FALLBACK_STATS.refundsIssued,
-                    refundsUnit: json.refundsUnit || 'Cr'
+                    itrsFiledToday: data.itrsFiledToday != null ? data.itrsFiledToday : FALLBACK_STATS.itrsFiledToday,
+                    totalITRsAY: data.totalITRsAY != null ? data.totalITRsAY : FALLBACK_STATS.totalITRsAY,
+                    totalITRsAYUnit: data.totalITRsAYUnit || 'Cr',
+                    formsFiled: data.formsFiled != null ? data.formsFiled : FALLBACK_STATS.formsFiled,
+                    formsFiledUnit: data.formsFiledUnit || 'Cr',
+                    itrsVerified: data.itrsVerified != null ? data.itrsVerified : FALLBACK_STATS.itrsVerified,
+                    itrsVerifiedUnit: data.itrsVerifiedUnit || 'Cr',
+                    refundsIssued: data.refundsIssued != null ? data.refundsIssued : FALLBACK_STATS.refundsIssued,
+                    refundsUnit: data.refundsUnit || 'Cr',
+                    lastUpdated: data.lastUpdated || FALLBACK_STATS.lastUpdated
                 };
-                renderStats(d, true);
+                apiStatusEl.textContent = isLive ? 'Data loaded from statistics.' : 'Using published statistics from Income Tax Department.';
+                apiStatusEl.className = 'api-status ' + (isLive ? 'live' : 'fallback');
+                renderStats(d, isLive);
                 showContent();
-            }).catch(function() {
-                clearTimeout(apiTimeout);
-                tryFetchStats();
-            });
+            }
+
+            // Fetch stats from same-origin JSON (like itrstats.in fetches data; our endpoint does not 404)
+            fetch('itr-stats.json', { method: 'GET' })
+                .then(function(r) { return r.ok ? r.json() : Promise.reject(new Error('Not ok')); })
+                .then(function(json) {
+                    var hasData = json && (json.totalITRsAY != null || json.itrsFiledToday != null || json.formsFiled != null);
+                    if (hasData) {
+                        applyData(json, true);
+                    } else {
+                        applyData(FALLBACK_STATS, false);
+                    }
+                })
+                .catch(function() {
+                    applyData(FALLBACK_STATS, false);
+                });
 
             document.querySelectorAll('.trend-tab').forEach(function(btn) {
                 btn.addEventListener('click', function() {
