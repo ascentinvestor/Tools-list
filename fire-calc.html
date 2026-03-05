@@ -1069,9 +1069,9 @@ function calculate() {
 
 function rawFmt(n) {
     if (!n || isNaN(n)) return '—';
-    if (Math.abs(n) >= 10000000) return '&#8377;' + (n/10000000).toFixed(2) + ' Cr';
-    if (Math.abs(n) >= 100000)   return '&#8377;' + (n/100000).toFixed(2) + ' L';
-    return '&#8377;' + Math.round(n).toLocaleString('en-IN');
+    if (Math.abs(n) >= 10000000) return '\u20B9' + (n/10000000).toFixed(2) + ' Cr';
+    if (Math.abs(n) >= 100000)   return '\u20B9' + (n/100000).toFixed(2) + ' L';
+    return '\u20B9' + Math.round(n).toLocaleString('en-IN');
 }
 
 function extraYearsNeeded(current, target, ret, stepup, sipNow) {
