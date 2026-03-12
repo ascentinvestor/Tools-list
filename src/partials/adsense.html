@@ -1,0 +1,25 @@
+    <!-- Load AdSense asynchronously (non-render-blocking) -->
+    <script>
+        (function () {
+            const script = document.createElement('script');
+            script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818';
+            script.crossOrigin = 'anonymous';
+            script.async = true;
+            document.head.appendChild(script);
+
+            script.onload = function () {
+                setTimeout(function () {
+                    try {
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    } catch (e) {}
+                }, 1000);
+            };
+        })();
+    </script>
+
+    <!-- Responsive ad -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
+
+    <!-- Display ad -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="7595341375" data-ad-format="auto" data-full-width-responsive="true"></ins>

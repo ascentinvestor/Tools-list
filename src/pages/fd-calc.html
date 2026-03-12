@@ -1,0 +1,369 @@
+<!-- @config
+nav_current: tools
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- @partial head-common -->
+    <title>Advanced FD Calculator</title>
+    <meta name="description" content="Calculate your Fixed Deposit (FD) maturity amount, total interest, and visualize your investment growth with our advanced FD calculator. Features a year-wise breakdown table and interactive charts.">
+    
+    <style>
+.title{text-align:center;margin-bottom:2rem;position:relative;padding:3rem 1.5rem;background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#a855f7 100%);border-radius:1rem;overflow:hidden}
+        .title::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+        .title h1{font-size:2.5rem;font-weight:800;color:white;margin-bottom:0.5rem;position:relative;z-index:1;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
+        .title p{font-size:1.125rem;color:rgba(255,255,255,0.9);position:relative;z-index:1}
+        .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem}
+        @media (max-width:768px){.calc-grid{grid-template-columns:1fr}}
+        .chart-container{width:100%;height:250px;margin:1rem 0;background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .chart{width:100%;height:100%}
+        .calc-grid{grid-template-columns:1fr}
+            }
+    </style>
+</head>
+<body>
+    <!-- @partial header-main -->
+
+    <!-- Main Content -->
+    <main class="container main">
+        <div class="title">
+            <h1>Advanced FD Calculator</h1>
+            <p>Calculate your Fixed Deposit maturity amount, total interest, and visualize your investment growth</p>
+        </div>
+
+        <div class="calc-grid">
+            <!-- Left Side: Input Controls -->
+            <div class="card">
+                <div class="form-group">
+                    <label for="investmentValue">Principal Amount (₹)</label>
+                    <input type="number" id="investmentValue" value="100000" min="1000" max="10000000" step="1000">
+                    <div class="slider-container">
+                        <input type="range" id="investmentSlider" min="10000" max="1000000" value="100000" step="5000" class="slider">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="interestRateValue">Interest Rate (% per annum)</label>
+                    <input type="number" id="interestRateValue" value="7.5" min="1" max="15" step="0.1">
+                    <div class="slider-container">
+                        <input type="range" id="interestRateSlider" min="1" max="15" value="7.5" step="0.1" class="slider">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="timePeriodValue">Time Period (Years)</label>
+                    <input type="number" id="timePeriodValue" value="3" min="1" max="10" step="1">
+                    <div class="slider-container">
+                        <input type="range" id="timePeriodSlider" min="1" max="10" value="3" step="1" class="slider">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="investmentDate">Investment Date</label>
+                    <input type="date" id="investmentDate" value="2024-01-01">
+                </div>
+
+                <div class="form-group">
+                    <label for="compoundingFrequency">Compounding Frequency</label>
+                    <select id="compoundingFrequency">
+                        <option value="1">Annually</option>
+                        <option value="2">Half-Yearly</option>
+                        <option value="4" selected>Quarterly</option>
+                        <option value="12">Monthly</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Right Side: Results & Charts -->
+            <div class="card">
+                <div class="results">
+                    <div class="result-item">
+                        <div class="result-label">Invested Amount</div>
+                        <div id="investedAmount" class="result-value">₹ 0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Total Interest</div>
+                        <div id="totalInterest" class="result-value">₹ 0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Maturity Value</div>
+                        <div id="maturityValue" class="result-value">₹ 0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Maturity Date</div>
+                        <div id="maturityDate" class="result-value">-</div>
+                    </div>
+                </div>
+                
+                <!-- Simple Pie Chart -->
+                <div class="chart-container">
+                    <canvas id="fdDoughnutChart" class="chart"></canvas>
+                </div>
+                
+                <!-- Line Chart -->
+                <div class="chart-container">
+                    <canvas id="fdLineChart" class="chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Year-wise Breakdown Table -->
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Opening Balance</th>
+                        <th>Interest Earned</th>
+                        <th>Closing Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="yearlyBreakdownBody">
+                    <tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- @partial footer-calc -->
+    <!-- @partial fonts-async -->
+
+    <!-- Minified JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded',function(){
+        function drawPieChart(canvas,data,options={}){
+            const ctx=canvas.getContext('2d');
+            const width=canvas.width=canvas.offsetWidth;
+            const height=canvas.height=canvas.offsetHeight;
+            const centerX=width/2;
+            const centerY=height/2;
+            const radius=Math.min(centerX,centerY)*0.8;
+            const colors=['#4f46e5','#10b981','#f59e0b','#ef4444'];
+            let total=data.reduce((sum,item)=>sum+item.value,0);
+            let currentAngle=0;
+            
+            data.forEach((item,index)=>{
+                const sliceAngle=(item.value/total)*2*Math.PI;
+                ctx.beginPath();
+                ctx.moveTo(centerX,centerY);
+                ctx.arc(centerX,centerY,radius,currentAngle,currentAngle+sliceAngle);
+                ctx.closePath();
+                ctx.fillStyle=colors[index%colors.length];
+                ctx.fill();
+                currentAngle+=sliceAngle;
+            });
+            
+            if(options.title){
+                ctx.fillStyle='#333';
+                ctx.font='bold 14px Inter, sans-serif';
+                ctx.textAlign='center';
+                ctx.textBaseline='top';
+                ctx.fillText(options.title,width/2,5);
+            }
+        }
+
+        function drawLineChart(canvas,data,options={}){
+            if(!data||data.length===0)return;
+            const ctx=canvas.getContext('2d');
+            const width=canvas.width=canvas.offsetWidth;
+            const height=canvas.height=canvas.offsetHeight;
+            const padding={top:30,right:20,bottom:40,left:60};
+            const chartWidth=width-padding.left-padding.right;
+            const chartHeight=height-padding.top-padding.bottom;
+            
+            const values=data.map(d=>d.value);
+            const minValue=Math.min(...values);
+            const maxValue=Math.max(...values);
+            const adjustedMin=minValue*0.95;
+            const adjustedMax=maxValue*1.05;
+            
+            ctx.clearRect(0,0,width,height);
+            ctx.strokeStyle='#e5e7eb';
+            ctx.lineWidth=1;
+            
+            for(let i=0;i<=5;i++){
+                const y=padding.top+chartHeight-(i/5)*chartHeight;
+                ctx.beginPath();
+                ctx.moveTo(padding.left,y);
+                ctx.lineTo(padding.left+chartWidth,y);
+                ctx.stroke();
+                
+                const value=adjustedMin+(adjustedMax-adjustedMin)*(i/5);
+                ctx.fillStyle='#666';
+                ctx.font='10px Inter, sans-serif';
+                ctx.textAlign='right';
+                ctx.textBaseline='middle';
+                ctx.fillText('₹'+Math.round(value/1000)+'K',padding.left-5,y);
+            }
+            
+            ctx.strokeStyle='#4f46e5';
+            ctx.lineWidth=3;
+            ctx.beginPath();
+            
+            data.forEach((point,index)=>{
+                const x=padding.left+(chartWidth*index/(data.length-1));
+                const y=padding.top+chartHeight-((point.value-adjustedMin)/(adjustedMax-adjustedMin))*chartHeight;
+                
+                if(index===0){
+                    ctx.moveTo(x,y);
+                }else{
+                    ctx.lineTo(x,y);
+                }
+            });
+            
+            ctx.stroke();
+            
+            ctx.fillStyle='#4f46e5';
+            data.forEach((point,index)=>{
+                const x=padding.left+(chartWidth*index/(data.length-1));
+                const y=padding.top+chartHeight-((point.value-adjustedMin)/(adjustedMax-adjustedMin))*chartHeight;
+                
+                ctx.beginPath();
+                ctx.arc(x,y,4,0,2*Math.PI);
+                ctx.fill();
+            });
+        }
+
+        const elements={
+            investmentSlider:document.getElementById('investmentSlider'),
+            investmentValue:document.getElementById('investmentValue'),
+            interestRateSlider:document.getElementById('interestRateSlider'),
+            interestRateValue:document.getElementById('interestRateValue'),
+            timePeriodSlider:document.getElementById('timePeriodSlider'),
+            timePeriodValue:document.getElementById('timePeriodValue'),
+            investmentDate:document.getElementById('investmentDate'),
+            compoundingFrequency:document.getElementById('compoundingFrequency'),
+            maturityDate:document.getElementById('maturityDate'),
+            investedAmount:document.getElementById('investedAmount'),
+            totalInterest:document.getElementById('totalInterest'),
+            maturityValue:document.getElementById('maturityValue'),
+            yearlyBreakdownBody:document.getElementById('yearlyBreakdownBody'),
+            fdDoughnutChart:document.getElementById('fdDoughnutChart'),
+            fdLineChart:document.getElementById('fdLineChart')
+        };
+
+        function formatCurrency(num){
+            return new Intl.NumberFormat('en-IN',{
+                style:'currency',
+                currency:'INR',
+                minimumFractionDigits:0,
+                maximumFractionDigits:2,
+            }).format(num);
+        }
+
+        function formatDate(date){
+            return date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+        }
+
+        function updateBreakdownTable(yearlyData){
+            elements.yearlyBreakdownBody.innerHTML='';
+            if(yearlyData.length===0){
+                elements.yearlyBreakdownBody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>';
+                return;
+            }
+
+            yearlyData.forEach(item=>{
+                const row=document.createElement('tr');
+                row.innerHTML=`
+                    <td style="font-weight:600">${item.year}</td>
+                    <td style="text-align:right">${formatCurrency(item.openingBalance)}</td>
+                    <td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td>
+                    <td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>
+                `;
+                elements.yearlyBreakdownBody.appendChild(row);
+            });
+        }
+
+        function calculateFD(){
+            try{
+                const P=parseFloat(elements.investmentValue.value)||0;
+                const r=parseFloat(elements.interestRateValue.value)/100||0;
+                const t=parseFloat(elements.timePeriodValue.value)||0;
+                const n=parseInt(elements.compoundingFrequency.value,10)||4;
+                const startDate=new Date(elements.investmentDate.value);
+
+                if(P<=0||r<=0||t<=0||!elements.investmentDate.value){
+                    updateBreakdownTable([]);
+                    return;
+                }
+
+                const totalAmount=P*Math.pow((1+r/n),(n*t));
+                const totalInterest=totalAmount-P;
+
+                elements.investedAmount.textContent=formatCurrency(P);
+                elements.totalInterest.textContent=formatCurrency(totalInterest);
+                elements.maturityValue.textContent=formatCurrency(totalAmount);
+                
+                const maturityDate=new Date(startDate);
+                maturityDate.setFullYear(maturityDate.getFullYear()+t);
+                elements.maturityDate.textContent=formatDate(maturityDate);
+
+                let yearlyData=[];
+                let currentBalance=P;
+                
+                for(let year=1;year<=t;year++){
+                    let openingBalance=currentBalance;
+                    let balanceAtYearEnd=openingBalance*Math.pow((1+r/n),n);
+                    let interestThisYear=balanceAtYearEnd-openingBalance;
+                    currentBalance=balanceAtYearEnd;
+
+                    yearlyData.push({
+                        year:`Year ${year}`,
+                        openingBalance:openingBalance,
+                        interestEarned:interestThisYear,
+                        closingBalance:currentBalance
+                    });
+                }
+                
+                const pieData=[
+                    {label:'Principal',value:P},
+                    {label:'Interest',value:totalInterest}
+                ];
+                drawPieChart(elements.fdDoughnutChart,pieData,{title:'FD Breakdown'});
+                
+                const lineData=yearlyData.map((data,index)=>({
+                    value:data.closingBalance,
+                    year:new Date().getFullYear()+index
+                }));
+                drawLineChart(elements.fdLineChart,lineData,{
+                    title:'FD Growth Over Time',
+                    color:'#10b981'
+                });
+                
+                updateBreakdownTable(yearlyData);
+
+            }catch(error){
+                console.error("Error in calculation:",error);
+            }
+        }
+
+        Object.keys(elements).forEach(key=>{
+            if(key.includes('Slider')||key.includes('Value')||key==='investmentDate'||key==='compoundingFrequency'){
+                const element=elements[key];
+                if(element){
+                    element.addEventListener('input',()=>{
+                        const baseKey=key.replace('Slider','').replace('Value','');
+                        if(key.includes('Slider')&&elements[baseKey+'Value']){
+                            elements[baseKey+'Value'].value=element.value;
+                        }
+                        if(key.includes('Value')&&elements[baseKey+'Slider']){
+                            elements[baseKey+'Slider'].value=element.value;
+                        }
+                        
+                        calculateFD();
+                    });
+                }
+            }
+        });
+
+        const today=new Date();
+        elements.investmentDate.value=today.toISOString().split('T')[0];
+        
+        calculateFD();
+    });
+    </script>
+
+    <!-- @partial adsense -->
+
+</body>
+</html>
