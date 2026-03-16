@@ -2,11 +2,13 @@
 import CalcLayout from '../layouts/CalcLayout.astro';
 import { FD_DEFAULTS, FD_RATES } from '../data/fd-rates';
 
-// SSR: compute default results server-side
 const { principal, interestRate, years, compounding } = FD_DEFAULTS;
 const r = interestRate / 100;
 const totalAmount = principal * Math.pow((1 + r / compounding), compounding * years);
 const totalInterest = totalAmount - principal;
+const tdsRate = 0.10;
+const tdsAmount = totalInterest > 40000 ? totalInterest * tdsRate : 0;
+const postTdsAmount = totalAmount - tdsAmount;
 
 function fmt(n: number) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
@@ -15,8 +17,9 @@ function fmt(n: number) {
 const ssrInvested = fmt(principal);
 const ssrInterest = fmt(Math.round(totalInterest));
 const ssrMaturity = fmt(Math.round(totalAmount));
+const ssrTds = fmt(Math.round(tdsAmount));
+const ssrPostTds = fmt(Math.round(postTdsAmount));
 
-// Year-wise breakdown for SSR
 const yearlyRows: { year: number; opening: number; interest: number; closing: number }[] = [];
 let bal = principal;
 for (let y = 1; y <= years; y++) {
@@ -25,162 +28,794 @@ for (let y = 1; y <= years; y++) {
   yearlyRows.push({ year: y, opening: open, interest: close - open, closing: close });
   bal = close;
 }
+
+// Best rate banks for comparison (1-year, general citizen)
+const oneyearRates = FD_RATES.filter(r => r.tenure === '1 Year').sort((a,b) => b.rateGeneral - a.rateGeneral);
+const topBanks = oneyearRates.slice(0, 8);
+
+const psus = FD_RATES.filter(r => r.category === 'PSU');
+const privates = FD_RATES.filter(r => r.category === 'Private');
+const sfbs = FD_RATES.filter(r => r.category === 'Small Finance');
 ---
 <CalcLayout
-  title="Advanced FD Calculator"
-  description="Calculate your Fixed Deposit (FD) maturity amount, total interest, and visualize your investment growth with our advanced FD calculator. Features a year-wise breakdown table and interactive charts."
+  title="FD Calculator 2025 — Fixed Deposit Maturity, TDS & Bank Comparison"
+  description="India's most comprehensive FD calculator. Calculate maturity amount, TDS deduction, inflation-adjusted returns, compare FD rates across SBI, HDFC, ICICI, Axis, and small finance banks for 2025."
+  navCurrent="tools"
 >
   <style is:global slot="head">
-.title{text-align:center;margin-bottom:2rem;position:relative;padding:3rem 1.5rem;background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#a855f7 100%);border-radius:1rem;overflow:hidden}
-.title::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
-.title h1{font-size:2.5rem;font-weight:800;color:white;margin-bottom:0.5rem;position:relative;z-index:1;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
-.title p{font-size:1.125rem;color:rgba(255,255,255,0.9);position:relative;z-index:1}
-.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem}
-@media (max-width:768px){.calc-grid{grid-template-columns:1fr}}
-.chart-container{width:100%;height:250px;margin:1rem 0;background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-.chart{width:100%;height:100%}
-.fd-rates-section{margin-bottom:2rem}
-.fd-rates-section h3{font-size:1rem;font-weight:700;color:#111827;margin-bottom:1rem}
+/* ── Hero ── */
+.fd-hero{text-align:center;margin-bottom:2rem;position:relative;padding:2.5rem 1.5rem;background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#a855f7 100%);border-radius:1.25rem;overflow:hidden}
+.fd-hero::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');pointer-events:none}
+.fd-hero h1{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;color:white;margin-bottom:0.5rem;position:relative;z-index:1;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.fd-hero p{font-size:1.05rem;color:rgba(255,255,255,0.88);position:relative;z-index:1;max-width:600px;margin:0 auto}
+.fd-badges{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:1}
+.fd-badge{background:rgba(255,255,255,0.18);color:white;font-size:0.75rem;font-weight:600;padding:0.25rem 0.75rem;border-radius:9999px;border:1px solid rgba(255,255,255,0.3)}
+
+/* ── Toggles (Senior / Tax-saving) ── */
+.toggle-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.toggle-item{display:flex;align-items:center;gap:0.6rem;background:#f0f0ff;border:1px solid #c7d2fe;border-radius:0.6rem;padding:0.6rem 1rem;cursor:pointer;flex:1;min-width:160px;transition:background 0.2s}
+.toggle-item.active{background:#ede9fe;border-color:#7c3aed}
+.toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#d1d5db;border-radius:22px;transition:.3s;cursor:pointer}
+.toggle-slider::before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s}
+.toggle-switch input:checked+.toggle-slider{background:#7c3aed}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px)}
+.toggle-label{font-size:0.875rem;font-weight:600;color:#374151}
+
+/* ── Main 2-col grid ── */
+.fd-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.75rem;margin-bottom:2rem}
+@media(max-width:768px){.fd-grid{grid-template-columns:1fr}}
+
+/* ── Sliders ── */
+.input-row{display:flex;align-items:center;gap:0.75rem;margin-top:0.4rem}
+.input-row input[type=number]{width:120px;flex-shrink:0;padding:0.5rem 0.6rem;border:1.5px solid #d1d5db;border-radius:0.5rem;font-size:0.95rem;font-weight:600;color:#111827}
+.input-row input[type=number]:focus{outline:none;border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,0.1)}
+.input-row .slider{flex:1}
+
+/* ── Result cards ── */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:1.25rem}
+.res-card{background:#f8fafc;border-radius:0.75rem;padding:1rem;text-align:center;border:1.5px solid transparent;transition:border-color 0.2s}
+.res-card.highlight{background:#f0fdf4;border-color:#22c55e}
+.res-card.warn{background:#fff7ed;border-color:#f97316}
+.res-label{font-size:0.78rem;color:#6b7280;margin-bottom:0.3rem;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.res-value{font-size:1.2rem;font-weight:800;color:#4f46e5}
+.res-value.green{color:#059669}
+.res-value.red{color:#dc2626}
+.res-value.orange{color:#d97706}
+
+/* ── Effective yield badge ── */
+.yield-pill{display:inline-flex;align-items:center;gap:0.4rem;background:linear-gradient(90deg,#4f46e5,#7c3aed);color:white;font-size:0.8rem;font-weight:700;padding:0.35rem 0.9rem;border-radius:9999px;margin-top:0.5rem}
+
+/* ── Chart ── */
+.chart-wrap{background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-top:1rem}
+.chart-wrap canvas{width:100%;display:block}
+.chart-title{font-size:0.875rem;font-weight:700;color:#374151;margin-bottom:0.5rem;text-align:center}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;border-bottom:2px solid #e5e7eb;margin-bottom:1.5rem;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{padding:0.75rem 1.25rem;font-weight:600;font-size:0.875rem;color:#6b7280;border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:color 0.2s,border-color 0.2s}
+.tab-btn.active{color:#4f46e5;border-bottom-color:#4f46e5}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Table tweaks ── */
+.rate-table th,.rate-table td{padding:0.6rem 0.75rem;font-size:0.875rem}
+.rate-best{background:#f0fdf4 !important}
+.rate-best td:nth-child(3){color:#059669;font-weight:700}
+.cat-badge{display:inline-block;font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:9999px;margin-left:0.35rem;vertical-align:middle;text-transform:uppercase}
+.cat-psu{background:#dbeafe;color:#1d4ed8}
+.cat-private{background:#fce7f3;color:#9d174d}
+.cat-sfb{background:#d1fae5;color:#065f46}
+
+/* ── Bank comparison bars ── */
+.compare-list{display:flex;flex-direction:column;gap:0.6rem}
+.compare-row{display:grid;grid-template-columns:130px 1fr 60px;align-items:center;gap:0.75rem}
+.compare-bank{font-size:0.8rem;font-weight:600;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compare-bar-bg{background:#e5e7eb;border-radius:9999px;height:10px;overflow:hidden}
+.compare-bar-fill{height:100%;border-radius:9999px;background:linear-gradient(90deg,#4f46e5,#7c3aed);transition:width 0.5s ease}
+.compare-rate{font-size:0.8rem;font-weight:700;color:#4f46e5;text-align:right}
+
+/* ── TDS / tax info box ── */
+.info-box{background:#fef3c7;border:1px solid #f59e0b;border-radius:0.625rem;padding:1rem;margin-top:1rem}
+.info-box.blue{background:#eff6ff;border-color:#3b82f6}
+.info-box h4{font-weight:700;color:#92400e;font-size:0.875rem;margin-bottom:0.4rem;display:flex;align-items:center;gap:0.4rem}
+.info-box.blue h4{color:#1e40af}
+.info-box p,.info-box li{font-size:0.82rem;color:#78350f;line-height:1.6}
+.info-box.blue p,.info-box.blue li{color:#1e3a8a}
+.info-box ul{margin:0.4rem 0 0 1rem;padding:0}
+
+/* ── Premature penalty ── */
+.penalty-box{background:#fff1f2;border:1px solid #fda4af;border-radius:0.625rem;padding:1rem;margin-top:1rem}
+.penalty-box h4{font-weight:700;color:#9f1239;font-size:0.875rem;margin-bottom:0.4rem}
+.penalty-box p{font-size:0.82rem;color:#881337}
+
+/* ── Inflation-adjusted ── */
+.real-return-box{background:#f0fdf4;border:1px solid #86efac;border-radius:0.625rem;padding:1rem;margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.real-return-item{text-align:center}
+.real-return-label{font-size:0.75rem;color:#166534;font-weight:500;margin-bottom:0.2rem}
+.real-return-value{font-size:1.1rem;font-weight:800;color:#15803d}
+
+/* ── Section headings ── */
+.section-heading{font-size:1.1rem;font-weight:700;color:#111827;margin:2rem 0 1rem;display:flex;align-items:center;gap:0.5rem}
+.section-heading::after{content:'';flex:1;height:1px;background:#e5e7eb}
+
+/* ── Responsive ── */
+@media(max-width:480px){.res-grid{grid-template-columns:1fr}.compare-row{grid-template-columns:100px 1fr 50px}.real-return-box{grid-template-columns:1fr}}
   </style>
 
   <main class="container main">
-    <div class="title">
-      <h1>Advanced FD Calculator</h1>
-      <p>Calculate your Fixed Deposit maturity amount, total interest, and visualize your investment growth</p>
+    <!-- Hero -->
+    <div class="fd-hero">
+      <h1>FD Calculator 2025</h1>
+      <p>Calculate maturity, TDS, real returns & compare rates across 15+ banks</p>
+      <div class="fd-badges">
+        <span class="fd-badge">TDS Deduction</span>
+        <span class="fd-badge">Inflation-adjusted</span>
+        <span class="fd-badge">Bank Comparison</span>
+        <span class="fd-badge">Tax-saving FD</span>
+        <span class="fd-badge">Premature Penalty</span>
+      </div>
     </div>
 
-    <div class="calc-grid">
-      <!-- Left Side: Input Controls -->
+    <div class="fd-grid">
+      <!-- ── LEFT: Inputs ── -->
       <div class="card">
+        <!-- Toggles -->
+        <div class="toggle-row">
+          <label class="toggle-item" id="senior-toggle-item">
+            <span class="toggle-switch">
+              <input type="checkbox" id="is-senior">
+              <span class="toggle-slider"></span>
+            </span>
+            <span class="toggle-label">Senior Citizen (+0.5%)</span>
+          </label>
+          <label class="toggle-item" id="taxsaver-toggle-item">
+            <span class="toggle-switch">
+              <input type="checkbox" id="is-taxsaver">
+              <span class="toggle-slider"></span>
+            </span>
+            <span class="toggle-label">Tax-saving FD (5 yr lock)</span>
+          </label>
+        </div>
+
         <div class="form-group">
-          <label for="investmentValue">Principal Amount (₹)</label>
-          <input type="number" id="investmentValue" value={principal} min="1000" max="10000000" step="1000">
-          <div class="slider-container">
-            <input type="range" id="investmentSlider" min="10000" max="1000000" value={principal} step="5000" class="slider">
+          <label for="fd-principal">Principal Amount (₹)</label>
+          <div class="input-row">
+            <input type="range" id="fd-principal-slider" min="10000" max="5000000" value={principal} step="5000" class="slider">
+            <input type="number" id="fd-principal" value={principal} min="1000" max="10000000" step="1000">
           </div>
         </div>
+
         <div class="form-group">
-          <label for="interestRateValue">Interest Rate (% per annum)</label>
-          <input type="number" id="interestRateValue" value={interestRate} min="1" max="15" step="0.1">
-          <div class="slider-container">
-            <input type="range" id="interestRateSlider" min="1" max="15" value={interestRate} step="0.1" class="slider">
+          <label for="fd-rate">Interest Rate (% p.a.)</label>
+          <div class="input-row">
+            <input type="range" id="fd-rate-slider" min="2" max="12" value={interestRate} step="0.05" class="slider">
+            <input type="number" id="fd-rate" value={interestRate} min="0.5" max="15" step="0.05">
           </div>
         </div>
+
         <div class="form-group">
-          <label for="timePeriodValue">Time Period (Years)</label>
-          <input type="number" id="timePeriodValue" value={years} min="1" max="10" step="1">
-          <div class="slider-container">
-            <input type="range" id="timePeriodSlider" min="1" max="10" value={years} step="1" class="slider">
+          <label for="fd-years">Time Period</label>
+          <div class="input-row" style="gap:0.5rem">
+            <input type="range" id="fd-years-slider" min="1" max="120" value={years * 12} step="1" class="slider">
+            <input type="number" id="fd-years" value={years} min="0" max="10" step="1" style="width:64px">
+            <span style="font-size:0.85rem;color:#6b7280;flex-shrink:0">yr</span>
+            <input type="number" id="fd-months" value="0" min="0" max="11" step="1" style="width:64px">
+            <span style="font-size:0.85rem;color:#6b7280;flex-shrink:0">mo</span>
           </div>
         </div>
+
         <div class="form-group">
-          <label for="investmentDate">Investment Date</label>
-          <input type="date" id="investmentDate" value="2024-01-01">
-        </div>
-        <div class="form-group">
-          <label for="compoundingFrequency">Compounding Frequency</label>
-          <select id="compoundingFrequency">
+          <label for="fd-compounding">Compounding Frequency</label>
+          <select id="fd-compounding">
             <option value="1">Annually</option>
             <option value="2">Half-Yearly</option>
             <option value="4" selected>Quarterly</option>
             <option value="12">Monthly</option>
           </select>
         </div>
+
+        <div class="form-group">
+          <label for="fd-start-date">Investment Start Date</label>
+          <input type="date" id="fd-start-date">
+        </div>
+
+        <div class="form-group">
+          <label for="fd-tax-bracket">Your Income Tax Bracket</label>
+          <select id="fd-tax-bracket">
+            <option value="0">0% (Income below ₹3L)</option>
+            <option value="5">5% (₹3L – ₹7L)</option>
+            <option value="10" selected>10% (₹7L – ₹10L)</option>
+            <option value="20">20% (₹10L – ₹12L)</option>
+            <option value="30">30% (Above ₹12L)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fd-inflation">Expected Inflation Rate (%)</label>
+          <div class="input-row">
+            <input type="range" id="fd-inflation-slider" min="2" max="10" value="6" step="0.5" class="slider">
+            <input type="number" id="fd-inflation" value="6" min="0" max="15" step="0.5">
+          </div>
+        </div>
       </div>
 
-      <!-- Right Side: Results & Charts (SSR pre-populated) -->
-      <div class="card">
-        <div class="results">
-          <div class="result-item">
-            <div class="result-label">Invested Amount</div>
-            <div id="investedAmount" class="result-value">{ssrInvested}</div>
+      <!-- ── RIGHT: Results ── -->
+      <div>
+        <div class="card">
+          <div class="res-grid">
+            <div class="res-card">
+              <div class="res-label">Invested Amount</div>
+              <div id="res-principal" class="res-value">{ssrInvested}</div>
+            </div>
+            <div class="res-card highlight">
+              <div class="res-label">Maturity Value</div>
+              <div id="res-maturity" class="res-value green">{ssrMaturity}</div>
+            </div>
+            <div class="res-card">
+              <div class="res-label">Total Interest</div>
+              <div id="res-interest" class="res-value">{ssrInterest}</div>
+            </div>
+            <div class="res-card warn">
+              <div class="res-label">TDS Deducted</div>
+              <div id="res-tds" class="res-value orange">{ssrTds}</div>
+            </div>
+            <div class="res-card" style="grid-column:span 2">
+              <div class="res-label">Amount After TDS</div>
+              <div id="res-post-tds" class="res-value">{ssrPostTds}</div>
+            </div>
           </div>
-          <div class="result-item">
-            <div class="result-label">Total Interest</div>
-            <div id="totalInterest" class="result-value">{ssrInterest}</div>
+
+          <div style="text-align:center">
+            <span class="yield-pill" id="effective-yield-pill">Effective Yield: 7.71% p.a.</span>
           </div>
-          <div class="result-item">
-            <div class="result-label">Maturity Value</div>
-            <div id="maturityValue" class="result-value">{ssrMaturity}</div>
+
+          <div style="margin-top:0.75rem;text-align:center;font-size:0.875rem;color:#6b7280">
+            Maturity Date: <strong id="res-maturity-date">-</strong>
           </div>
-          <div class="result-item">
-            <div class="result-label">Maturity Date</div>
-            <div id="maturityDate" class="result-value">-</div>
+
+          <div class="chart-wrap" style="height:200px">
+            <div class="chart-title">Principal vs Interest</div>
+            <canvas id="fd-donut-chart" height="170"></canvas>
           </div>
         </div>
-        <div class="chart-container">
-          <canvas id="fdDoughnutChart" class="chart"></canvas>
-        </div>
-        <div class="chart-container">
-          <canvas id="fdLineChart" class="chart"></canvas>
+
+        <!-- Inflation-adjusted -->
+        <div class="real-return-box" id="real-return-box" style="margin-top:1rem">
+          <div class="real-return-item">
+            <div class="real-return-label">Real Return (after inflation)</div>
+            <div id="real-return-pct" class="real-return-value">+1.42%</div>
+          </div>
+          <div class="real-return-item">
+            <div class="real-return-label">Inflation-adj. Maturity</div>
+            <div id="real-return-amt" class="real-return-value">₹1,15,234</div>
+          </div>
+          <div class="real-return-item">
+            <div class="real-return-label">Post-tax Return</div>
+            <div id="post-tax-return" class="real-return-value">+6.75%</div>
+          </div>
+          <div class="real-return-item">
+            <div class="real-return-label">Tax on Interest</div>
+            <div id="tax-on-interest" class="real-return-value">₹0</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Live FD Rates Panel (SSR) -->
-    <div class="card fd-rates-section">
-      <h3>Current FD Rates (as of {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })})</h3>
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Bank</th>
-              <th>Tenure</th>
-              <th>General (%)</th>
-              <th>Senior Citizen (%)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {FD_RATES.map(rate => (
+    <!-- ── Tabs: Growth / Yearly / Compare / Rates / TDS ── -->
+    <div class="card" style="margin-bottom:2rem">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="growth">Growth Chart</button>
+        <button class="tab-btn" data-tab="yearly">Year-wise Breakdown</button>
+        <button class="tab-btn" data-tab="compare">Bank Comparison</button>
+        <button class="tab-btn" data-tab="rates">FD Rates 2025</button>
+        <button class="tab-btn" data-tab="tds">TDS & Tax Guide</button>
+        <button class="tab-btn" data-tab="penalty">Premature Withdrawal</button>
+      </div>
+
+      <!-- Growth Chart -->
+      <div class="tab-panel active" id="tab-growth">
+        <div class="chart-wrap" style="height:300px">
+          <div class="chart-title">FD Growth Over Time (Principal + Interest)</div>
+          <canvas id="fd-line-chart" height="270"></canvas>
+        </div>
+      </div>
+
+      <!-- Yearly Breakdown -->
+      <div class="tab-panel" id="tab-yearly">
+        <div class="table-container" style="margin-top:0">
+          <table class="table rate-table" id="yearly-table">
+            <thead>
               <tr>
-                <td style="font-weight:600">{rate.bank}</td>
-                <td>{rate.tenure}</td>
-                <td style="text-align:right;color:#059669">{rate.rateGeneral.toFixed(2)}</td>
-                <td style="text-align:right;color:#4f46e5">{rate.rateSenior.toFixed(2)}</td>
+                <th>Period</th>
+                <th style="text-align:right">Opening Balance</th>
+                <th style="text-align:right">Interest Earned</th>
+                <th style="text-align:right">TDS</th>
+                <th style="text-align:right">Closing Balance</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody id="yearly-tbody">
+              {yearlyRows.map(row => (
+                <tr>
+                  <td style="font-weight:600">Year {row.year}</td>
+                  <td style="text-align:right">{fmt(Math.round(row.opening))}</td>
+                  <td style="text-align:right;color:#059669">{fmt(Math.round(row.interest))}</td>
+                  <td style="text-align:right;color:#d97706">{row.interest > 40000 ? fmt(Math.round(row.interest * 0.1)) : '—'}</td>
+                  <td style="text-align:right;font-weight:700">{fmt(Math.round(row.closing))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <!-- Year-wise Breakdown Table (SSR pre-populated) -->
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Year</th>
-            <th>Opening Balance</th>
-            <th>Interest Earned</th>
-            <th>Closing Balance</th>
-          </tr>
-        </thead>
-        <tbody id="yearlyBreakdownBody">
-          {yearlyRows.map(row => (
-            <tr>
-              <td style="font-weight:600">Year {row.year}</td>
-              <td style="text-align:right">{fmt(Math.round(row.opening))}</td>
-              <td style="text-align:right;color:#059669">{fmt(Math.round(row.interest))}</td>
-              <td style="text-align:right;font-weight:600">{fmt(Math.round(row.closing))}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <!-- Bank Comparison -->
+      <div class="tab-panel" id="tab-compare">
+        <p style="font-size:0.875rem;color:#6b7280;margin-bottom:1rem">Top 1-year FD rates. Toggle <strong>Senior Citizen</strong> above to see enhanced rates.</p>
+        <div class="compare-list" id="compare-bars">
+          {topBanks.map(b => {
+            const maxRate = topBanks[0].rateGeneral;
+            const pct = (b.rateGeneral / maxRate) * 100;
+            return (
+              <div class="compare-row">
+                <span class="compare-bank">{b.bank}</span>
+                <div class="compare-bar-bg"><div class="compare-bar-fill" style={`width:${pct}%`}></div></div>
+                <span class="compare-rate">{b.rateGeneral}%</span>
+              </div>
+            );
+          })}
+        </div>
+        <div class="info-box blue" style="margin-top:1.25rem">
+          <h4>💡 Which bank to choose?</h4>
+          <ul>
+            <li>Small Finance Banks (SFBs) offer higher rates but deposits are insured only up to <strong>₹5 lakh per bank</strong> under DICGC.</li>
+            <li>PSU banks are considered safer — backed by Government of India.</li>
+            <li>Consider splitting ₹5L per bank/FD for maximum DICGC coverage.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- FD Rates Table -->
+      <div class="tab-panel" id="tab-rates">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
+          <button class="tab-btn active" id="filter-all" onclick="filterRates('all')" style="padding:0.4rem 0.9rem;border:1px solid #e5e7eb;border-radius:9999px;background:white">All Banks</button>
+          <button class="tab-btn" id="filter-psu" onclick="filterRates('PSU')" style="padding:0.4rem 0.9rem;border:1px solid #e5e7eb;border-radius:9999px;background:white">PSU Banks</button>
+          <button class="tab-btn" id="filter-private" onclick="filterRates('Private')" style="padding:0.4rem 0.9rem;border:1px solid #e5e7eb;border-radius:9999px;background:white">Private Banks</button>
+          <button class="tab-btn" id="filter-sfb" onclick="filterRates('Small Finance')" style="padding:0.4rem 0.9rem;border:1px solid #e5e7eb;border-radius:9999px;background:white">Small Finance</button>
+        </div>
+        <div class="table-container" style="margin-top:0">
+          <table class="table rate-table" id="rates-table">
+            <thead>
+              <tr>
+                <th>Bank</th>
+                <th>Tenure</th>
+                <th style="text-align:right">General (%)</th>
+                <th style="text-align:right">Senior (%)</th>
+              </tr>
+            </thead>
+            <tbody id="rates-tbody">
+              {FD_RATES.map(rate => (
+                <tr data-category={rate.category}>
+                  <td>
+                    <span style="font-weight:600">{rate.bank}</span>
+                    <span class={`cat-badge ${rate.category === 'PSU' ? 'cat-psu' : rate.category === 'Private' ? 'cat-private' : 'cat-sfb'}`}>
+                      {rate.category === 'Small Finance' ? 'SFB' : rate.category}
+                    </span>
+                  </td>
+                  <td>{rate.tenure}</td>
+                  <td style="text-align:right;color:#059669;font-weight:600">{rate.rateGeneral.toFixed(2)}</td>
+                  <td style="text-align:right;color:#4f46e5;font-weight:600">{rate.rateSenior.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.78rem;color:#9ca3af;margin-top:0.75rem">Rates as of {new Date().toLocaleDateString('en-IN',{month:'long',year:'numeric'})}. Subject to change — verify on bank websites before investing.</p>
+      </div>
+
+      <!-- TDS Guide -->
+      <div class="tab-panel" id="tab-tds">
+        <div class="info-box blue">
+          <h4>📋 TDS on FD Interest — Rules for FY 2024-25</h4>
+          <ul>
+            <li><strong>TDS threshold:</strong> ₹40,000 per year per bank (₹50,000 for senior citizens)</li>
+            <li><strong>TDS rate:</strong> 10% if PAN furnished; <strong>20%</strong> without PAN</li>
+            <li>TDS is deducted by the bank at source and can be claimed as credit in ITR</li>
+            <li>If your total income is below taxable limit, file <strong>Form 15G</strong> (or 15H for senior citizens) to avoid TDS</li>
+            <li>Interest income is fully taxable under <em>Income from Other Sources</em> — no special exemption</li>
+          </ul>
+        </div>
+        <div class="info-box" style="margin-top:1rem">
+          <h4>📌 Tax-saving FD — Section 80C</h4>
+          <ul>
+            <li>5-year lock-in period — <strong>no premature withdrawal</strong></li>
+            <li>Investment up to ₹1.5 lakh eligible for deduction under 80C</li>
+            <li>Interest is <strong>fully taxable</strong> — not exempt like PPF/SSY</li>
+            <li>Only eligible for deduction under <strong>Old Tax Regime</strong></li>
+            <li>Joint account: only first holder gets 80C benefit</li>
+          </ul>
+        </div>
+        <div class="table-container" style="margin-top:1.25rem">
+          <table class="table rate-table">
+            <thead><tr><th>Tax Bracket</th><th>TDS Rate</th><th>Effective FD Return @ 7.5%</th><th>Post-tax Real Return (@6% inflation)</th></tr></thead>
+            <tbody>
+              <tr><td>0%</td><td>10% (refundable)</td><td>7.50%</td><td>1.42%</td></tr>
+              <tr><td>5%</td><td>10%</td><td>7.13%</td><td>1.07%</td></tr>
+              <tr><td>10%</td><td>10%</td><td>6.75%</td><td>0.71%</td></tr>
+              <tr><td>20%</td><td>10%</td><td>6.00%</td><td>0.00%</td></tr>
+              <tr><td>30%</td><td>10%</td><td>5.25%</td><td>−0.71%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Premature Withdrawal -->
+      <div class="tab-panel" id="tab-penalty">
+        <div class="penalty-box">
+          <h4>⚠️ Premature Withdrawal Penalty</h4>
+          <p>Most banks charge a 0.5% – 1% penalty on the applicable rate for premature withdrawal. The interest paid = <em>rate applicable for actual holding period − penalty</em>.</p>
+        </div>
+        <div class="card" style="margin-top:1rem;background:#f9fafb;box-shadow:none;border:1px solid #e5e7eb">
+          <h4 style="font-weight:700;color:#111827;margin-bottom:1rem;font-size:0.95rem">Premature Withdrawal Calculator</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group" style="margin-bottom:0">
+              <label for="pw-months" style="font-size:0.82rem">Actual Holding (months)</label>
+              <input type="number" id="pw-months" value="12" min="1" max="120" step="1">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label for="pw-penalty" style="font-size:0.82rem">Penalty (%)</label>
+              <input type="number" id="pw-penalty" value="1" min="0" max="2" step="0.25">
+            </div>
+          </div>
+          <div class="real-return-box" id="pw-result-box" style="margin-top:1rem">
+            <div class="real-return-item">
+              <div class="real-return-label">Applicable Rate</div>
+              <div id="pw-applicable-rate" class="real-return-value" style="color:#d97706">6.50%</div>
+            </div>
+            <div class="real-return-item">
+              <div class="real-return-label">You Receive</div>
+              <div id="pw-receive" class="real-return-value" style="color:#d97706">₹1,06,500</div>
+            </div>
+            <div class="real-return-item">
+              <div class="real-return-label">Penalty Cost</div>
+              <div id="pw-penalty-cost" class="real-return-value" style="color:#dc2626">₹1,000</div>
+            </div>
+            <div class="real-return-item">
+              <div class="real-return-label">Opportunity Cost vs. Full Term</div>
+              <div id="pw-opp-cost" class="real-return-value" style="color:#dc2626">₹3,500</div>
+            </div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:1rem">
+          <h4>💡 Tips to avoid premature withdrawal</h4>
+          <ul>
+            <li>Use the <strong>FD overdraft facility</strong> — borrow against FD at ~2% over FD rate instead of breaking it</li>
+            <li>Create a <strong>FD ladder</strong> — split into multiple FDs with different tenures so one matures every few months</li>
+            <li>Maintain a liquid emergency fund separately (3–6 months expenses) so FDs are never touched early</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </main>
 
   <script is:inline>
-  document.addEventListener('DOMContentLoaded',function(){
-    function drawPieChart(canvas,data,options={}){const ctx=canvas.getContext('2d');const width=canvas.width=canvas.offsetWidth;const height=canvas.height=canvas.offsetHeight;const centerX=width/2;const centerY=height/2;const radius=Math.min(centerX,centerY)*0.8;const colors=['#4f46e5','#10b981','#f59e0b','#ef4444'];let total=data.reduce((sum,item)=>sum+item.value,0);let currentAngle=0;data.forEach((item,index)=>{const sliceAngle=(item.value/total)*2*Math.PI;ctx.beginPath();ctx.moveTo(centerX,centerY);ctx.arc(centerX,centerY,radius,currentAngle,currentAngle+sliceAngle);ctx.closePath();ctx.fillStyle=colors[index%colors.length];ctx.fill();currentAngle+=sliceAngle;});if(options.title){ctx.fillStyle='#333';ctx.font='bold 14px Inter, sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(options.title,width/2,5);}}
-    function drawLineChart(canvas,data,options={}){if(!data||data.length===0)return;const ctx=canvas.getContext('2d');const width=canvas.width=canvas.offsetWidth;const height=canvas.height=canvas.offsetHeight;const padding={top:30,right:20,bottom:40,left:60};const chartWidth=width-padding.left-padding.right;const chartHeight=height-padding.top-padding.bottom;const values=data.map(d=>d.value);const minValue=Math.min(...values);const maxValue=Math.max(...values);const adjustedMin=minValue*0.95;const adjustedMax=maxValue*1.05;ctx.clearRect(0,0,width,height);ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;for(let i=0;i<=5;i++){const y=padding.top+chartHeight-(i/5)*chartHeight;ctx.beginPath();ctx.moveTo(padding.left,y);ctx.lineTo(padding.left+chartWidth,y);ctx.stroke();const value=adjustedMin+(adjustedMax-adjustedMin)*(i/5);ctx.fillStyle='#666';ctx.font='10px Inter, sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText('₹'+Math.round(value/1000)+'K',padding.left-5,y);}ctx.strokeStyle='#4f46e5';ctx.lineWidth=3;ctx.beginPath();data.forEach((point,index)=>{const x=padding.left+(chartWidth*index/(data.length-1));const y=padding.top+chartHeight-((point.value-adjustedMin)/(adjustedMax-adjustedMin))*chartHeight;if(index===0){ctx.moveTo(x,y);}else{ctx.lineTo(x,y);}});ctx.stroke();ctx.fillStyle='#4f46e5';data.forEach((point,index)=>{const x=padding.left+(chartWidth*index/(data.length-1));const y=padding.top+chartHeight-((point.value-adjustedMin)/(adjustedMax-adjustedMin))*chartHeight;ctx.beginPath();ctx.arc(x,y,4,0,2*Math.PI);ctx.fill();});}
-    const elements={investmentSlider:document.getElementById('investmentSlider'),investmentValue:document.getElementById('investmentValue'),interestRateSlider:document.getElementById('interestRateSlider'),interestRateValue:document.getElementById('interestRateValue'),timePeriodSlider:document.getElementById('timePeriodSlider'),timePeriodValue:document.getElementById('timePeriodValue'),investmentDate:document.getElementById('investmentDate'),compoundingFrequency:document.getElementById('compoundingFrequency'),maturityDate:document.getElementById('maturityDate'),investedAmount:document.getElementById('investedAmount'),totalInterest:document.getElementById('totalInterest'),maturityValue:document.getElementById('maturityValue'),yearlyBreakdownBody:document.getElementById('yearlyBreakdownBody'),fdDoughnutChart:document.getElementById('fdDoughnutChart'),fdLineChart:document.getElementById('fdLineChart')};
-    function formatCurrency(num){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:2,}).format(num);}
-    function formatDate(date){return date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
-    function updateBreakdownTable(yearlyData){elements.yearlyBreakdownBody.innerHTML='';if(yearlyData.length===0){elements.yearlyBreakdownBody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>';return;}yearlyData.forEach(item=>{const row=document.createElement('tr');row.innerHTML=`<td style="font-weight:600">${item.year}</td><td style="text-align:right">${formatCurrency(item.openingBalance)}</td><td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td><td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>`;elements.yearlyBreakdownBody.appendChild(row);});}
-    function calculateFD(){try{const P=parseFloat(elements.investmentValue.value)||0;const r=parseFloat(elements.interestRateValue.value)/100||0;const t=parseFloat(elements.timePeriodValue.value)||0;const n=parseInt(elements.compoundingFrequency.value,10)||4;const startDate=new Date(elements.investmentDate.value);if(P<=0||r<=0||t<=0||!elements.investmentDate.value){updateBreakdownTable([]);return;}const totalAmount=P*Math.pow((1+r/n),(n*t));const totalInterest=totalAmount-P;elements.investedAmount.textContent=formatCurrency(P);elements.totalInterest.textContent=formatCurrency(totalInterest);elements.maturityValue.textContent=formatCurrency(totalAmount);const maturityDate=new Date(startDate);maturityDate.setFullYear(maturityDate.getFullYear()+t);elements.maturityDate.textContent=formatDate(maturityDate);let yearlyData=[];let currentBalance=P;for(let year=1;year<=t;year++){let openingBalance=currentBalance;let balanceAtYearEnd=openingBalance*Math.pow((1+r/n),n);let interestThisYear=balanceAtYearEnd-openingBalance;currentBalance=balanceAtYearEnd;yearlyData.push({year:`Year ${year}`,openingBalance:openingBalance,interestEarned:interestThisYear,closingBalance:currentBalance});}const pieData=[{label:'Principal',value:P},{label:'Interest',value:totalInterest}];drawPieChart(elements.fdDoughnutChart,pieData,{title:'FD Breakdown'});const lineData=yearlyData.map((data,index)=>({value:data.closingBalance,year:new Date().getFullYear()+index}));drawLineChart(elements.fdLineChart,lineData,{title:'FD Growth Over Time',color:'#10b981'});updateBreakdownTable(yearlyData);}catch(error){console.error("Error in calculation:",error);}}
-    Object.keys(elements).forEach(key=>{if(key.includes('Slider')||key.includes('Value')||key==='investmentDate'||key==='compoundingFrequency'){const element=elements[key];if(element){element.addEventListener('input',()=>{const baseKey=key.replace('Slider','').replace('Value','');if(key.includes('Slider')&&elements[baseKey+'Value']){elements[baseKey+'Value'].value=element.value;}if(key.includes('Value')&&elements[baseKey+'Slider']){elements[baseKey+'Slider'].value=element.value;}calculateFD();});}}});
-    const today=new Date();elements.investmentDate.value=today.toISOString().split('T')[0];
-    calculateFD();
+  (function(){
+  const $ = id => document.getElementById(id);
+
+  /* ── Formatters ── */
+  function fmtINR(n){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n);}
+  function fmtPct(n){return (n>=0?'+':'')+n.toFixed(2)+'%';}
+
+  /* ── Donut chart ── */
+  function drawDonut(canvas,principal,interest){
+    const dpr=window.devicePixelRatio||1;
+    const w=canvas.parentElement.clientWidth-32;
+    const h=170;
+    canvas.width=w*dpr; canvas.height=h*dpr;
+    canvas.style.width=w+'px'; canvas.style.height=h+'px';
+    const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+    const cx=w/2, cy=h/2, R=Math.min(cx,cy)*0.75, r=R*0.55;
+    const total=principal+interest;
+    const pAngle=(principal/total)*Math.PI*2;
+    // principal slice
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,R,-Math.PI/2,-Math.PI/2+pAngle);
+    ctx.closePath(); ctx.fillStyle='#4f46e5'; ctx.fill();
+    // interest slice
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,R,-Math.PI/2+pAngle,-Math.PI/2+Math.PI*2);
+    ctx.closePath(); ctx.fillStyle='#10b981'; ctx.fill();
+    // hole
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle='white'; ctx.fill();
+    // centre text
+    ctx.fillStyle='#111827'; ctx.font=`bold ${Math.round(R*0.22)}px Inter,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(fmtINR(principal+interest),cx,cy);
+    // legend
+    const lx=8;
+    [[`Principal ${fmtINR(principal)}`, '#4f46e5'],[`Interest ${fmtINR(interest)}`, '#10b981']].forEach(([lbl,col],i)=>{
+      ctx.fillStyle=col; ctx.fillRect(lx,h-24+i*13,10,10);
+      ctx.fillStyle='#374151'; ctx.font=`${Math.round(R*0.18)}px Inter,sans-serif`;
+      ctx.textAlign='left'; ctx.fillText(lbl,lx+14,h-19+i*13);
+    });
+  }
+
+  /* ── Line chart ── */
+  function drawLine(canvas, points){
+    const dpr=window.devicePixelRatio||1;
+    const w=canvas.parentElement.clientWidth-32;
+    const h=270;
+    canvas.width=w*dpr; canvas.height=h*dpr;
+    canvas.style.width=w+'px'; canvas.style.height=h+'px';
+    const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+    if(!points||points.length<2) return;
+    const pad={t:24,r:16,b:40,l:72};
+    const cw=w-pad.l-pad.r, ch=h-pad.t-pad.b;
+    const vals=points.map(p=>p.v);
+    const minV=Math.min(...vals)*0.98, maxV=Math.max(...vals)*1.02;
+    // grid
+    ctx.strokeStyle='#f3f4f6'; ctx.lineWidth=1;
+    for(let i=0;i<=5;i++){
+      const y=pad.t+ch-(i/5)*ch;
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+      const v=minV+(maxV-minV)*(i/5);
+      ctx.fillStyle='#9ca3af'; ctx.font='10px Inter,sans-serif';
+      ctx.textAlign='right'; ctx.textBaseline='middle';
+      const lbl=v>=10000000?`₹${(v/10000000).toFixed(1)}Cr`:v>=100000?`₹${(v/100000).toFixed(1)}L`:`₹${(v/1000).toFixed(0)}K`;
+      ctx.fillText(lbl,pad.l-4,y);
+    }
+    // principal line (dashed)
+    ctx.strokeStyle='#c7d2fe'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+    ctx.beginPath();
+    points.forEach((p,i)=>{
+      const x=pad.l+(cw*i/(points.length-1));
+      const y=pad.t+ch-((p.p-minV)/(maxV-minV))*ch;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+    // maturity line (solid gradient)
+    const grad=ctx.createLinearGradient(pad.l,0,pad.l+cw,0);
+    grad.addColorStop(0,'#4f46e5'); grad.addColorStop(1,'#10b981');
+    ctx.strokeStyle=grad; ctx.lineWidth=2.5;
+    ctx.beginPath();
+    points.forEach((p,i)=>{
+      const x=pad.l+(cw*i/(points.length-1));
+      const y=pad.t+ch-((p.v-minV)/(maxV-minV))*ch;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    // area fill
+    ctx.beginPath();
+    points.forEach((p,i)=>{
+      const x=pad.l+(cw*i/(points.length-1));
+      const y=pad.t+ch-((p.v-minV)/(maxV-minV))*ch;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    const agrad=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);
+    agrad.addColorStop(0,'rgba(79,70,229,0.12)'); agrad.addColorStop(1,'rgba(79,70,229,0)');
+    ctx.lineTo(pad.l+cw,pad.t+ch); ctx.lineTo(pad.l,pad.t+ch); ctx.closePath();
+    ctx.fillStyle=agrad; ctx.fill();
+    // x labels
+    const step=Math.ceil(points.length/8);
+    ctx.fillStyle='#9ca3af'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='center';
+    points.forEach((p,i)=>{
+      if(i%step!==0&&i!==points.length-1) return;
+      const x=pad.l+(cw*i/(points.length-1));
+      ctx.fillText(p.label,x,h-8);
+    });
+  }
+
+  /* ── Core calculation ── */
+  function calc(){
+    const P=parseFloat($('fd-principal').value)||0;
+    const rBase=parseFloat($('fd-rate').value)||0;
+    const isSenior=$('is-senior').checked;
+    const isTaxSaver=$('is-taxsaver').checked;
+    const rate=isSenior?rBase+0.5:rBase;
+    const yrs=parseInt($('fd-years').value)||0;
+    const mos=parseInt($('fd-months').value)||0;
+    const t=yrs+mos/12;
+    const n=parseInt($('fd-compounding').value)||4;
+    const taxBracket=parseFloat($('fd-tax-bracket').value)/100||0;
+    const inflation=parseFloat($('fd-inflation').value)||6;
+    if(P<=0||rate<=0||t<=0) return;
+    const r=rate/100;
+    const maturity=P*Math.pow(1+r/n,n*t);
+    const interest=maturity-P;
+    const tdsThreshold=isSenior?50000:40000;
+    const tdsRate=0.10;
+    const tds=interest>tdsThreshold?interest*tdsRate:0;
+    const postTds=maturity-tds;
+    const taxOnInterest=interest*taxBracket;
+    const postTaxMaturity=maturity-taxOnInterest;
+    const effectiveYield=(Math.pow(maturity/P,1/t)-1)*100;
+    const realRate=((1+(rate-inflation)/100)/(1+inflation/100)-1)*100; // simplified
+    const realMaturity=P*Math.pow(1+realRate/100,t);
+    const postTaxRate=rate*(1-taxBracket);
+    $('res-principal').textContent=fmtINR(P);
+    $('res-maturity').textContent=fmtINR(Math.round(maturity));
+    $('res-interest').textContent=fmtINR(Math.round(interest));
+    $('res-tds').textContent=fmtINR(Math.round(tds));
+    $('res-post-tds').textContent=fmtINR(Math.round(postTds));
+    $('effective-yield-pill').textContent='Effective Yield: '+effectiveYield.toFixed(2)+'% p.a.';
+    $('real-return-pct').textContent=fmtPct(realRate);
+    $('real-return-pct').style.color=realRate>=0?'#15803d':'#dc2626';
+    $('real-return-amt').textContent=fmtINR(Math.round(realMaturity));
+    $('post-tax-return').textContent=fmtPct(postTaxRate);
+    $('tax-on-interest').textContent=fmtINR(Math.round(taxOnInterest));
+    // maturity date
+    const sd=new Date($('fd-start-date').value);
+    if(!isNaN(sd)){
+      const md=new Date(sd);
+      md.setMonth(md.getMonth()+Math.round(t*12));
+      $('res-maturity-date').textContent=md.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    }
+    // charts
+    drawDonut($('fd-donut-chart'),P,Math.round(interest));
+    // build monthly line points
+    const totalMonths=Math.round(t*12);
+    const pts=[];
+    for(let m=0;m<=totalMonths;m+=Math.max(1,Math.floor(totalMonths/24))){
+      const tm=m/12;
+      const v=P*Math.pow(1+r/n,n*tm);
+      const yr=Math.floor(m/12), mo=m%12;
+      pts.push({v,p:P,label:mo===0?`Y${yr}`:`Y${yr}M${mo}`});
+    }
+    if(pts[pts.length-1].label!=='end') pts.push({v:maturity,p:P,label:'End'});
+    drawLine($('fd-line-chart'),pts);
+    // yearly table
+    updateYearlyTable(P,r,n,t,tds,isSenior);
+    // premature calc
+    calcPremature(P,r,n);
+    // compare bars
+    updateCompareBars(isSenior);
+  }
+
+  function updateYearlyTable(P,r,n,t,totalTds,isSenior){
+    const tbody=$('yearly-tbody');
+    const threshold=isSenior?50000:40000;
+    tbody.innerHTML='';
+    let bal=P;
+    const totalPeriods=Math.ceil(t);
+    for(let y=1;y<=totalPeriods;y++){
+      const open=bal;
+      const close=open*Math.pow(1+r/n,n);
+      const int=close-open;
+      const tds=int>threshold?int*0.1:0;
+      bal=close;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="font-weight:600">Year ${y}</td><td style="text-align:right">${fmtINR(Math.round(open))}</td><td style="text-align:right;color:#059669">${fmtINR(Math.round(int))}</td><td style="text-align:right;color:#d97706">${tds>0?fmtINR(Math.round(tds)):'—'}</td><td style="text-align:right;font-weight:700">${fmtINR(Math.round(close))}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function calcPremature(P,r,n){
+    const pwMonths=parseInt($('pw-months').value)||12;
+    const penaltyPct=parseFloat($('pw-penalty').value)||1;
+    const t=pwMonths/12;
+    const applicableRate=Math.max(0,r*100-penaltyPct);
+    const received=P*Math.pow(1+applicableRate/100/n,n*t);
+    const fullTermT=parseFloat($('fd-years').value)+(parseInt($('fd-months').value)||0)/12;
+    const fullMaturity=P*Math.pow(1+r/n,n*fullTermT);
+    $('pw-applicable-rate').textContent=applicableRate.toFixed(2)+'%';
+    $('pw-receive').textContent=fmtINR(Math.round(received));
+    $('pw-penalty-cost').textContent=fmtINR(Math.round(P*Math.pow(1+r/n,n*t)-received));
+    $('pw-opp-cost').textContent=fmtINR(Math.round(fullMaturity-received));
+  }
+
+  function updateCompareBars(isSenior){
+    const tbody=$('compare-bars');
+    // rebuild bars using stored data
+    const rates=window._fdRates||[];
+    if(!rates.length) return;
+    const oneYear=rates.filter(r=>r.tenure==='1 Year').sort((a,b)=>
+      (isSenior?b.rateSenior:b.rateGeneral)-(isSenior?a.rateSenior:a.rateGeneral)
+    ).slice(0,8);
+    const maxRate=isSenior?oneYear[0].rateSenior:oneYear[0].rateGeneral;
+    tbody.innerHTML='';
+    oneYear.forEach(b=>{
+      const rate=isSenior?b.rateSenior:b.rateGeneral;
+      const pct=(rate/maxRate)*100;
+      tbody.innerHTML+=`<div class="compare-row"><span class="compare-bank">${b.bank}</span><div class="compare-bar-bg"><div class="compare-bar-fill" style="width:${pct}%"></div></div><span class="compare-rate">${rate}%</span></div>`;
+    });
+  }
+
+  /* ── Sync sliders ↔ inputs ── */
+  function syncPair(sliderId, inputId, transform){
+    const sl=$(sliderId), ip=$(inputId);
+    if(!sl||!ip) return;
+    sl.addEventListener('input',()=>{ ip.value=transform?transform(sl.value):sl.value; calc(); });
+    ip.addEventListener('input',()=>{ sl.value=transform?transform(ip.value,true):ip.value; calc(); });
+  }
+  syncPair('fd-principal-slider','fd-principal');
+  syncPair('fd-rate-slider','fd-rate');
+  syncPair('fd-inflation-slider','fd-inflation');
+  // years+months slider (total months)
+  $('fd-years-slider').addEventListener('input',()=>{
+    const totalMo=parseInt($('fd-years-slider').value);
+    $('fd-years').value=Math.floor(totalMo/12);
+    $('fd-months').value=totalMo%12;
+    calc();
   });
+  $('fd-years').addEventListener('input',()=>{ $('fd-years-slider').value=parseInt($('fd-years').value||0)*12+(parseInt($('fd-months').value)||0); calc(); });
+  $('fd-months').addEventListener('input',()=>{ $('fd-years-slider').value=parseInt($('fd-years').value||0)*12+(parseInt($('fd-months').value)||0); calc(); });
+
+  /* ── Other inputs ── */
+  ['fd-compounding','fd-start-date','fd-tax-bracket','is-senior','is-taxsaver'].forEach(id=>{
+    const el=$(id);
+    if(el) el.addEventListener('change',()=>{
+      if(id==='is-taxsaver'&&$('is-taxsaver').checked){
+        $('fd-years').value=5; $('fd-months').value=0;
+        $('fd-years-slider').value=60;
+      }
+      calc();
+    });
+  });
+  // toggle styling
+  ['is-senior','is-taxsaver'].forEach(id=>{
+    $(id)?.addEventListener('change',function(){
+      const item=this.closest('.toggle-item');
+      item&&item.classList.toggle('active',this.checked);
+    });
+  });
+
+  /* ── Premature inputs ── */
+  ['pw-months','pw-penalty'].forEach(id=>{
+    $(id)?.addEventListener('input',()=>{
+      const P=parseFloat($('fd-principal').value)||0;
+      const r=parseFloat($('fd-rate').value)/100||0;
+      const n=parseInt($('fd-compounding').value)||4;
+      calcPremature(P,r,n);
+    });
+  });
+
+  /* ── Tabs ── */
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      this.classList.add('active');
+      $('tab-'+this.dataset.tab)?.classList.add('active');
+      // redraw charts when tab becomes visible
+      if(this.dataset.tab==='growth') calc();
+    });
+  });
+
+  /* ── Rate filter ── */
+  window.filterRates=function(cat){
+    document.querySelectorAll('#rates-tbody tr').forEach(tr=>{
+      tr.style.display=(cat==='all'||tr.dataset.category===cat)?'':'none';
+    });
+    ['all','psu','private','sfb'].forEach(k=>{
+      const btn=$('filter-'+k);
+      btn&&btn.classList.toggle('active',k===cat.toLowerCase().replace(' ',''));
+    });
+  };
+
+  /* ── Expose rates to JS ── */
+  window._fdRates = [
+    {bank:'SBI',tenure:'1 Year',rateGeneral:6.80,rateSenior:7.30},
+    {bank:'Bank of Baroda',tenure:'1 Year',rateGeneral:6.85,rateSenior:7.35},
+    {bank:'Punjab National Bank',tenure:'1 Year',rateGeneral:6.75,rateSenior:7.25},
+    {bank:'HDFC Bank',tenure:'1 Year',rateGeneral:7.10,rateSenior:7.60},
+    {bank:'ICICI Bank',tenure:'1 Year',rateGeneral:7.10,rateSenior:7.60},
+    {bank:'Axis Bank',tenure:'1 Year',rateGeneral:7.10,rateSenior:7.75},
+    {bank:'Kotak Mahindra',tenure:'1 Year',rateGeneral:7.10,rateSenior:7.60},
+    {bank:'IndusInd Bank',tenure:'1 Year',rateGeneral:7.50,rateSenior:8.00},
+    {bank:'AU Small Finance',tenure:'1 Year',rateGeneral:7.75,rateSenior:8.25},
+    {bank:'Ujjivan SFB',tenure:'1 Year',rateGeneral:8.25,rateSenior:8.75},
+    {bank:'Jana SFB',tenure:'1 Year',rateGeneral:8.25,rateSenior:8.75},
+    {bank:'ESAF SFB',tenure:'1 Year',rateGeneral:8.25,rateSenior:8.75},
+    {bank:'Suryoday SFB',tenure:'1 Year',rateGeneral:8.60,rateSenior:9.10},
+  ];
+
+  /* ── Init ── */
+  $('fd-start-date').value=new Date().toISOString().split('T')[0];
+  calc();
+  window.addEventListener('resize',calc);
+  })();
   </script>
 </CalcLayout>
