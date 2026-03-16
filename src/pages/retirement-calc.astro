@@ -1,0 +1,340 @@
+---
+import CalcLayout from '../layouts/CalcLayout.astro';
+
+// SSR defaults
+const currentAge = 30, retirementAge = 60, currentExpenses = 50000;
+const currentSavings = 500000, monthlySavings = 25000;
+const expectedReturn = 0.12, inflation = 0.06, lifeExpectancy = 85;
+const yearsToRetirement = retirementAge - currentAge;
+const futureMonthlyExpenses = currentExpenses * Math.pow(1 + inflation, yearsToRetirement);
+const retirementCorpusNeeded = futureMonthlyExpenses * 12 * 25;
+const annualSavings = monthlySavings * 12;
+const finalProjectedCorpus = currentSavings * Math.pow(1 + expectedReturn, yearsToRetirement) +
+  annualSavings * (Math.pow(1 + expectedReturn, yearsToRetirement) - 1) / expectedReturn;
+const fireRatio = finalProjectedCorpus / retirementCorpusNeeded;
+
+function fmtLarge(n: number) {
+  if (n >= 10000000) return '₹' + (n / 10000000).toFixed(2) + ' Cr';
+  if (n >= 100000) return '₹' + (n / 100000).toFixed(2) + ' L';
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(n);
+}
+---
+<CalcLayout
+  title="Advanced Retirement Calculator - AscentInvestor"
+  description="Plan your retirement with inflation-adjusted calculations, multiple portfolio options, and comprehensive analysis. Calculate your FIRE number and retirement corpus."
+>
+  <style is:global slot="head">
+.title{text-align:center;margin-bottom:2rem;position:relative;padding:3rem 1.5rem;background:linear-gradient(135deg,#f43f5e 0%,#e11d48 40%,#7c3aed 100%);border-radius:1rem;overflow:hidden}
+.title::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+.title h1{font-size:2.5rem;font-weight:800;color:white;margin-bottom:0.5rem;position:relative;z-index:1;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.title p{font-size:1.125rem;color:rgba(255,255,255,0.9);position:relative;z-index:1}
+.calc-grid{display:grid;grid-template-columns:1fr 2fr;gap:2rem;margin-bottom:2rem}
+@media (max-width:768px){.calc-grid{grid-template-columns:1fr}}
+.fire-result{background:#dcfce7;border:2px solid #22c55e;color:#166534}
+.chart-container{width:100%;height:300px;margin:2rem 0;background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.chart{width:100%;height:100%}
+  </style>
+
+  <main class="container main">
+    <div class="title">
+      <h1>Advanced Retirement Calculator</h1>
+      <p>Plan your retirement with inflation-adjusted calculations and comprehensive analysis</p>
+    </div>
+
+    <div class="calc-grid">
+      <div class="card">
+        <div class="form-group">
+          <label for="currentAgeValue">Current Age</label>
+          <input type="number" id="currentAgeValue" value="30" min="18" max="80" step="1">
+          <div class="slider-container"><input type="range" id="currentAgeSlider" min="18" max="80" value="30" step="1" class="slider"></div>
+        </div>
+        <div class="form-group">
+          <label for="retirementAgeValue">Retirement Age</label>
+          <input type="number" id="retirementAgeValue" value="60" min="40" max="80" step="1">
+          <div class="slider-container"><input type="range" id="retirementAgeSlider" min="40" max="80" value="60" step="1" class="slider"></div>
+        </div>
+        <div class="form-group">
+          <label for="currentExpensesValue">Current Monthly Expenses (₹)</label>
+          <input type="number" id="currentExpensesValue" value="50000" min="10000" max="500000" step="5000">
+          <div class="slider-container"><input type="range" id="currentExpensesSlider" min="10000" max="200000" value="50000" step="5000" class="slider"></div>
+        </div>
+        <div class="form-group">
+          <label for="currentSavingsValue">Current Savings (₹)</label>
+          <input type="number" id="currentSavingsValue" value="500000" min="0" max="50000000" step="50000">
+          <div class="slider-container"><input type="range" id="currentSavingsSlider" min="0" max="5000000" value="500000" step="50000" class="slider"></div>
+        </div>
+        <div class="form-group">
+          <label for="monthlySavingsValue">Monthly Savings (₹)</label>
+          <input type="number" id="monthlySavingsValue" value="25000" min="1000" max="200000" step="1000">
+          <div class="slider-container"><input type="range" id="monthlySavingsSlider" min="1000" max="100000" value="25000" step="1000" class="slider"></div>
+        </div>
+        <div class="form-group">
+          <label for="expectedReturnValue">Expected Annual Return (%)</label>
+          <input type="number" id="expectedReturnValue" value="12" min="5" max="20" step="0.5">
+          <div class="slider-container"><input type="range" id="expectedReturnSlider" min="5" max="20" value="12" step="0.5" class="slider"></div>
+        </div>
+        <div class="form-group">
+          <label for="inflationValue">Inflation Rate (%)</label>
+          <input type="number" id="inflationValue" value="6" min="3" max="10" step="0.5">
+          <div class="slider-container"><input type="range" id="inflationSlider" min="3" max="10" value="6" step="0.5" class="slider"></div>
+        </div>
+        <div class="form-group">
+          <label for="lifeExpectancyValue">Life Expectancy</label>
+          <input type="number" id="lifeExpectancyValue" value="85" min="70" max="100" step="1">
+          <div class="slider-container"><input type="range" id="lifeExpectancySlider" min="70" max="100" value="85" step="1" class="slider"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="results">
+          <div class="result-item">
+            <div class="result-label">Years to Retirement</div>
+            <div id="yearsToRetirement" class="result-value">{yearsToRetirement}</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Retirement Corpus Needed</div>
+            <div id="retirementCorpus" class="result-value">{fmtLarge(Math.round(retirementCorpusNeeded))}</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Projected Corpus at Retirement</div>
+            <div id="projectedCorpus" class="result-value">{fmtLarge(Math.round(finalProjectedCorpus))}</div>
+          </div>
+          <div class="result-item fire-result">
+            <div class="result-label">FIRE Status</div>
+            <div id="fireStatus" class="result-value">
+              {fireRatio >= 1 ? '🔥 FIRE Achieved!' : `${(fireRatio * 100).toFixed(0)}% of FIRE Goal`}
+            </div>
+          </div>
+        </div>
+        <div class="chart-container"><canvas id="portfolioChart" class="chart"></canvas></div>
+        <div class="chart-container"><canvas id="expenseChart" class="chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr><th>Age</th><th>Year</th><th>Annual Savings</th><th>Portfolio Value</th><th>Annual Expenses</th><th>Surplus/Deficit</th></tr>
+        </thead>
+        <tbody id="analysisTableBody">
+          <tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7280">Loading analysis...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script is:inline defer>
+  document.addEventListener('DOMContentLoaded', function() {
+    function drawLineChart(canvas, data, options = {}) {
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+        ctx.scale(2, 2);
+        const width = rect.width, height = rect.height;
+        const padding = { top: 20, right: 20, bottom: 60, left: 80 };
+        const chartWidth = width - padding.left - padding.right;
+        const chartHeight = height - padding.top - padding.bottom;
+        ctx.clearRect(0, 0, width, height);
+        if (!data || data.length === 0) return;
+        const maxValue = Math.max(...data.map(d => d.value));
+        const minValue = Math.min(...data.map(d => d.value));
+        const valueRange = maxValue - minValue;
+        const adjustedMax = maxValue + (valueRange * 0.1);
+        const adjustedMin = Math.max(0, minValue - (valueRange * 0.1));
+        ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+            const y = padding.top + (chartHeight * i / 5);
+            ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + chartWidth, y); ctx.stroke();
+        }
+        for (let i = 0; i <= Math.min(data.length - 1, 10); i++) {
+            const x = padding.left + (chartWidth * i / Math.min(data.length - 1, 10));
+            ctx.beginPath(); ctx.moveTo(x, padding.top); ctx.lineTo(x, padding.top + chartHeight); ctx.stroke();
+        }
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(padding.left, padding.top); ctx.lineTo(padding.left, padding.top + chartHeight); ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight); ctx.stroke();
+        ctx.fillStyle = '#666'; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        for (let i = 0; i <= 5; i++) {
+            const value = adjustedMax - ((adjustedMax - adjustedMin) * i / 5);
+            const y = padding.top + (chartHeight * i / 5);
+            const label = value >= 10000000 ? `₹${(value/10000000).toFixed(1)}Cr` : value >= 100000 ? `₹${(value/100000).toFixed(1)}L` : `₹${(value/1000).toFixed(0)}K`;
+            ctx.fillText(label, padding.left - 10, y);
+        }
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        const labelStep = Math.max(1, Math.floor(data.length / 10));
+        for (let i = 0; i < data.length; i += labelStep) {
+            const x = padding.left + (chartWidth * i / (data.length - 1));
+            ctx.fillText((data[i].year || (new Date().getFullYear() + i)).toString(), x, padding.top + chartHeight + 10);
+        }
+        if (options.title) { ctx.fillStyle = '#333'; ctx.font = 'bold 14px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(options.title, width / 2, 5); }
+        ctx.strokeStyle = options.color || '#4f46e5'; ctx.lineWidth = 3; ctx.beginPath();
+        data.forEach((point, index) => {
+            const x = padding.left + (chartWidth * index / (data.length - 1));
+            const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
+            if (index === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+        });
+        ctx.stroke();
+        ctx.fillStyle = options.color || '#4f46e5';
+        data.forEach((point, index) => {
+            const x = padding.left + (chartWidth * index / (data.length - 1));
+            const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
+            ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * Math.PI); ctx.fill();
+        });
+    }
+    function drawDualLineChart(canvas, data1, data2, options = {}) {
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * 2; canvas.height = rect.height * 2; ctx.scale(2, 2);
+        const width = rect.width, height = rect.height;
+        const padding = { top: 40, right: 20, bottom: 60, left: 80 };
+        const chartWidth = width - padding.left - padding.right;
+        const chartHeight = height - padding.top - padding.bottom;
+        ctx.clearRect(0, 0, width, height);
+        if (!data1 || data1.length === 0 || !data2 || data2.length === 0) return;
+        const allValues = [...data1.map(d => d.value), ...data2.map(d => d.value)];
+        const maxValue = Math.max(...allValues), minValue = Math.min(...allValues);
+        const valueRange = maxValue - minValue;
+        const adjustedMax = maxValue + (valueRange * 0.1);
+        const adjustedMin = Math.max(0, minValue - (valueRange * 0.1));
+        ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+            const y = padding.top + (chartHeight * i / 5);
+            ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + chartWidth, y); ctx.stroke();
+        }
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(padding.left, padding.top); ctx.lineTo(padding.left, padding.top + chartHeight); ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight); ctx.stroke();
+        ctx.fillStyle = '#666'; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        for (let i = 0; i <= 5; i++) {
+            const value = adjustedMax - ((adjustedMax - adjustedMin) * i / 5);
+            const y = padding.top + (chartHeight * i / 5);
+            const label = value >= 10000000 ? `₹${(value/10000000).toFixed(1)}Cr` : value >= 100000 ? `₹${(value/100000).toFixed(1)}L` : `₹${(value/1000).toFixed(0)}K`;
+            ctx.fillText(label, padding.left - 10, y);
+        }
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        const labelStep = Math.max(1, Math.floor(data1.length / 10));
+        for (let i = 0; i < data1.length; i += labelStep) {
+            const x = padding.left + (chartWidth * i / (data1.length - 1));
+            ctx.fillText((data1[i].year || (new Date().getFullYear() + i)).toString(), x, padding.top + chartHeight + 10);
+        }
+        const legendY = 25; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillStyle = options.color1 || '#4f46e5'; ctx.fillRect(padding.left, legendY, 15, 3);
+        ctx.fillStyle = '#333'; ctx.fillText(options.label1 || 'Series 1', padding.left + 20, legendY + 1);
+        const legend2X = padding.left + 120;
+        ctx.fillStyle = options.color2 || '#10b981'; ctx.fillRect(legend2X, legendY, 15, 3);
+        ctx.fillStyle = '#333'; ctx.fillText(options.label2 || 'Series 2', legend2X + 20, legendY + 1);
+        function drawLine(data, color) {
+            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath();
+            data.forEach((point, index) => {
+                const x = padding.left + (chartWidth * index / (data.length - 1));
+                const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
+                if (index === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+            });
+            ctx.stroke();
+            ctx.fillStyle = color;
+            data.forEach((point, index) => {
+                const x = padding.left + (chartWidth * index / (data.length - 1));
+                const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
+                ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * Math.PI); ctx.fill();
+            });
+        }
+        drawLine(data1, options.color1 || '#4f46e5');
+        drawLine(data2, options.color2 || '#10b981');
+    }
+    const elements = {
+        currentAgeSlider: document.getElementById('currentAgeSlider'), currentAgeValue: document.getElementById('currentAgeValue'),
+        retirementAgeSlider: document.getElementById('retirementAgeSlider'), retirementAgeValue: document.getElementById('retirementAgeValue'),
+        currentExpensesSlider: document.getElementById('currentExpensesSlider'), currentExpensesValue: document.getElementById('currentExpensesValue'),
+        currentSavingsSlider: document.getElementById('currentSavingsSlider'), currentSavingsValue: document.getElementById('currentSavingsValue'),
+        monthlySavingsSlider: document.getElementById('monthlySavingsSlider'), monthlySavingsValue: document.getElementById('monthlySavingsValue'),
+        expectedReturnSlider: document.getElementById('expectedReturnSlider'), expectedReturnValue: document.getElementById('expectedReturnValue'),
+        inflationSlider: document.getElementById('inflationSlider'), inflationValue: document.getElementById('inflationValue'),
+        lifeExpectancySlider: document.getElementById('lifeExpectancySlider'), lifeExpectancyValue: document.getElementById('lifeExpectancyValue'),
+        yearsToRetirement: document.getElementById('yearsToRetirement'), retirementCorpus: document.getElementById('retirementCorpus'),
+        projectedCorpus: document.getElementById('projectedCorpus'), fireStatus: document.getElementById('fireStatus'),
+        analysisTableBody: document.getElementById('analysisTableBody'),
+        portfolioChart: document.getElementById('portfolioChart'), expenseChart: document.getElementById('expenseChart')
+    };
+    function formatCurrency(num) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num); }
+    function formatLargeNumber(num) {
+        if (num >= 10000000) return '₹' + (num / 10000000).toFixed(2) + ' Cr';
+        if (num >= 100000) return '₹' + (num / 100000).toFixed(2) + ' L';
+        return formatCurrency(num);
+    }
+    function updateAnalysisTable(analysisData) {
+        elements.analysisTableBody.innerHTML = '';
+        if (analysisData.length === 0) { elements.analysisTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see analysis</td></tr>`; return; }
+        const filteredData = analysisData.filter((item, index) => index % 5 === 0 || index >= analysisData.length - 5);
+        filteredData.forEach(item => {
+            const row = document.createElement('tr');
+            const surplus = item.portfolioValue - item.annualExpenses;
+            const surplusClass = surplus >= 0 ? 'color:#059669' : 'color:#dc2626';
+            row.innerHTML = `<td style="font-weight:600">${item.age}</td><td>${item.year}</td><td style="text-align:right">${formatLargeNumber(item.annualSavings)}</td><td style="text-align:right;font-weight:600">${formatLargeNumber(item.portfolioValue)}</td><td style="text-align:right">${formatLargeNumber(item.annualExpenses)}</td><td style="text-align:right;${surplusClass}">${formatLargeNumber(surplus)}</td>`;
+            elements.analysisTableBody.appendChild(row);
+        });
+    }
+    function calculateRetirement() {
+        try {
+            const currentAge = parseInt(elements.currentAgeValue.value) || 30;
+            const retirementAge = parseInt(elements.retirementAgeValue.value) || 60;
+            const currentExpenses = parseFloat(elements.currentExpensesValue.value) || 50000;
+            const currentSavings = parseFloat(elements.currentSavingsValue.value) || 500000;
+            const monthlySavings = parseFloat(elements.monthlySavingsValue.value) || 25000;
+            const expectedReturn = parseFloat(elements.expectedReturnValue.value) / 100 || 0.12;
+            const inflation = parseFloat(elements.inflationValue.value) / 100 || 0.06;
+            const lifeExpectancy = parseInt(elements.lifeExpectancyValue.value) || 85;
+            if (currentAge >= retirementAge) { updateAnalysisTable([]); return; }
+            const yearsToRetirement = retirementAge - currentAge;
+            const futureMonthlyExpenses = currentExpenses * Math.pow(1 + inflation, yearsToRetirement);
+            const futureAnnualExpenses = futureMonthlyExpenses * 12;
+            const retirementCorpusNeeded = futureAnnualExpenses * 25;
+            const annualSavings = monthlySavings * 12;
+            let projectedCorpus = currentSavings;
+            let analysisData = [], portfolioValues = [], expenseValues = [];
+            for (let year = 0; year <= lifeExpectancy - currentAge; year++) {
+                const age = currentAge + year;
+                const currentYear = new Date().getFullYear() + year;
+                if (age < retirementAge) {
+                    projectedCorpus = projectedCorpus * (1 + expectedReturn) + annualSavings;
+                    const currentAnnualExpenses = currentExpenses * 12 * Math.pow(1 + inflation, year);
+                    analysisData.push({ age, year: currentYear, annualSavings, portfolioValue: projectedCorpus, annualExpenses: currentAnnualExpenses });
+                } else {
+                    const annualWithdrawal = futureAnnualExpenses * Math.pow(1 + inflation, age - retirementAge);
+                    projectedCorpus = projectedCorpus * (1 + expectedReturn) - annualWithdrawal;
+                    if (projectedCorpus < 0) projectedCorpus = 0;
+                    analysisData.push({ age, year: currentYear, annualSavings: 0, portfolioValue: projectedCorpus, annualExpenses: annualWithdrawal });
+                }
+                portfolioValues.push(projectedCorpus);
+                expenseValues.push(age >= retirementAge ? futureAnnualExpenses * Math.pow(1 + inflation, age - retirementAge) : currentExpenses * 12 * Math.pow(1 + inflation, year));
+            }
+            const finalProjectedCorpus = currentSavings * Math.pow(1 + expectedReturn, yearsToRetirement) + annualSavings * (Math.pow(1 + expectedReturn, yearsToRetirement) - 1) / expectedReturn;
+            elements.yearsToRetirement.textContent = yearsToRetirement;
+            elements.retirementCorpus.textContent = formatLargeNumber(retirementCorpusNeeded);
+            elements.projectedCorpus.textContent = formatLargeNumber(finalProjectedCorpus);
+            const fireRatio = finalProjectedCorpus / retirementCorpusNeeded;
+            if (fireRatio >= 1) { elements.fireStatus.textContent = '🔥 FIRE Achieved!'; elements.fireStatus.style.color = '#059669'; }
+            else { const shortfall = retirementCorpusNeeded - finalProjectedCorpus; elements.fireStatus.innerHTML = `${(fireRatio * 100).toFixed(0)}% of FIRE<br>Short: ${formatLargeNumber(shortfall)}`; elements.fireStatus.style.color = '#dc2626'; }
+            updateAnalysisTable(analysisData);
+            drawLineChart(elements.portfolioChart, portfolioValues.map((value, index) => ({ value, year: new Date().getFullYear() + index })), { title: 'Portfolio Growth', color: '#4f46e5' });
+            drawDualLineChart(elements.expenseChart, portfolioValues.map((value, index) => ({ value, year: new Date().getFullYear() + index })), expenseValues.map((value, index) => ({ value, year: new Date().getFullYear() + index })), { title: 'Portfolio vs Annual Expenses', label1: 'Portfolio Value', color1: '#4f46e5', label2: 'Annual Expenses', color2: '#059669' });
+        } catch(error) { console.error("Error in retirement calculation:", error); }
+    }
+    function syncSliderAndInput(sliderElement, inputElement) {
+        sliderElement.addEventListener('input', function() { inputElement.value = sliderElement.value; calculateRetirement(); });
+        inputElement.addEventListener('input', function() {
+            const value = parseFloat(inputElement.value);
+            if (value >= parseFloat(sliderElement.min) && value <= parseFloat(sliderElement.max)) sliderElement.value = value;
+            calculateRetirement();
+        });
+    }
+    syncSliderAndInput(elements.currentAgeSlider, elements.currentAgeValue);
+    syncSliderAndInput(elements.retirementAgeSlider, elements.retirementAgeValue);
+    syncSliderAndInput(elements.currentExpensesSlider, elements.currentExpensesValue);
+    syncSliderAndInput(elements.currentSavingsSlider, elements.currentSavingsValue);
+    syncSliderAndInput(elements.monthlySavingsSlider, elements.monthlySavingsValue);
+    syncSliderAndInput(elements.expectedReturnSlider, elements.expectedReturnValue);
+    syncSliderAndInput(elements.inflationSlider, elements.inflationValue);
+    syncSliderAndInput(elements.lifeExpectancySlider, elements.lifeExpectancyValue);
+    calculateRetirement();
+  });
+  </script>
+</CalcLayout>

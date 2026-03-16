@@ -1,0 +1,178 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeaderMain from '../components/HeaderMain.astro';
+import FooterMain from '../components/FooterMain.astro';
+---
+<BaseLayout
+  title="Financial Blogs & Articles - AscentInvestor"
+  description="Expert insights on personal finance, investing, and wealth building. Learn about SIPs, retirement planning, tax strategies, and more from AscentInvestor."
+>
+  <Fragment slot="head">
+    <style is:global>
+
+.title-section{text-align:center;margin-bottom:2rem;position:relative;padding:4rem 0;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);border-radius:1rem;color:white;overflow:hidden}
+        .title-section::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:0.3}
+        .title-section *{position:relative;z-index:1}
+        @media (min-width:640px){.title-section{margin-bottom:3rem;padding:5rem 0}}
+        .title{font-size:2.25rem;font-weight:700;color:white;margin-bottom:1rem;text-shadow:0 2px 4px rgba(0,0,0,0.3)}
+        @media (min-width:640px){.title{font-size:3rem}}
+        @media (min-width:768px){.title{font-size:3.75rem}}
+        .subtitle{font-size:1.125rem;color:rgba(255,255,255,0.9);max-width:42rem;margin:0 auto;text-shadow:0 1px 2px rgba(0,0,0,0.2)}
+        .blog-grid{display:grid;grid-template-columns:1fr;gap:2rem}
+        @media (min-width:768px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
+        @media (min-width:1024px){.blog-grid{grid-template-columns:repeat(3,1fr)}}
+        .blog-card{background:white;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);overflow:hidden;transition:all 0.3s ease;height:100%}
+        .blog-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+        .blog-image{width:100%;height:12rem;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:1.125rem}
+        .blog-content{padding:1.5rem}
+        .blog-meta{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;font-size:0.875rem;color:#6b7280}
+        .blog-date{display:flex;align-items:center;gap:0.5rem}
+        .blog-read-time{display:flex;align-items:center;gap:0.5rem}
+        .blog-title{font-size:1.25rem;font-weight:700;color:#111827;margin-bottom:0.75rem;line-height:1.4}
+        .blog-excerpt{color:#374151;line-height:1.6;margin-bottom:1rem}
+        .blog-link{color:#4f46e5;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem}
+        .blog-link:hover{color:#4338ca}
+    
+    </style>
+  </Fragment>
+  <HeaderMain navCurrent="blogs" />
+<!-- Main Content -->
+    <main id="main-content" role="main" class="container main">
+        <!-- Title Section -->
+        <div class="title-section">
+            <h1 class="title">Financial Insights & Articles</h1>
+            <p class="subtitle">Expert guidance on investing, wealth building, and financial planning to help you achieve your financial goals.</p>
+        </div>
+
+        <!-- Blog Articles Grid -->
+        <div class="blog-grid">
+
+            <!-- Featured Article: Interactive SIP Guide -->
+            <article class="blog-card">
+                <div class="blog-image">
+                    <span>Interactive SIP Guide</span>
+                </div>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <div class="blog-date">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>December 2024</span>
+                        </div>
+                        <div class="blog-read-time">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>5 min read</span>
+                        </div>
+                    </div>
+                    <h2 class="blog-title">The Unstoppable Rise of the SIP: An Interactive Guide to Building Wealth</h2>
+                    <p class="blog-excerpt">Discover the power of SIPs with our comprehensive interactive guide. Learn about compounding, rupee cost averaging, and practical steps to start your wealth-building journey.</p>
+                    <a href="/blog-interactive-sip-guide" class="blog-link">
+                        Read Full Article
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </article>
+
+            <!-- SIP Guide Article -->
+            <article class="blog-card">
+                <div class="blog-image">
+                    <span>SIP Investment Guide</span>
+                </div>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <div class="blog-date">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>December 2024</span>
+                        </div>
+                        <div class="blog-read-time">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>10 min read</span>
+                        </div>
+                    </div>
+                    <h2 class="blog-title">The Unstoppable Rise of the SIP: Your Guide to Building Wealth in the Indian Market</h2>
+                    <p class="blog-excerpt">Discover how Systematic Investment Plans (SIPs) can help you build wealth through disciplined investing. Learn about rupee cost averaging, compounding, and practical steps to start your investment journey.</p>
+                    <a href="/blog-sip-guide" class="blog-link">
+                        Read Full Article
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </article>
+
+            <!-- Tax Planning Guide Article -->
+            <article class="blog-card">
+                <div class="blog-image">
+                    <span>Tax Planning Guide</span>
+                </div>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <div class="blog-date">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>January 2025</span>
+                        </div>
+                        <div class="blog-read-time">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>8 min read</span>
+                        </div>
+                    </div>
+                    <h2 class="blog-title">Tax Planning Strategies for the New Financial Year</h2>
+                    <p class="blog-excerpt">Comprehensive guide to optimize your tax savings and maximize your investments under both old and new tax regimes. Learn about Section 80C, 80D, NPS, and more tax-saving strategies.</p>
+                    <a href="/blog-tax-planning-guide" class="blog-link">
+                        Read Full Article
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </article>
+
+            <!-- FIRE Movement Guide Article -->
+            <article class="blog-card">
+                <div class="blog-image">
+                    <span>FIRE Movement Guide</span>
+                </div>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <div class="blog-date">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>December 2024</span>
+                        </div>
+                        <div class="blog-read-time">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>12 min read</span>
+                        </div>
+                    </div>
+                    <h2 class="blog-title">FIRE Movement in India: Financial Independence Made Simple</h2>
+                    <p class="blog-excerpt">Learn how to achieve Financial Independence and Retire Early (FIRE) with practical strategies tailored for the Indian market and lifestyle.</p>
+                    <a href="/blog-fire-movement-guide" class="blog-link">
+                        Read Full Article
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </article>
+
+        </div>
+    </main><!-- AdSense Ad Unit -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  <FooterMain />
+</BaseLayout>

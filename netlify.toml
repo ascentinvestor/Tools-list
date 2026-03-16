@@ -1,11 +1,17 @@
 [build]
-  command = "node build.js"
+  command = "yarn build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
 
-# CSS/JS assets: 1 week — no immutable since filenames are not hashed yet
+# Astro-hashed assets: 1 year immutable (filenames include content hash)
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Public CSS/JS assets (not hashed): 1 week
 [[headers]]
   for = "/assets/css/*"
   [headers.values]
@@ -15,12 +21,6 @@
   for = "/assets/js/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
-
-# HTML pages: revalidate every request (Netlify CDN handles invalidation on deploy)
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, no-cache"
 
 # Images: 1 day
 [[headers]]
@@ -32,84 +32,3 @@
   for = "/*.ico"
   [headers.values]
     Cache-Control = "public, max-age=86400"
-
-# Pretty URL rewrites (strip .html extension)
-[[redirects]]
-  from   = "/tools"
-  to     = "/index.html"
-  status = 200
-
-[[redirects]]
-  from   = "/fd-calc"
-  to     = "/fd-calc.html"
-  status = 200
-
-[[redirects]]
-  from   = "/fire-calc"
-  to     = "/fire-calc.html"
-  status = 200
-
-[[redirects]]
-  from   = "/swp-calc"
-  to     = "/swp-calc.html"
-  status = 200
-
-[[redirects]]
-  from   = "/tax-calc"
-  to     = "/tax-calc.html"
-  status = 200
-
-[[redirects]]
-  from   = "/retirement-calc"
-  to     = "/retirement-calc.html"
-  status = 200
-
-[[redirects]]
-  from   = "/portfolio"
-  to     = "/portfolio.html"
-  status = 200
-
-[[redirects]]
-  from   = "/blogs"
-  to     = "/blogs.html"
-  status = 200
-
-[[redirects]]
-  from   = "/blog-sip-guide"
-  to     = "/blog-sip-guide.html"
-  status = 200
-
-[[redirects]]
-  from   = "/blog-fire-movement-guide"
-  to     = "/blog-fire-movement-guide.html"
-  status = 200
-
-[[redirects]]
-  from   = "/blog-tax-planning-guide"
-  to     = "/blog-tax-planning-guide.html"
-  status = 200
-
-[[redirects]]
-  from   = "/blog-interactive-sip-guide"
-  to     = "/blog-interactive-sip-guide.html"
-  status = 200
-
-[[redirects]]
-  from   = "/privacy-policy"
-  to     = "/privacy-policy.html"
-  status = 200
-
-[[redirects]]
-  from   = "/refund-policy"
-  to     = "/refund-policy.html"
-  status = 200
-
-[[redirects]]
-  from   = "/terms-conditions"
-  to     = "/terms-conditions.html"
-  status = 200
-
-[[redirects]]
-  from   = "/fb-disclaimer"
-  to     = "/fb-disclaimer.html"
-  status = 200

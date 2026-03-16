@@ -1,0 +1,33 @@
+---
+interface Props {
+  navCurrent?: 'tools' | 'blogs' | 'portfolio' | '';
+}
+const { navCurrent = '' } = Astro.props;
+---
+<!-- Accessibility: Skip Link -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Header -->
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <div>
+                <a href="/tools" class="logo">
+                    <img src="/logo-ai-32.png" alt="AscentInvestor Logo" width="32" height="32" loading="eager" decoding="async">
+                    AscentInvestor
+                </a>
+            </div>
+            <nav role="navigation" aria-label="Main Navigation" class="nav">
+                <a href="/tools" class="nav-link" aria-current={navCurrent === 'tools' ? 'page' : undefined}>Tools</a>
+                <a href="/blogs" class="nav-link" aria-current={navCurrent === 'blogs' ? 'page' : undefined}>Blogs</a>
+                <a href="/portfolio" class="nav-link" aria-current={navCurrent === 'portfolio' ? 'page' : undefined}>Portfolio</a>
+            </nav>
+            <div class="menu-btn">
+                <button aria-label="Open main menu" aria-expanded="false">
+                    <svg style="width:1.5rem;height:1.5rem" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img"><title>Menu Icon</title><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+<script src="/assets/js/mobile-menu.js" is:inline></script>

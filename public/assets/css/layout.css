@@ -1,0 +1,48 @@
+/* Layout: container, header, nav, footer, skip-link — shared across all pages */
+
+/* Container */
+.container{width:100%;margin:0 auto;padding:0 1rem}
+@media (min-width:640px){.container{max-width:640px;padding:0 1.5rem}}
+@media (min-width:768px){.container{max-width:768px}}
+@media (min-width:1024px){.container{max-width:1024px}}
+@media (min-width:1280px){.container{max-width:1280px}}
+@media (min-width:1536px){.container{max-width:1536px}}
+
+/* Skip link (accessibility) */
+.skip-link{position:absolute;top:-40px;left:0;background:#111827;color:white;padding:8px;z-index:100;transition:top 0.3s;text-decoration:none}
+.skip-link:focus{top:0}
+
+/* Header */
+.header{background:white;box-shadow:0 1px 3px 0 rgba(0,0,0,.1);position:sticky;top:0;z-index:50}
+.header-content{display:flex;justify-content:space-between;align-items:center;padding:1rem 0}
+.logo{display:flex;align-items:center;font-size:1.5rem;font-weight:700;color:#111827;text-decoration:none}
+.logo:hover{color:#4f46e5;transition:color 0.2s}
+.logo img{height:2rem;width:2rem;margin-right:0.5rem}
+
+/* Nav */
+.nav{display:none;align-items:center;gap:1.5rem}
+@media (min-width:768px){.nav{display:flex}}
+.nav-link{color:#4f46e5;font-weight:600;text-decoration:none}
+.nav-link:hover{color:#4338ca}
+.menu-btn{color:#374151}
+@media (min-width:768px){.menu-btn{display:none}}
+
+/* Main padding */
+.main{padding:2rem 0}
+@media (min-width:640px){.main{padding:3rem 0}}
+@media (min-width:768px){.main{padding:5rem 0}}
+
+/* Footer */
+.footer{background:white;border-top:1px solid #e5e7eb;margin-top:4rem}
+.footer-content{padding:2rem 0;display:grid;grid-template-columns:1fr;gap:2rem}
+@media (min-width:640px){.footer-content{padding:3rem 0}}
+@media (min-width:768px){.footer-content{grid-template-columns:repeat(4,1fr)}}
+.footer-title{font-size:1.125rem;font-weight:700;color:#111827;margin-bottom:1rem}
+.footer-text{color:#374151}
+.footer-links{list-style:none;margin:0;padding:0}
+.footer-links li{margin-bottom:0.75rem}
+.footer-links a{color:#374151;text-decoration:none;display:flex;align-items:center}
+.footer-links a:hover{color:#4f46e5}
+.footer-links svg{width:1rem;height:1rem;margin-right:0.5rem}
+.footer-bottom{margin-top:2rem;border-top:1px solid #e5e7eb;padding-top:2rem;text-align:center;color:#6b7280}
+@media (min-width:640px){.footer-bottom{margin-top:3rem}}

@@ -1,0 +1,23 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import HeaderBlog from '../components/HeaderBlog.astro';
+import FooterMain from '../components/FooterMain.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  navCurrent?: 'tools' | 'blogs' | '';
+  skipHeadCommon?: boolean;
+  noAdsense?: boolean;
+}
+const { title, description, navCurrent = 'blogs', skipHeadCommon = false, noAdsense = false } = Astro.props;
+---
+<BaseLayout title={title} description={description} skipHeadCommon={skipHeadCommon} noAdsense={noAdsense}>
+  <Fragment slot="head">
+    <link rel="stylesheet" href="/assets/css/blog.css">
+    <slot name="head" />
+  </Fragment>
+  <HeaderBlog navCurrent={navCurrent} />
+  <slot />
+  <FooterMain />
+</BaseLayout>
