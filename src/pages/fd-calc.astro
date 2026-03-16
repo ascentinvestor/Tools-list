@@ -2,21 +2,16 @@
 import CalcLayout from '../layouts/CalcLayout.astro';
 import { FD_DEFAULTS, FD_RATES } from '../data/fd-rates';
 
-// SSR: compute default results server-side
 const { principal, interestRate, years, compounding } = FD_DEFAULTS;
 const r = interestRate / 100;
 const totalAmount = principal * Math.pow((1 + r / compounding), compounding * years);
 const totalInterest = totalAmount - principal;
+const tdsAmount = totalInterest > 40000 ? totalInterest * 0.10 : 0;
 
 function fmt(n: number) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 }
 
-const ssrInvested = fmt(principal);
-const ssrInterest = fmt(Math.round(totalInterest));
-const ssrMaturity = fmt(Math.round(totalAmount));
-
-// Year-wise breakdown for SSR
 const yearlyRows: { year: number; opening: number; interest: number; closing: number }[] = [];
 let bal = principal;
 for (let y = 1; y <= years; y++) {
@@ -25,162 +20,784 @@ for (let y = 1; y <= years; y++) {
   yearlyRows.push({ year: y, opening: open, interest: close - open, closing: close });
   bal = close;
 }
+
+const topBanks = FD_RATES.filter(r => r.tenure === '1 Year').sort((a,b) => b.rateGeneral - a.rateGeneral).slice(0, 10);
 ---
 <CalcLayout
-  title="Advanced FD Calculator"
-  description="Calculate your Fixed Deposit (FD) maturity amount, total interest, and visualize your investment growth with our advanced FD calculator. Features a year-wise breakdown table and interactive charts."
+  title="FD Calculator 2025 — Maturity, TDS, Bank Comparison"
+  description="Calculate FD maturity, TDS, real returns and compare rates across 15+ Indian banks."
+  navCurrent="tools"
 >
-  <style is:global slot="head">
-.title{text-align:center;margin-bottom:2rem;position:relative;padding:3rem 1.5rem;background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#a855f7 100%);border-radius:1rem;overflow:hidden}
-.title::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
-.title h1{font-size:2.5rem;font-weight:800;color:white;margin-bottom:0.5rem;position:relative;z-index:1;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
-.title p{font-size:1.125rem;color:rgba(255,255,255,0.9);position:relative;z-index:1}
-.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem}
-@media (max-width:768px){.calc-grid{grid-template-columns:1fr}}
-.chart-container{width:100%;height:250px;margin:1rem 0;background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-.chart{width:100%;height:100%}
-.fd-rates-section{margin-bottom:2rem}
-.fd-rates-section h3{font-size:1rem;font-weight:700;color:#111827;margin-bottom:1rem}
-  </style>
+<style is:global slot="head">
+/* ── FD page reset overrides ── */
+#fd-page *{box-sizing:border-box}
+#fd-page h1,#fd-page h2,#fd-page h3,#fd-page h4{margin:0;font-weight:700}
+#fd-page p{margin:0}
+#fd-page button{cursor:pointer}
 
-  <main class="container main">
-    <div class="title">
-      <h1>Advanced FD Calculator</h1>
-      <p>Calculate your Fixed Deposit maturity amount, total interest, and visualize your investment growth</p>
+/* ── Layout ── */
+#fd-page{padding:1.5rem 0 4rem;background:#f4f5f7;min-height:100vh}
+.fd-wrap{max-width:1200px;margin:0 auto;padding:0 1rem}
+
+/* ── Hero ── */
+.fd-hero{background:linear-gradient(135deg,#4338ca 0%,#6d28d9 50%,#9333ea 100%);border-radius:1.25rem;padding:2.5rem 2rem;margin-bottom:1.75rem;text-align:center;position:relative;overflow:hidden}
+.fd-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(255,255,255,0.15),transparent 60%);pointer-events:none}
+.fd-hero h1{font-size:clamp(1.6rem,3.5vw,2.25rem)!important;font-weight:800!important;color:#fff!important;letter-spacing:-0.02em;margin-bottom:0.4rem}
+.fd-hero p{color:rgba(255,255,255,0.85)!important;font-size:1rem;margin-bottom:1rem}
+.hero-chips{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.72rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:99px;letter-spacing:0.03em}
+
+/* ── Two-column layout ── */
+.fd-body{display:grid;grid-template-columns:420px 1fr;gap:1.5rem;align-items:start}
+@media(max-width:900px){.fd-body{grid-template-columns:1fr}}
+
+/* ── Card ── */
+.fd-card{background:#fff;border-radius:1rem;padding:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.04)}
+
+/* ── Form ── */
+.fg{margin-bottom:1.25rem}
+.fg label{display:block;font-size:0.8rem;font-weight:600;color:#374151;margin-bottom:0.4rem;letter-spacing:0.02em;text-transform:uppercase}
+.fg input[type=number],
+.fg select{width:100%!important;padding:0.65rem 0.875rem;border:1.5px solid #e5e7eb!important;border-radius:0.625rem;font-size:0.95rem;color:#111827;background:#fff;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.fg input[type=number]:focus,
+.fg select:focus{border-color:#6d28d9!important;box-shadow:0 0 0 3px rgba(109,40,217,0.12)!important}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.75rem center;padding-right:2.5rem}
+
+/* ── Slider ── */
+.slider-row{display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem}
+.slider-row input[type=range]{flex:1;height:5px;border-radius:99px;background:linear-gradient(to right,#6d28d9 var(--pct,50%),#e5e7eb var(--pct,50%));outline:none;-webkit-appearance:none;appearance:none;border:none!important;box-shadow:none!important}
+.slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#6d28d9;cursor:pointer;box-shadow:0 1px 4px rgba(109,40,217,0.4)}
+.slider-row input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#6d28d9;cursor:pointer;border:none;box-shadow:0 1px 4px rgba(109,40,217,0.4)}
+.slider-row .num-box{width:110px;flex-shrink:0;padding:0.5rem 0.65rem;border:1.5px solid #e5e7eb;border-radius:0.5rem;font-size:0.9rem;font-weight:600;color:#111827;text-align:right;outline:none}
+.slider-row .num-box:focus{border-color:#6d28d9!important;box-shadow:0 0 0 3px rgba(109,40,217,0.12)!important}
+
+/* ── Toggles ── */
+.toggle-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem}
+.tog{display:flex;align-items:center;gap:0.6rem;background:#f8f7ff;border:1.5px solid #ede9fe;border-radius:0.75rem;padding:0.75rem;cursor:pointer;transition:all .2s;user-select:none}
+.tog.on{background:#ede9fe;border-color:#6d28d9}
+.tog-sw{position:relative;width:38px;height:21px;flex-shrink:0}
+.tog-sw input{position:absolute;opacity:0;width:0;height:0}
+.tog-track{position:absolute;inset:0;background:#d1d5db;border-radius:99px;transition:.25s}
+.tog-track::before{content:'';position:absolute;width:15px;height:15px;top:3px;left:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.tog-sw input:checked~.tog-track{background:#6d28d9}
+.tog-sw input:checked~.tog-track::before{transform:translateX(17px)}
+.tog-lbl{font-size:0.78rem;font-weight:600;color:#4b5563;line-height:1.3}
+
+/* ── Period row (yr + mo) ── */
+.period-row{display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;width:100%}
+.period-row input[type=range]{flex:1;height:5px;border-radius:99px;background:linear-gradient(to right,#6d28d9 var(--pct,30%),#e5e7eb var(--pct,30%));outline:none;-webkit-appearance:none;appearance:none;border:none!important;box-shadow:none!important}
+.period-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#6d28d9;cursor:pointer}
+.period-row .sm-num{width:52px;padding:0.5rem 0.4rem;border:1.5px solid #e5e7eb;border-radius:0.5rem;font-size:0.88rem;font-weight:600;text-align:center;outline:none}
+.period-row .sm-num:focus{border-color:#6d28d9!important}
+.period-row span{font-size:0.78rem;color:#6b7280;flex-shrink:0}
+
+/* ── Section label ── */
+.sec-label{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9ca3af;padding:0.75rem 0 0.25rem;margin-bottom:0.25rem;border-top:1px solid #f3f4f6;margin-top:0.25rem}
+.sec-label:first-child{border-top:none;margin-top:0;padding-top:0}
+
+/* ── Result cards ── */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.875rem;margin-bottom:1rem}
+.res-c{border-radius:0.875rem;padding:1rem 1.125rem;border:1.5px solid #f3f4f6}
+.res-c.primary{background:linear-gradient(135deg,#ede9fe,#faf5ff);border-color:#c4b5fd}
+.res-c.success{background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-color:#6ee7b7}
+.res-c.warn{background:linear-gradient(135deg,#fff7ed,#fffbeb);border-color:#fcd34d}
+.res-c.neutral{background:#f8fafc;border-color:#e2e8f0}
+.res-c.wide{grid-column:span 2}
+.res-lbl{font-size:0.7rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;margin-bottom:0.3rem}
+.res-val{font-size:1.25rem;font-weight:800;color:#111827;letter-spacing:-0.02em}
+.res-val.purple{color:#6d28d9}
+.res-val.green{color:#059669}
+.res-val.orange{color:#d97706}
+
+/* ── Yield badge ── */
+.yield-row{display:flex;justify-content:center;margin:0.25rem 0 0.75rem}
+.yield-badge{display:inline-flex;align-items:center;gap:0.4rem;background:linear-gradient(90deg,#4338ca,#7c3aed);color:#fff;font-size:0.78rem;font-weight:700;padding:0.4rem 1rem;border-radius:99px;letter-spacing:0.02em}
+
+/* ── Maturity date ── */
+.mat-date{text-align:center;font-size:0.825rem;color:#6b7280;margin-bottom:1rem}
+.mat-date strong{color:#111827}
+
+/* ── Canvas chart ── */
+.chart-box{background:#f8fafc;border-radius:0.75rem;padding:1rem;margin-top:0.5rem}
+.chart-ttl{font-size:0.75rem;font-weight:700;color:#374151;text-align:center;margin-bottom:0.5rem;letter-spacing:0.03em;text-transform:uppercase}
+
+/* ── Tabs ── */
+.tabs{display:flex;border-bottom:2px solid #e5e7eb;overflow-x:auto;scrollbar-width:none;gap:0;margin-bottom:1.25rem;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab-b{background:none!important;border:none!important;padding:0.7rem 1rem;font-size:0.82rem;font-weight:600;color:#6b7280;cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent!important;margin-bottom:-2px;transition:color .2s,border-color .2s;flex-shrink:0}
+.tab-b.act{color:#6d28d9!important;border-bottom-color:#6d28d9!important}
+.tab-p{display:none}
+.tab-p.act{display:block}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto;margin-top:0.5rem}
+.tbl{width:100%;border-collapse:collapse;font-size:0.82rem}
+.tbl th{background:#f9fafb;padding:0.6rem 0.75rem;text-align:left;font-size:0.72rem;font-weight:700;color:#374151;letter-spacing:0.05em;text-transform:uppercase;border-bottom:1.5px solid #e5e7eb;white-space:nowrap}
+.tbl td{padding:0.6rem 0.75rem;border-bottom:1px solid #f3f4f6;color:#374151}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+.cat-chip{font-size:0.62rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:99px;vertical-align:middle;margin-left:0.3rem;text-transform:uppercase}
+.chip-psu{background:#dbeafe;color:#1d4ed8}
+.chip-pvt{background:#fce7f3;color:#9d174d}
+.chip-sfb{background:#d1fae5;color:#065f46}
+
+/* ── Compare bars ── */
+.cmp-list{display:flex;flex-direction:column;gap:0.625rem}
+.cmp-row{display:grid;grid-template-columns:130px 1fr 56px;align-items:center;gap:0.75rem}
+.cmp-name{font-size:0.78rem;font-weight:600;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmp-bg{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden}
+.cmp-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#4338ca,#7c3aed);transition:width .5s}
+.cmp-rate{font-size:0.8rem;font-weight:700;color:#6d28d9;text-align:right}
+
+/* ── Info / callout ── */
+.callout{border-radius:0.75rem;padding:0.875rem 1rem;margin-top:0.875rem}
+.callout.amber{background:#fffbeb;border:1px solid #fde68a}
+.callout.blue{background:#eff6ff;border:1px solid #bfdbfe}
+.callout.green{background:#f0fdf4;border:1px solid #bbf7d0}
+.callout.red{background:#fff1f2;border:1px solid #fecdd3}
+.callout h4{font-size:0.8rem;font-weight:700;margin-bottom:0.4rem;display:flex;align-items:center;gap:0.35rem}
+.callout.amber h4{color:#92400e}
+.callout.blue h4{color:#1e40af}
+.callout.green h4{color:#166534}
+.callout.red h4{color:#9f1239}
+.callout ul{margin:0.3rem 0 0 1rem;padding:0}
+.callout li{font-size:0.78rem;line-height:1.6;color:#374151}
+
+/* ── Real returns ── */
+.real-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.875rem}
+.real-c{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:0.75rem;padding:0.875rem;text-align:center}
+.real-lbl{font-size:0.7rem;font-weight:600;color:#166534;margin-bottom:0.25rem;text-transform:uppercase;letter-spacing:0.04em}
+.real-val{font-size:1.1rem;font-weight:800;color:#15803d}
+
+/* ── Filter chips ── */
+.filter-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.fchip{background:#fff!important;border:1.5px solid #e5e7eb!important;color:#6b7280;font-size:0.78rem;font-weight:600;padding:0.35rem 0.875rem;border-radius:99px;cursor:pointer;transition:all .2s}
+.fchip.act{background:#ede9fe!important;border-color:#6d28d9!important;color:#6d28d9}
+
+/* ── Premature ── */
+.pw-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.875rem}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .res-grid{grid-template-columns:1fr}
+  .res-c.wide{grid-column:span 1}
+  .cmp-row{grid-template-columns:100px 1fr 48px}
+  .real-grid{grid-template-columns:1fr}
+  .pw-grid{grid-template-columns:1fr}
+  .toggle-row{grid-template-columns:1fr}
+  .period-row .sm-num{width:44px}
+}
+</style>
+
+<div id="fd-page">
+<div class="fd-wrap">
+
+  <!-- Hero -->
+  <div class="fd-hero">
+    <h1>FD Calculator 2025</h1>
+    <p>Maturity · TDS · Real Returns · Bank Comparison · Premature Penalty</p>
+    <div class="hero-chips">
+      <span class="hero-chip">TDS Deduction</span>
+      <span class="hero-chip">Inflation-adjusted</span>
+      <span class="hero-chip">15+ Banks</span>
+      <span class="hero-chip">Tax-saving FD</span>
+      <span class="hero-chip">Senior Citizen</span>
     </div>
+  </div>
 
-    <div class="calc-grid">
-      <!-- Left Side: Input Controls -->
-      <div class="card">
-        <div class="form-group">
-          <label for="investmentValue">Principal Amount (₹)</label>
-          <input type="number" id="investmentValue" value={principal} min="1000" max="10000000" step="1000">
-          <div class="slider-container">
-            <input type="range" id="investmentSlider" min="10000" max="1000000" value={principal} step="5000" class="slider">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="interestRateValue">Interest Rate (% per annum)</label>
-          <input type="number" id="interestRateValue" value={interestRate} min="1" max="15" step="0.1">
-          <div class="slider-container">
-            <input type="range" id="interestRateSlider" min="1" max="15" value={interestRate} step="0.1" class="slider">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="timePeriodValue">Time Period (Years)</label>
-          <input type="number" id="timePeriodValue" value={years} min="1" max="10" step="1">
-          <div class="slider-container">
-            <input type="range" id="timePeriodSlider" min="1" max="10" value={years} step="1" class="slider">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="investmentDate">Investment Date</label>
-          <input type="date" id="investmentDate" value="2024-01-01">
-        </div>
-        <div class="form-group">
-          <label for="compoundingFrequency">Compounding Frequency</label>
-          <select id="compoundingFrequency">
-            <option value="1">Annually</option>
-            <option value="2">Half-Yearly</option>
-            <option value="4" selected>Quarterly</option>
-            <option value="12">Monthly</option>
-          </select>
+  <!-- Body: 2-col -->
+  <div class="fd-body">
+
+    <!-- LEFT: Inputs -->
+    <div class="fd-card">
+      <div class="sec-label">Investor type</div>
+      <div class="toggle-row">
+        <label class="tog" id="tog-senior">
+          <span class="tog-sw">
+            <input type="checkbox" id="is-senior">
+            <span class="tog-track"></span>
+          </span>
+          <span class="tog-lbl">Senior Citizen<br><small style="font-weight:400;color:#9ca3af">+0.5% rate</small></span>
+        </label>
+        <label class="tog" id="tog-taxsaver">
+          <span class="tog-sw">
+            <input type="checkbox" id="is-taxsaver">
+            <span class="tog-track"></span>
+          </span>
+          <span class="tog-lbl">Tax-saving FD<br><small style="font-weight:400;color:#9ca3af">5-yr lock · 80C</small></span>
+        </label>
+      </div>
+
+      <div class="sec-label">Investment details</div>
+
+      <div class="fg">
+        <label>Principal Amount (₹)</label>
+        <div class="slider-row">
+          <input type="range" id="sl-principal" min="10000" max="5000000" value={principal} step="5000">
+          <input type="number" id="in-principal" class="num-box" value={principal} min="1000" max="10000000" step="1000">
         </div>
       </div>
 
-      <!-- Right Side: Results & Charts (SSR pre-populated) -->
-      <div class="card">
-        <div class="results">
-          <div class="result-item">
-            <div class="result-label">Invested Amount</div>
-            <div id="investedAmount" class="result-value">{ssrInvested}</div>
-          </div>
-          <div class="result-item">
-            <div class="result-label">Total Interest</div>
-            <div id="totalInterest" class="result-value">{ssrInterest}</div>
-          </div>
-          <div class="result-item">
-            <div class="result-label">Maturity Value</div>
-            <div id="maturityValue" class="result-value">{ssrMaturity}</div>
-          </div>
-          <div class="result-item">
-            <div class="result-label">Maturity Date</div>
-            <div id="maturityDate" class="result-value">-</div>
-          </div>
+      <div class="fg">
+        <label>Interest Rate (% p.a.)</label>
+        <div class="slider-row">
+          <input type="range" id="sl-rate" min="2" max="12" value={interestRate} step="0.05">
+          <input type="number" id="in-rate" class="num-box" value={interestRate} min="0.5" max="15" step="0.05">
         </div>
-        <div class="chart-container">
-          <canvas id="fdDoughnutChart" class="chart"></canvas>
+      </div>
+
+      <div class="fg">
+        <label>Time Period</label>
+        <div class="period-row">
+          <input type="range" id="sl-period" min="1" max="120" value={years * 12} step="1">
+          <input type="number" id="in-years" class="sm-num" value={years} min="0" max="10" step="1">
+          <span>yr</span>
+          <input type="number" id="in-months" class="sm-num" value="0" min="0" max="11" step="1">
+          <span>mo</span>
         </div>
-        <div class="chart-container">
-          <canvas id="fdLineChart" class="chart"></canvas>
+      </div>
+
+      <div class="fg">
+        <label>Compounding Frequency</label>
+        <select id="in-compound">
+          <option value="1">Annually</option>
+          <option value="2">Half-Yearly</option>
+          <option value="4" selected>Quarterly</option>
+          <option value="12">Monthly</option>
+        </select>
+      </div>
+
+      <div class="fg">
+        <label>Investment Start Date</label>
+        <input type="date" id="in-date" style="width:100%;padding:0.65rem 0.875rem;border:1.5px solid #e5e7eb;border-radius:0.625rem;font-size:0.95rem;color:#111827;background:#fff;outline:none">
+      </div>
+
+      <div class="sec-label">Tax settings</div>
+
+      <div class="fg">
+        <label>Your Income Tax Bracket</label>
+        <select id="in-taxbracket">
+          <option value="0">Nil — below taxable limit</option>
+          <option value="5">5% slab</option>
+          <option value="10" selected>10% slab</option>
+          <option value="20">20% slab</option>
+          <option value="30">30% slab</option>
+        </select>
+      </div>
+
+      <div class="fg">
+        <label>Expected Inflation (% p.a.)</label>
+        <div class="slider-row">
+          <input type="range" id="sl-inflation" min="2" max="10" value="6" step="0.5">
+          <input type="number" id="in-inflation" class="num-box" value="6" min="0" max="15" step="0.5">
         </div>
       </div>
     </div>
 
-    <!-- Live FD Rates Panel (SSR) -->
-    <div class="card fd-rates-section">
-      <h3>Current FD Rates (as of {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })})</h3>
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Bank</th>
-              <th>Tenure</th>
-              <th>General (%)</th>
-              <th>Senior Citizen (%)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {FD_RATES.map(rate => (
-              <tr>
-                <td style="font-weight:600">{rate.bank}</td>
-                <td>{rate.tenure}</td>
-                <td style="text-align:right;color:#059669">{rate.rateGeneral.toFixed(2)}</td>
-                <td style="text-align:right;color:#4f46e5">{rate.rateSenior.toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <!-- RIGHT: Results + Tabs -->
+    <div>
+      <!-- Results card -->
+      <div class="fd-card" style="margin-bottom:1.25rem">
+        <div class="res-grid">
+          <div class="res-c neutral">
+            <div class="res-lbl">Principal</div>
+            <div id="rv-principal" class="res-val">{fmt(principal)}</div>
+          </div>
+          <div class="res-c primary">
+            <div class="res-lbl">Maturity Value</div>
+            <div id="rv-maturity" class="res-val purple">{fmt(Math.round(totalAmount))}</div>
+          </div>
+          <div class="res-c success">
+            <div class="res-lbl">Interest Earned</div>
+            <div id="rv-interest" class="res-val green">{fmt(Math.round(totalInterest))}</div>
+          </div>
+          <div class="res-c warn">
+            <div class="res-lbl">TDS Deducted</div>
+            <div id="rv-tds" class="res-val orange">{fmt(Math.round(tdsAmount))}</div>
+          </div>
+          <div class="res-c wide" style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-color:#86efac">
+            <div class="res-lbl">Amount After TDS</div>
+            <div id="rv-posttds" class="res-val green">{fmt(Math.round(totalAmount - tdsAmount))}</div>
+          </div>
+        </div>
+
+        <div class="yield-row">
+          <span class="yield-badge" id="rv-yield">⚡ Effective Yield: 7.71% p.a.</span>
+        </div>
+        <div class="mat-date">Matures on: <strong id="rv-matdate">—</strong></div>
+
+        <div class="chart-box">
+          <div class="chart-ttl">Principal vs Interest earned</div>
+          <canvas id="cv-donut" style="width:100%;height:180px;display:block"></canvas>
+        </div>
+      </div>
+
+      <!-- Real returns strip -->
+      <div class="fd-card" style="margin-bottom:1.25rem">
+        <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6b7280;margin-bottom:0.75rem">Inflation & Tax impact</div>
+        <div class="real-grid">
+          <div class="real-c">
+            <div class="real-lbl">Real Return (after inflation)</div>
+            <div id="rv-real-pct" class="real-val">+1.42%</div>
+          </div>
+          <div class="real-c">
+            <div class="real-lbl">Inflation-adj. Maturity</div>
+            <div id="rv-real-amt" class="real-val">—</div>
+          </div>
+          <div class="real-c" style="background:#eff6ff;border-color:#bfdbfe">
+            <div class="real-lbl" style="color:#1e40af">Post-tax Return</div>
+            <div id="rv-posttax-pct" class="real-val" style="color:#1d4ed8">+6.75%</div>
+          </div>
+          <div class="real-c" style="background:#eff6ff;border-color:#bfdbfe">
+            <div class="real-lbl" style="color:#1e40af">Tax on Interest</div>
+            <div id="rv-taxamt" class="real-val" style="color:#1d4ed8">₹0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="fd-card">
+        <div class="tabs" role="tablist">
+          <button class="tab-b act" data-tab="growth" role="tab">📈 Growth</button>
+          <button class="tab-b" data-tab="yearly" role="tab">📋 Year-wise</button>
+          <button class="tab-b" data-tab="compare" role="tab">🏦 Compare Banks</button>
+          <button class="tab-b" data-tab="rates" role="tab">📊 FD Rates</button>
+          <button class="tab-b" data-tab="tds" role="tab">📌 TDS Guide</button>
+          <button class="tab-b" data-tab="penalty" role="tab">⚠️ Premature</button>
+        </div>
+
+        <!-- Growth chart -->
+        <div class="tab-p act" id="tp-growth">
+          <div class="chart-box" style="background:#fff;border:1px solid #f3f4f6">
+            <div class="chart-ttl">FD growth over time</div>
+            <canvas id="cv-line" style="width:100%;height:260px;display:block"></canvas>
+          </div>
+        </div>
+
+        <!-- Yearly -->
+        <div class="tab-p" id="tp-yearly">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Period</th>
+                  <th style="text-align:right">Opening</th>
+                  <th style="text-align:right">Interest</th>
+                  <th style="text-align:right">TDS</th>
+                  <th style="text-align:right">Closing</th>
+                </tr>
+              </thead>
+              <tbody id="tb-yearly">
+                {yearlyRows.map(row => (
+                  <tr>
+                    <td style="font-weight:600">Year {row.year}</td>
+                    <td style="text-align:right">{fmt(Math.round(row.opening))}</td>
+                    <td style="text-align:right;color:#059669;font-weight:600">{fmt(Math.round(row.interest))}</td>
+                    <td style="text-align:right;color:#d97706">{row.interest > 40000 ? fmt(Math.round(row.interest * 0.1)) : '—'}</td>
+                    <td style="text-align:right;font-weight:700">{fmt(Math.round(row.closing))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Compare -->
+        <div class="tab-p" id="tp-compare">
+          <p style="font-size:0.8rem;color:#6b7280;margin-bottom:1rem">1-year FD rates. Toggle <strong>Senior Citizen</strong> to see enhanced rates.</p>
+          <div class="cmp-list" id="cmp-bars">
+            {topBanks.map((b, i) => {
+              const maxRate = topBanks[0].rateGeneral;
+              const pct = (b.rateGeneral / maxRate) * 100;
+              return (
+                <div class="cmp-row">
+                  <span class="cmp-name">{b.bank}</span>
+                  <div class="cmp-bg"><div class="cmp-fill" style={`width:${pct}%`}></div></div>
+                  <span class="cmp-rate">{b.rateGeneral}%</span>
+                </div>
+              );
+            })}
+          </div>
+          <div class="callout blue" style="margin-top:1rem">
+            <h4>💡 Which bank to choose?</h4>
+            <ul>
+              <li>SFBs offer highest rates but deposits insured only up to <strong>₹5 lakh per bank</strong> (DICGC)</li>
+              <li>PSU banks are safest — backed by Government of India</li>
+              <li>Split across multiple banks to maximise DICGC coverage</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Rates table -->
+        <div class="tab-p" id="tp-rates">
+          <div class="filter-row">
+            <button class="fchip act" onclick="fdFilter('all',this)">All Banks</button>
+            <button class="fchip" onclick="fdFilter('PSU',this)">PSU</button>
+            <button class="fchip" onclick="fdFilter('Private',this)">Private</button>
+            <button class="fchip" onclick="fdFilter('Small Finance',this)">Small Finance</button>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Bank</th>
+                  <th>Tenure</th>
+                  <th style="text-align:right">General %</th>
+                  <th style="text-align:right">Senior %</th>
+                </tr>
+              </thead>
+              <tbody id="tb-rates">
+                {FD_RATES.map(rate => (
+                  <tr data-cat={rate.category}>
+                    <td>
+                      <span style="font-weight:600">{rate.bank}</span>
+                      <span class={`cat-chip ${rate.category === 'PSU' ? 'chip-psu' : rate.category === 'Private' ? 'chip-pvt' : 'chip-sfb'}`}>
+                        {rate.category === 'Small Finance' ? 'SFB' : rate.category}
+                      </span>
+                    </td>
+                    <td>{rate.tenure}</td>
+                    <td style="text-align:right;color:#059669;font-weight:700">{rate.rateGeneral.toFixed(2)}</td>
+                    <td style="text-align:right;color:#6d28d9;font-weight:700">{rate.rateSenior.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:0.72rem;color:#9ca3af;margin-top:0.625rem">As of {new Date().toLocaleDateString('en-IN',{month:'long',year:'numeric'})}. Verify on bank websites before investing.</p>
+        </div>
+
+        <!-- TDS Guide -->
+        <div class="tab-p" id="tp-tds">
+          <div class="callout blue">
+            <h4>📋 TDS Rules — FY 2024-25</h4>
+            <ul>
+              <li>TDS threshold: <strong>₹40,000/yr per bank</strong> (₹50,000 for senior citizens)</li>
+              <li>TDS rate: <strong>10%</strong> with PAN · <strong>20%</strong> without PAN</li>
+              <li>File <strong>Form 15G</strong> (or 15H for seniors) to avoid TDS if income is below taxable limit</li>
+              <li>TDS is credited in 26AS — claim it in your ITR</li>
+              <li>Interest is taxable as "Income from Other Sources" at your slab rate</li>
+            </ul>
+          </div>
+          <div class="callout amber" style="margin-top:0.875rem">
+            <h4>📌 Tax-saving FD — Section 80C</h4>
+            <ul>
+              <li>5-year lock-in — <strong>no premature withdrawal allowed</strong></li>
+              <li>Investment up to ₹1.5L deductible under 80C</li>
+              <li>Interest is <strong>fully taxable</strong> (unlike PPF/SSY)</li>
+              <li>Only under <strong>Old Tax Regime</strong> — not applicable under new regime</li>
+            </ul>
+          </div>
+          <div class="tbl-wrap" style="margin-top:0.875rem">
+            <table class="tbl">
+              <thead><tr><th>Tax Bracket</th><th style="text-align:right">Post-tax @ 7.5%</th><th style="text-align:right">Real return @ 6% inflation</th></tr></thead>
+              <tbody>
+                <tr><td>0% (nil tax)</td><td style="text-align:right;color:#059669;font-weight:700">7.50%</td><td style="text-align:right">+1.42%</td></tr>
+                <tr><td>5%</td><td style="text-align:right;color:#059669;font-weight:700">7.13%</td><td style="text-align:right">+1.07%</td></tr>
+                <tr><td>10%</td><td style="text-align:right;color:#d97706;font-weight:700">6.75%</td><td style="text-align:right">+0.71%</td></tr>
+                <tr><td>20%</td><td style="text-align:right;color:#d97706;font-weight:700">6.00%</td><td style="text-align:right">0.00%</td></tr>
+                <tr><td>30%</td><td style="text-align:right;color:#dc2626;font-weight:700">5.25%</td><td style="text-align:right;color:#dc2626">−0.71%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Premature -->
+        <div class="tab-p" id="tp-penalty">
+          <div class="callout red">
+            <h4>⚠️ Premature Withdrawal Penalty</h4>
+            <ul>
+              <li>Most banks charge 0.5%–1% penalty on the applicable rate</li>
+              <li>You receive interest at: <em>rate for actual tenure − penalty %</em></li>
+            </ul>
+          </div>
+          <div style="margin-top:1rem;background:#f9fafb;border:1px solid #e5e7eb;border-radius:0.75rem;padding:1rem">
+            <div style="font-size:0.8rem;font-weight:700;color:#374151;margin-bottom:0.875rem">Calculate premature withdrawal</div>
+            <div class="pw-grid">
+              <div class="fg" style="margin-bottom:0">
+                <label>Actual holding (months)</label>
+                <input type="number" id="pw-months" value="12" min="1" max="120" step="1" style="width:100%;padding:0.6rem;border:1.5px solid #e5e7eb;border-radius:0.5rem;font-size:0.9rem;outline:none">
+              </div>
+              <div class="fg" style="margin-bottom:0">
+                <label>Penalty (%)</label>
+                <input type="number" id="pw-penalty" value="1" min="0" max="2" step="0.25" style="width:100%;padding:0.6rem;border:1.5px solid #e5e7eb;border-radius:0.5rem;font-size:0.9rem;outline:none">
+              </div>
+            </div>
+            <div class="real-grid" style="margin-top:0.875rem">
+              <div class="real-c">
+                <div class="real-lbl">Applicable rate</div>
+                <div id="pw-rate" class="real-val" style="color:#d97706">6.50%</div>
+              </div>
+              <div class="real-c">
+                <div class="real-lbl">You receive</div>
+                <div id="pw-recv" class="real-val" style="color:#d97706">—</div>
+              </div>
+              <div class="real-c" style="background:#fff1f2;border-color:#fecdd3">
+                <div class="real-lbl" style="color:#9f1239">Penalty cost</div>
+                <div id="pw-cost" class="real-val" style="color:#dc2626">—</div>
+              </div>
+              <div class="real-c" style="background:#fff1f2;border-color:#fecdd3">
+                <div class="real-lbl" style="color:#9f1239">Opportunity cost</div>
+                <div id="pw-opp" class="real-val" style="color:#dc2626">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="callout green" style="margin-top:0.875rem">
+            <h4>💡 Alternatives to breaking FD</h4>
+            <ul>
+              <li><strong>Overdraft against FD</strong> — borrow ~2% above FD rate, FD stays intact</li>
+              <li><strong>FD ladder</strong> — multiple FDs with staggered maturities</li>
+              <li>Keep 3–6 months expenses in liquid funds / savings account as emergency buffer</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+</div>
 
-    <!-- Year-wise Breakdown Table (SSR pre-populated) -->
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Year</th>
-            <th>Opening Balance</th>
-            <th>Interest Earned</th>
-            <th>Closing Balance</th>
-          </tr>
-        </thead>
-        <tbody id="yearlyBreakdownBody">
-          {yearlyRows.map(row => (
-            <tr>
-              <td style="font-weight:600">Year {row.year}</td>
-              <td style="text-align:right">{fmt(Math.round(row.opening))}</td>
-              <td style="text-align:right;color:#059669">{fmt(Math.round(row.interest))}</td>
-              <td style="text-align:right;font-weight:600">{fmt(Math.round(row.closing))}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </main>
+<script is:inline>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmtINR=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n);
+  const fmtPct=(n,plus=true)=>(n>=0&&plus?'+':'')+n.toFixed(2)+'%';
 
-  <script is:inline>
-  document.addEventListener('DOMContentLoaded',function(){
-    function drawPieChart(canvas,data,options={}){const ctx=canvas.getContext('2d');const width=canvas.width=canvas.offsetWidth;const height=canvas.height=canvas.offsetHeight;const centerX=width/2;const centerY=height/2;const radius=Math.min(centerX,centerY)*0.8;const colors=['#4f46e5','#10b981','#f59e0b','#ef4444'];let total=data.reduce((sum,item)=>sum+item.value,0);let currentAngle=0;data.forEach((item,index)=>{const sliceAngle=(item.value/total)*2*Math.PI;ctx.beginPath();ctx.moveTo(centerX,centerY);ctx.arc(centerX,centerY,radius,currentAngle,currentAngle+sliceAngle);ctx.closePath();ctx.fillStyle=colors[index%colors.length];ctx.fill();currentAngle+=sliceAngle;});if(options.title){ctx.fillStyle='#333';ctx.font='bold 14px Inter, sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(options.title,width/2,5);}}
-    function drawLineChart(canvas,data,options={}){if(!data||data.length===0)return;const ctx=canvas.getContext('2d');const width=canvas.width=canvas.offsetWidth;const height=canvas.height=canvas.offsetHeight;const padding={top:30,right:20,bottom:40,left:60};const chartWidth=width-padding.left-padding.right;const chartHeight=height-padding.top-padding.bottom;const values=data.map(d=>d.value);const minValue=Math.min(...values);const maxValue=Math.max(...values);const adjustedMin=minValue*0.95;const adjustedMax=maxValue*1.05;ctx.clearRect(0,0,width,height);ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;for(let i=0;i<=5;i++){const y=padding.top+chartHeight-(i/5)*chartHeight;ctx.beginPath();ctx.moveTo(padding.left,y);ctx.lineTo(padding.left+chartWidth,y);ctx.stroke();const value=adjustedMin+(adjustedMax-adjustedMin)*(i/5);ctx.fillStyle='#666';ctx.font='10px Inter, sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText('₹'+Math.round(value/1000)+'K',padding.left-5,y);}ctx.strokeStyle='#4f46e5';ctx.lineWidth=3;ctx.beginPath();data.forEach((point,index)=>{const x=padding.left+(chartWidth*index/(data.length-1));const y=padding.top+chartHeight-((point.value-adjustedMin)/(adjustedMax-adjustedMin))*chartHeight;if(index===0){ctx.moveTo(x,y);}else{ctx.lineTo(x,y);}});ctx.stroke();ctx.fillStyle='#4f46e5';data.forEach((point,index)=>{const x=padding.left+(chartWidth*index/(data.length-1));const y=padding.top+chartHeight-((point.value-adjustedMin)/(adjustedMax-adjustedMin))*chartHeight;ctx.beginPath();ctx.arc(x,y,4,0,2*Math.PI);ctx.fill();});}
-    const elements={investmentSlider:document.getElementById('investmentSlider'),investmentValue:document.getElementById('investmentValue'),interestRateSlider:document.getElementById('interestRateSlider'),interestRateValue:document.getElementById('interestRateValue'),timePeriodSlider:document.getElementById('timePeriodSlider'),timePeriodValue:document.getElementById('timePeriodValue'),investmentDate:document.getElementById('investmentDate'),compoundingFrequency:document.getElementById('compoundingFrequency'),maturityDate:document.getElementById('maturityDate'),investedAmount:document.getElementById('investedAmount'),totalInterest:document.getElementById('totalInterest'),maturityValue:document.getElementById('maturityValue'),yearlyBreakdownBody:document.getElementById('yearlyBreakdownBody'),fdDoughnutChart:document.getElementById('fdDoughnutChart'),fdLineChart:document.getElementById('fdLineChart')};
-    function formatCurrency(num){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:2,}).format(num);}
-    function formatDate(date){return date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
-    function updateBreakdownTable(yearlyData){elements.yearlyBreakdownBody.innerHTML='';if(yearlyData.length===0){elements.yearlyBreakdownBody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>';return;}yearlyData.forEach(item=>{const row=document.createElement('tr');row.innerHTML=`<td style="font-weight:600">${item.year}</td><td style="text-align:right">${formatCurrency(item.openingBalance)}</td><td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td><td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>`;elements.yearlyBreakdownBody.appendChild(row);});}
-    function calculateFD(){try{const P=parseFloat(elements.investmentValue.value)||0;const r=parseFloat(elements.interestRateValue.value)/100||0;const t=parseFloat(elements.timePeriodValue.value)||0;const n=parseInt(elements.compoundingFrequency.value,10)||4;const startDate=new Date(elements.investmentDate.value);if(P<=0||r<=0||t<=0||!elements.investmentDate.value){updateBreakdownTable([]);return;}const totalAmount=P*Math.pow((1+r/n),(n*t));const totalInterest=totalAmount-P;elements.investedAmount.textContent=formatCurrency(P);elements.totalInterest.textContent=formatCurrency(totalInterest);elements.maturityValue.textContent=formatCurrency(totalAmount);const maturityDate=new Date(startDate);maturityDate.setFullYear(maturityDate.getFullYear()+t);elements.maturityDate.textContent=formatDate(maturityDate);let yearlyData=[];let currentBalance=P;for(let year=1;year<=t;year++){let openingBalance=currentBalance;let balanceAtYearEnd=openingBalance*Math.pow((1+r/n),n);let interestThisYear=balanceAtYearEnd-openingBalance;currentBalance=balanceAtYearEnd;yearlyData.push({year:`Year ${year}`,openingBalance:openingBalance,interestEarned:interestThisYear,closingBalance:currentBalance});}const pieData=[{label:'Principal',value:P},{label:'Interest',value:totalInterest}];drawPieChart(elements.fdDoughnutChart,pieData,{title:'FD Breakdown'});const lineData=yearlyData.map((data,index)=>({value:data.closingBalance,year:new Date().getFullYear()+index}));drawLineChart(elements.fdLineChart,lineData,{title:'FD Growth Over Time',color:'#10b981'});updateBreakdownTable(yearlyData);}catch(error){console.error("Error in calculation:",error);}}
-    Object.keys(elements).forEach(key=>{if(key.includes('Slider')||key.includes('Value')||key==='investmentDate'||key==='compoundingFrequency'){const element=elements[key];if(element){element.addEventListener('input',()=>{const baseKey=key.replace('Slider','').replace('Value','');if(key.includes('Slider')&&elements[baseKey+'Value']){elements[baseKey+'Value'].value=element.value;}if(key.includes('Value')&&elements[baseKey+'Slider']){elements[baseKey+'Slider'].value=element.value;}calculateFD();});}}});
-    const today=new Date();elements.investmentDate.value=today.toISOString().split('T')[0];
-    calculateFD();
+  /* slider gradient fill */
+  function setSl(el,min,max,val){const pct=((val-min)/(max-min))*100;el.style.setProperty('--pct',pct+'%')}
+
+  /* ── Donut ── */
+  function drawDonut(can,P,I){
+    const dpr=window.devicePixelRatio||1;
+    const W=can.parentElement.clientWidth-32, H=180;
+    can.width=W*dpr; can.height=H*dpr; can.style.width=W+'px'; can.style.height=H+'px';
+    const ctx=can.getContext('2d'); ctx.scale(dpr,dpr);
+    const cx=W/2,cy=H/2,R=Math.min(cx,cy)*0.78,ri=R*0.56;
+    const total=P+I, pa=(P/total)*Math.PI*2;
+    // slices
+    [[0,pa,'#4338ca'],[pa,Math.PI*2,'#10b981']].forEach(([s,e,c])=>{
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,s-Math.PI/2,e-Math.PI/2);ctx.closePath();ctx.fillStyle=c;ctx.fill();
+    });
+    ctx.beginPath();ctx.arc(cx,cy,ri,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+    // centre
+    const tot=P+I;
+    ctx.fillStyle='#111827';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=`bold ${Math.round(R*0.18)}px system-ui`;
+    ctx.fillText(fmtINR(Math.round(tot)),cx,cy-8);
+    ctx.fillStyle='#6b7280';ctx.font=`${Math.round(R*0.13)}px system-ui`;
+    ctx.fillText('Maturity',cx,cy+10);
+    // legend
+    const lx=8, fs=Math.round(R*0.14);
+    [[`Principal: ${fmtINR(P)}`, '#4338ca'],[`Interest: ${fmtINR(I)}`, '#10b981']].forEach(([lbl,c],i)=>{
+      ctx.fillStyle=c;ctx.fillRect(lx,H-20+i*13,9,9);
+      ctx.fillStyle='#374151';ctx.font=`${fs}px system-ui`;ctx.textAlign='left';ctx.textBaseline='alphabetic';
+      ctx.fillText(lbl,lx+13,H-12+i*13);
+    });
+  }
+
+  /* ── Line ── */
+  function drawLine(can,pts){
+    const dpr=window.devicePixelRatio||1;
+    const W=can.parentElement.clientWidth-32, H=260;
+    can.width=W*dpr; can.height=H*dpr; can.style.width=W+'px'; can.style.height=H+'px';
+    const ctx=can.getContext('2d'); ctx.scale(dpr,dpr);
+    if(!pts||pts.length<2)return;
+    const pad={t:20,r:12,b:36,l:68};
+    const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+    const vals=pts.map(p=>p.v);
+    const min=Math.min(...vals)*0.97, max=Math.max(...vals)*1.03;
+    // grid
+    for(let i=0;i<=4;i++){
+      const y=pad.t+ch*(1-i/4);
+      ctx.strokeStyle='#f3f4f6';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();
+      const v=min+(max-min)*(i/4);
+      const lbl=v>=10000000?`₹${(v/10000000).toFixed(1)}Cr`:v>=100000?`₹${(v/100000).toFixed(1)}L`:`₹${(v/1000).toFixed(0)}K`;
+      ctx.fillStyle='#9ca3af';ctx.font='10px system-ui';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(lbl,pad.l-4,y);
+    }
+    // area
+    ctx.beginPath();
+    pts.forEach((p,i)=>{const x=pad.l+cw*i/(pts.length-1);const y=pad.t+ch-(p.v-min)/(max-min)*ch;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+    const ag=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);ag.addColorStop(0,'rgba(67,56,202,0.15)');ag.addColorStop(1,'rgba(67,56,202,0)');
+    ctx.lineTo(pad.l+cw,pad.t+ch);ctx.lineTo(pad.l,pad.t+ch);ctx.closePath();ctx.fillStyle=ag;ctx.fill();
+    // principal dashed
+    ctx.strokeStyle='#c4b5fd';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+    ctx.beginPath();pts.forEach((p,i)=>{const x=pad.l+cw*i/(pts.length-1);const y=pad.t+ch-(p.p-min)/(max-min)*ch;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();ctx.setLineDash([]);
+    // main line
+    const lg=ctx.createLinearGradient(pad.l,0,pad.l+cw,0);lg.addColorStop(0,'#4338ca');lg.addColorStop(1,'#10b981');
+    ctx.strokeStyle=lg;ctx.lineWidth=2.5;
+    ctx.beginPath();pts.forEach((p,i)=>{const x=pad.l+cw*i/(pts.length-1);const y=pad.t+ch-(p.v-min)/(max-min)*ch;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+    // x labels
+    const step=Math.ceil(pts.length/7);
+    ctx.fillStyle='#9ca3af';ctx.font='10px system-ui';ctx.textAlign='center';ctx.textBaseline='top';
+    pts.forEach((p,i)=>{if(i%step&&i!==pts.length-1)return;const x=pad.l+cw*i/(pts.length-1);ctx.fillText(p.lbl,x,pad.t+ch+5);});
+  }
+
+  /* ── Main calc ── */
+  function calc(){
+    const P=parseFloat($('in-principal').value)||0;
+    const rBase=parseFloat($('in-rate').value)||0;
+    const senior=$('is-senior').checked;
+    const rate=senior?rBase+0.5:rBase;
+    const yrs=parseInt($('in-years').value)||0;
+    const mos=parseInt($('in-months').value)||0;
+    const t=yrs+mos/12; if(t<=0||P<=0)return;
+    const n=parseInt($('in-compound').value)||4;
+    const r=rate/100;
+    const taxBracket=parseFloat($('in-taxbracket').value)/100||0;
+    const infl=parseFloat($('in-inflation').value)||6;
+    const mat=P*Math.pow(1+r/n,n*t);
+    const int=mat-P;
+    const tdsThresh=senior?50000:40000;
+    const tds=int>tdsThresh?int*0.10:0;
+    const postTds=mat-tds;
+    const taxInt=int*taxBracket;
+    const effYield=(Math.pow(mat/P,1/t)-1)*100;
+    const realR=((1+r)/(1+infl/100)-1)*100;
+    const realMat=P*Math.pow(1+realR/100,t);
+    const postTaxR=rate*(1-taxBracket);
+
+    $('rv-principal').textContent=fmtINR(P);
+    $('rv-maturity').textContent=fmtINR(Math.round(mat));
+    $('rv-interest').textContent=fmtINR(Math.round(int));
+    $('rv-tds').textContent=fmtINR(Math.round(tds));
+    $('rv-posttds').textContent=fmtINR(Math.round(postTds));
+    $('rv-yield').textContent=`⚡ Effective Yield: ${effYield.toFixed(2)}% p.a.`;
+    $('rv-real-pct').textContent=fmtPct(realR); $('rv-real-pct').style.color=realR>=0?'#15803d':'#dc2626';
+    $('rv-real-amt').textContent=fmtINR(Math.round(realMat));
+    $('rv-posttax-pct').textContent=fmtPct(postTaxR);
+    $('rv-taxamt').textContent=fmtINR(Math.round(taxInt));
+
+    const sd=new Date($('in-date').value);
+    if(!isNaN(sd)){const md=new Date(sd);md.setMonth(md.getMonth()+Math.round(t*12));$('rv-matdate').textContent=md.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
+
+    drawDonut($('cv-donut'),P,Math.round(int));
+
+    const totalMo=Math.round(t*12);
+    const pts=[];
+    const step=Math.max(1,Math.floor(totalMo/24));
+    for(let m=0;m<=totalMo;m+=step){const tm=m/12;const v=P*Math.pow(1+r/n,n*tm);const yr=Math.floor(m/12),mo=m%12;pts.push({v,p:P,lbl:mo===0?`Y${yr}`:`Y${yr}M${mo}`});}
+    if(!pts.length||pts[pts.length-1].v!==mat)pts.push({v:mat,p:P,lbl:'End'});
+    drawLine($('cv-line'),pts);
+
+    updateYearly(P,r,n,t,tdsThresh);
+    calcPW(P,r,n,t);
+    updateCompare(senior);
+  }
+
+  function updateYearly(P,r,n,t,thresh){
+    const tb=$('tb-yearly'); tb.innerHTML='';
+    let bal=P;
+    for(let y=1;y<=Math.ceil(t);y++){
+      const op=bal, cl=op*Math.pow(1+r/n,n), int=cl-op;
+      bal=cl;
+      const tds=int>thresh?fmtINR(Math.round(int*0.1)):'—';
+      tb.innerHTML+=`<tr><td style="font-weight:600">Year ${y}</td><td style="text-align:right">${fmtINR(Math.round(op))}</td><td style="text-align:right;color:#059669;font-weight:600">${fmtINR(Math.round(int))}</td><td style="text-align:right;color:#d97706">${tds}</td><td style="text-align:right;font-weight:700">${fmtINR(Math.round(cl))}</td></tr>`;
+    }
+  }
+
+  function calcPW(P,r,n,fullT){
+    const pwMo=parseInt($('pw-months').value)||12;
+    const pen=parseFloat($('pw-penalty').value)||1;
+    const pwT=pwMo/12;
+    const appR=Math.max(0,r*100-pen)/100;
+    const recv=P*Math.pow(1+appR/n,n*pwT);
+    const withPenalty=P*Math.pow(1+r/n,n*pwT);
+    const fullMat=P*Math.pow(1+r/n,n*fullT);
+    $('pw-rate').textContent=(appR*100).toFixed(2)+'%';
+    $('pw-recv').textContent=fmtINR(Math.round(recv));
+    $('pw-cost').textContent=fmtINR(Math.round(withPenalty-recv));
+    $('pw-opp').textContent=fmtINR(Math.round(fullMat-recv));
+  }
+
+  function updateCompare(senior){
+    const rates=window._fdRates1Y||[];
+    const sorted=[...rates].sort((a,b)=>(senior?b.sr:b.gr)-(senior?a.sr:a.gr)).slice(0,10);
+    const maxR=senior?sorted[0].sr:sorted[0].gr;
+    const el=$('cmp-bars'); el.innerHTML='';
+    sorted.forEach(b=>{
+      const rate=senior?b.sr:b.gr;
+      const pct=(rate/maxR)*100;
+      el.innerHTML+=`<div class="cmp-row"><span class="cmp-name">${b.bank}</span><div class="cmp-bg"><div class="cmp-fill" style="width:${pct}%"></div></div><span class="cmp-rate">${rate}%</span></div>`;
+    });
+  }
+
+  /* ── Slider sync ── */
+  function pair(slId,inId){
+    const sl=$(slId),ip=$(inId);
+    if(!sl||!ip)return;
+    setSl(sl,+sl.min,+sl.max,+sl.value);
+    sl.addEventListener('input',()=>{ip.value=sl.value;setSl(sl,+sl.min,+sl.max,+sl.value);calc();});
+    ip.addEventListener('input',()=>{sl.value=ip.value;setSl(sl,+sl.min,+sl.max,+sl.value);calc();});
+  }
+  pair('sl-principal','in-principal');
+  pair('sl-rate','in-rate');
+  pair('sl-inflation','in-inflation');
+
+  const slPeriod=$('sl-period');
+  setSl(slPeriod,1,120,+slPeriod.value);
+  slPeriod.addEventListener('input',()=>{
+    const mo=+slPeriod.value;
+    $('in-years').value=Math.floor(mo/12);
+    $('in-months').value=mo%12;
+    setSl(slPeriod,1,120,mo);
+    calc();
   });
-  </script>
+  ['in-years','in-months'].forEach(id=>{$(id)?.addEventListener('input',()=>{
+    const mo=Math.max(1,(+$('in-years').value||0)*12+(+$('in-months').value||0));
+    slPeriod.value=mo; setSl(slPeriod,1,120,mo); calc();
+  });});
+
+  ['in-compound','in-date','in-taxbracket'].forEach(id=>$(id)?.addEventListener('change',calc));
+
+  // toggles
+  ['is-senior','is-taxsaver'].forEach(id=>{
+    const cb=$(id);
+    cb?.addEventListener('change',function(){
+      const tog=this.closest('.tog');
+      tog?.classList.toggle('on',this.checked);
+      if(id==='is-taxsaver'&&this.checked){$('in-years').value=5;$('in-months').value=0;slPeriod.value=60;setSl(slPeriod,1,120,60);}
+      calc();
+    });
+  });
+
+  // pw inputs
+  ['pw-months','pw-penalty'].forEach(id=>{$(id)?.addEventListener('input',()=>{
+    const P=+$('in-principal').value||0,r=+$('in-rate').value/100,n=+$('in-compound').value||4;
+    const t=(+$('in-years').value||0)+(+$('in-months').value||0)/12;
+    calcPW(P,r,n,t);
+  });});
+
+  /* ── Tabs ── */
+  document.querySelectorAll('#fd-page .tab-b').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      const parent=this.closest('.fd-card');
+      parent.querySelectorAll('.tab-b').forEach(b=>b.classList.remove('act'));
+      parent.querySelectorAll('.tab-p').forEach(p=>p.classList.remove('act'));
+      this.classList.add('act');
+      $('tp-'+this.dataset.tab)?.classList.add('act');
+      if(this.dataset.tab==='growth')calc();
+    });
+  });
+
+  /* ── Rate filter ── */
+  window.fdFilter=function(cat,btn){
+    document.querySelectorAll('#tb-rates tr').forEach(tr=>tr.style.display=(cat==='all'||tr.dataset.cat===cat)?'':'none');
+    document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('act'));
+    btn.classList.add('act');
+  };
+
+  /* ── 1Y rates for comparison ── */
+  window._fdRates1Y=[
+    {bank:'SBI',gr:6.80,sr:7.30},{bank:'Bank of Baroda',gr:6.85,sr:7.35},{bank:'PNB',gr:6.75,sr:7.25},
+    {bank:'HDFC Bank',gr:7.10,sr:7.60},{bank:'ICICI Bank',gr:7.10,sr:7.60},{bank:'Axis Bank',gr:7.10,sr:7.75},
+    {bank:'Kotak Mahindra',gr:7.10,sr:7.60},{bank:'IndusInd Bank',gr:7.50,sr:8.00},
+    {bank:'AU Small Finance',gr:7.75,sr:8.25},{bank:'Ujjivan SFB',gr:8.25,sr:8.75},
+    {bank:'Jana SFB',gr:8.25,sr:8.75},{bank:'Suryoday SFB',gr:8.60,sr:9.10},
+  ];
+
+  /* ── Init ── */
+  $('in-date').value=new Date().toISOString().split('T')[0];
+  calc();
+  window.addEventListener('resize',calc);
+})();
+</script>
 </CalcLayout>
