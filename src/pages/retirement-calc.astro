@@ -2,339 +2,953 @@
 import CalcLayout from '../layouts/CalcLayout.astro';
 
 // SSR defaults
-const currentAge = 30, retirementAge = 60, currentExpenses = 50000;
-const currentSavings = 500000, monthlySavings = 25000;
-const expectedReturn = 0.12, inflation = 0.06, lifeExpectancy = 85;
-const yearsToRetirement = retirementAge - currentAge;
-const futureMonthlyExpenses = currentExpenses * Math.pow(1 + inflation, yearsToRetirement);
-const retirementCorpusNeeded = futureMonthlyExpenses * 12 * 25;
-const annualSavings = monthlySavings * 12;
-const finalProjectedCorpus = currentSavings * Math.pow(1 + expectedReturn, yearsToRetirement) +
-  annualSavings * (Math.pow(1 + expectedReturn, yearsToRetirement) - 1) / expectedReturn;
-const fireRatio = finalProjectedCorpus / retirementCorpusNeeded;
+const currentAge = 30;
+const retirementAge = 60;
+const lifeExpectancy = 85;
+const currentExpenses = 50000;
+const currentSavings = 500000;
+const monthlySIP = 25000;
+const expectedReturn = 0.12;
+const inflation = 0.06;
+const postRetReturn = 0.08;
+const stepUpEnabled = false;
+const stepUpRate = 0.10;
 
-function fmtLarge(n: number) {
-  if (n >= 10000000) return '₹' + (n / 10000000).toFixed(2) + ' Cr';
-  if (n >= 100000) return '₹' + (n / 100000).toFixed(2) + ' L';
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(n);
+// SSR computation
+const yearsToRetire = retirementAge - currentAge;
+const retirementYears = lifeExpectancy - retirementAge;
+const monthlyExpenseAtRetirement = currentExpenses * Math.pow(1 + inflation, yearsToRetire);
+const annualExpenseAtRetirement = monthlyExpenseAtRetirement * 12;
+const corpusNeeded = annualExpenseAtRetirement * 25;
+
+// Projected corpus: FV of current savings + FV of SIP stream
+let projectedCorpus = currentSavings * Math.pow(1 + expectedReturn, yearsToRetire);
+let totalSIPContrib = 0;
+for (let y = 0; y < yearsToRetire; y++) {
+  const sipThisYear = stepUpEnabled ? monthlySIP * Math.pow(1 + stepUpRate, y) : monthlySIP;
+  const annualSIP = sipThisYear * 12;
+  totalSIPContrib += annualSIP;
+  projectedCorpus += annualSIP * Math.pow(1 + expectedReturn, yearsToRetire - y - 1);
+}
+
+const savingsGrowth = projectedCorpus - totalSIPContrib - currentSavings;
+const surplus = projectedCorpus - corpusNeeded;
+const fireRatio = projectedCorpus / corpusNeeded;
+const fireAchieved = fireRatio >= 1;
+
+// Corpus sustainability: simulate post-retirement drawdown
+let postBal = projectedCorpus;
+let corpusLastsAge = lifeExpectancy;
+for (let y = 0; y < retirementYears; y++) {
+  const expense = annualExpenseAtRetirement * Math.pow(1 + inflation, y);
+  const growth = postBal * postRetReturn;
+  postBal = postBal + growth - expense;
+  if (postBal <= 0) { corpusLastsAge = retirementAge + y; break; }
+}
+
+// Required SIP to meet corpus
+const fvFactor = (Math.pow(1 + expectedReturn, yearsToRetire) - 1) / expectedReturn;
+const fvCurrentSavings = currentSavings * Math.pow(1 + expectedReturn, yearsToRetire);
+const requiredAnnualSIP = Math.max(0, (corpusNeeded - fvCurrentSavings) / fvFactor);
+const requiredMonthlySIP = requiredAnnualSIP / 12;
+
+function fmtL(n: number) {
+  if (n >= 10000000) return '\u20B9' + (n / 10000000).toFixed(2) + ' Cr';
+  if (n >= 100000) return '\u20B9' + (n / 100000).toFixed(2) + ' L';
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+}
+function fmt(n: number) {
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 }
 ---
 <CalcLayout
-  title="Advanced Retirement Calculator - AscentInvestor"
-  description="Plan your retirement with inflation-adjusted calculations, multiple portfolio options, and comprehensive analysis. Calculate your FIRE number and retirement corpus."
+  title="Retirement Calculator 2025 — Plan Your Retirement Corpus for India"
+  description="India's most advanced retirement calculator. Plan with inflation, step-up SIP, corpus sustainability analysis, FIRE tracking, milestones, and retirement income strategies."
+  navCurrent="tools"
 >
-  <style is:global slot="head">
-.title{text-align:center;margin-bottom:2rem;position:relative;padding:3rem 1.5rem;background:linear-gradient(135deg,#f43f5e 0%,#e11d48 40%,#7c3aed 100%);border-radius:1rem;overflow:hidden}
-.title::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
-.title h1{font-size:2.5rem;font-weight:800;color:white;margin-bottom:0.5rem;position:relative;z-index:1;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
-.title p{font-size:1.125rem;color:rgba(255,255,255,0.9);position:relative;z-index:1}
-.calc-grid{display:grid;grid-template-columns:1fr 2fr;gap:2rem;margin-bottom:2rem}
-@media (max-width:768px){.calc-grid{grid-template-columns:1fr}}
-.fire-result{background:#dcfce7;border:2px solid #22c55e;color:#166534}
-.chart-container{width:100%;height:300px;margin:2rem 0;background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-.chart{width:100%;height:100%}
-  </style>
+<style is:global slot="head">
+/* ── Page scope ── */
+#ret-page *{box-sizing:border-box}
+#ret-page h1,#ret-page h2,#ret-page h3,#ret-page h4{margin:0;font-weight:700}
+#ret-page p{margin:0}
+#ret-page button{cursor:pointer}
+#ret-page{padding:1.5rem 0 4rem;background:#f4f5f7;min-height:100vh}
+.rt-wrap{max-width:1200px;margin:0 auto;padding:0 1rem}
 
-  <main class="container main">
-    <div class="title">
-      <h1>Advanced Retirement Calculator</h1>
-      <p>Plan your retirement with inflation-adjusted calculations and comprehensive analysis</p>
+/* ── Hero ── */
+.rt-hero{background:linear-gradient(135deg,#e11d48 0%,#f43f5e 45%,#7c3aed 100%);border-radius:1.25rem;padding:2.5rem 2rem;margin-bottom:1.75rem;text-align:center;position:relative;overflow:hidden}
+.rt-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(255,255,255,0.15),transparent 60%);pointer-events:none}
+.rt-hero h1{font-size:clamp(1.6rem,3.5vw,2.25rem)!important;font-weight:800!important;color:#fff!important;letter-spacing:-0.02em;margin-bottom:0.4rem}
+.rt-hero p{color:rgba(255,255,255,0.85)!important;font-size:1rem;margin-bottom:1rem}
+.hero-chips{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.72rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:99px;letter-spacing:0.03em}
+
+/* ── 2-col ── */
+.rt-body{display:grid;grid-template-columns:420px 1fr;gap:1.5rem;align-items:start}
+@media(max-width:900px){.rt-body{grid-template-columns:1fr}}
+
+/* ── Card ── */
+.rt-card{background:#fff;border-radius:1rem;padding:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.04)}
+
+/* ── Form ── */
+.fg{margin-bottom:1.25rem}
+.fg>label{display:block;font-size:0.8rem;font-weight:600;color:#374151;margin-bottom:0.4rem;letter-spacing:0.02em;text-transform:uppercase}
+.fg>input[type=number],
+.fg>select{width:100%!important;padding:0.65rem 0.875rem;border:1.5px solid #e5e7eb!important;border-radius:0.625rem;font-size:0.95rem;color:#111827;background:#fff;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.fg>input[type=number]:focus,
+.fg>select:focus{border-color:#e11d48!important;box-shadow:0 0 0 3px rgba(225,29,72,0.12)!important}
+
+/* ── Sliders ── */
+.srow{display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;overflow:hidden}
+.srow input[type=range]{flex:1;height:5px;border-radius:99px;background:linear-gradient(to right,#e11d48 var(--pct,50%),#e5e7eb var(--pct,50%));outline:none;-webkit-appearance:none;appearance:none;border:none!important;box-shadow:none!important}
+.srow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#e11d48;cursor:pointer;box-shadow:0 1px 4px rgba(225,29,72,0.4)}
+.srow input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#e11d48;cursor:pointer;border:none}
+.srow .nb{width:110px!important;min-width:110px!important;max-width:110px!important;flex:0 0 110px!important;padding:0.5rem 0.65rem;border:1.5px solid #e5e7eb!important;border-radius:0.5rem;font-size:0.9rem;font-weight:600;color:#111827;text-align:right;outline:none;background:#fff;-webkit-appearance:none;appearance:none}
+.srow .nb:focus{border-color:#e11d48!important;box-shadow:0 0 0 3px rgba(225,29,72,0.12)!important}
+
+/* ── Section divider ── */
+.sec-lbl{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9ca3af;padding:0.75rem 0 0.25rem;margin-bottom:0.25rem;border-top:1px solid #f3f4f6;margin-top:0.25rem}
+.sec-lbl:first-child{border-top:none;margin-top:0;padding-top:0}
+
+/* ── Toggle ── */
+.tog{display:flex;align-items:center;gap:0.6rem;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:0.75rem;padding:0.75rem;cursor:pointer;transition:all .2s;user-select:none;margin-bottom:1.25rem}
+.tog.on{background:#ffe4e6;border-color:#e11d48}
+.tog-sw{position:relative;width:38px;height:21px;flex-shrink:0}
+.tog-sw input{position:absolute;opacity:0;width:0;height:0}
+.tog-track{position:absolute;inset:0;background:#d1d5db;border-radius:99px;transition:.25s}
+.tog-track::before{content:'';position:absolute;width:15px;height:15px;top:3px;left:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.tog-sw input:checked~.tog-track{background:#e11d48}
+.tog-sw input:checked~.tog-track::before{transform:translateX(17px)}
+.tog-lbl{font-size:0.78rem;font-weight:600;color:#4b5563;line-height:1.3}
+
+/* ── FIRE Status Banner ── */
+.fire-banner{border-radius:1rem;padding:1.25rem;text-align:center;margin-bottom:1.25rem;border:2px solid}
+.fire-banner.achieved{background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-color:#22c55e}
+.fire-banner.shortfall{background:linear-gradient(135deg,#fff7ed,#fff1f2);border-color:#f97316}
+.fire-banner .fire-icon{font-size:2rem;display:block;margin-bottom:0.35rem}
+.fire-banner .fire-title{font-size:1.1rem;font-weight:800;margin-bottom:0.25rem}
+.fire-banner.achieved .fire-title{color:#166534}
+.fire-banner.shortfall .fire-title{color:#c2410c}
+.fire-banner .fire-sub{font-size:0.82rem;color:#6b7280}
+.fire-pbar{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:0.75rem}
+.fire-pfill{height:100%;border-radius:99px;transition:width .5s}
+
+/* ── Result cards ── */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.875rem;margin-bottom:1rem}
+.res-c{border-radius:0.875rem;padding:1rem 1.125rem;border:1.5px solid #f3f4f6}
+.res-c.primary{background:linear-gradient(135deg,#fff1f2,#fce7f3);border-color:#fda4af}
+.res-c.success{background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-color:#6ee7b7}
+.res-c.warn{background:linear-gradient(135deg,#fff7ed,#fffbeb);border-color:#fcd34d}
+.res-c.danger{background:linear-gradient(135deg,#fff1f2,#fef2f2);border-color:#fca5a5}
+.res-c.neutral{background:#f8fafc;border-color:#e2e8f0}
+.res-c.wide{grid-column:span 2}
+.res-lbl{font-size:0.7rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;margin-bottom:0.3rem}
+.res-val{font-size:1.25rem;font-weight:800;letter-spacing:-0.02em}
+.res-val.rose{color:#e11d48}
+.res-val.green{color:#059669}
+.res-val.orange{color:#d97706}
+.res-val.red{color:#dc2626}
+.res-val.blue{color:#1d4ed8}
+
+/* ── Progress bar (corpus vs needed) ── */
+.corpus-pbar{margin:0.5rem 0 1rem}
+.cpb-label{display:flex;justify-content:space-between;font-size:0.7rem;font-weight:600;color:#6b7280;margin-bottom:0.35rem}
+.cpb-track{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden;position:relative}
+.cpb-fill{height:100%;border-radius:99px;transition:width .5s}
+.cpb-marker{position:absolute;top:-2px;bottom:-2px;width:2px;background:#111827;border-radius:1px}
+
+/* ── Sustainability indicator ── */
+.sust-strip{display:flex;gap:0.75rem;align-items:stretch;margin:0.5rem 0 1rem}
+.sust-card{flex:1;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.75rem;padding:0.75rem 0.5rem}
+.sust-lbl{font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#6b7280;margin-bottom:0.2rem}
+.sust-val{font-size:1.1rem;font-weight:800;color:#e11d48}
+.sust-card.ok{border-color:#6ee7b7;background:#ecfdf5}
+.sust-card.ok .sust-val{color:#059669}
+.sust-card.alert{border-color:#fca5a5;background:#fff1f2}
+.sust-card.alert .sust-val{color:#dc2626}
+
+/* ── Chart ── */
+.chart-box{background:#f8fafc;border-radius:0.75rem;padding:1rem}
+.chart-ttl{font-size:0.72rem;font-weight:700;color:#374151;text-align:center;margin-bottom:0.5rem;letter-spacing:0.04em;text-transform:uppercase}
+
+/* ── Tabs ── */
+.tabs{display:flex;border-bottom:2px solid #e5e7eb;overflow-x:auto;scrollbar-width:none;gap:0;margin-bottom:1.25rem}
+.tabs::-webkit-scrollbar{display:none}
+.tab-b{background:none!important;border:none!important;padding:0.7rem 1rem;font-size:0.82rem;font-weight:600;color:#6b7280;cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent!important;margin-bottom:-2px;transition:color .2s,border-color .2s;flex-shrink:0}
+.tab-b.act{color:#e11d48!important;border-bottom-color:#e11d48!important}
+.tab-p{display:none}
+.tab-p.act{display:block}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto;margin-top:0.5rem}
+.tbl{width:100%;border-collapse:collapse;font-size:0.82rem}
+.tbl th{background:#f9fafb;padding:0.6rem 0.75rem;font-size:0.72rem;font-weight:700;color:#374151;letter-spacing:0.05em;text-transform:uppercase;border-bottom:1.5px solid #e5e7eb;white-space:nowrap;text-align:left}
+.tbl td{padding:0.6rem 0.75rem;border-bottom:1px solid #f3f4f6;color:#374151}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+.tbl tr.depleted td{background:#fff7ed;color:#c2410c}
+.tbl tr.milestone td{background:#fdf2f8;font-weight:600}
+
+/* ── Milestone cards ── */
+.ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.5rem}
+.ms-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:0.875rem;padding:1rem;text-align:center}
+.ms-card.highlight{background:#fff1f2;border-color:#fda4af}
+.ms-card.green-hl{background:#ecfdf5;border-color:#6ee7b7}
+.ms-card.warn-hl{background:#fff7ed;border-color:#fdba74}
+.ms-icon{font-size:1.5rem;display:block;margin-bottom:0.3rem}
+.ms-label{font-size:0.7rem;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.2rem}
+.ms-value{font-size:1.1rem;font-weight:800;color:#111827}
+.ms-sub{font-size:0.72rem;color:#9ca3af;margin-top:0.15rem}
+
+/* ── Callout ── */
+.callout{border-radius:0.75rem;padding:0.875rem 1rem;margin-top:0.875rem}
+.callout.amber{background:#fffbeb;border:1px solid #fde68a}
+.callout.blue{background:#eff6ff;border:1px solid #bfdbfe}
+.callout.green{background:#f0fdf4;border:1px solid #bbf7d0}
+.callout.rose{background:#fff1f2;border:1px solid #fecdd3}
+.callout.teal{background:#f0fdfa;border:1px solid #99f6e4}
+.callout h4{font-size:0.8rem;font-weight:700;margin-bottom:0.4rem;display:flex;align-items:center;gap:0.35rem}
+.callout.amber h4{color:#92400e}
+.callout.blue h4{color:#1e40af}
+.callout.green h4{color:#166534}
+.callout.rose h4{color:#9f1239}
+.callout.teal h4{color:#115e59}
+.callout ul{margin:0.3rem 0 0 1rem;padding:0}
+.callout li{font-size:0.78rem;line-height:1.65;color:#374151}
+
+/* ── Income source grid ── */
+.inc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-top:0.5rem}
+.inc-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.75rem;padding:0.875rem;text-align:center}
+.inc-card h5{font-size:0.72rem;font-weight:700;color:#374151;margin:0 0 0.4rem;text-transform:uppercase;letter-spacing:0.04em}
+.inc-card .rate{font-size:1rem;font-weight:800;color:#e11d48}
+.inc-card .meta{font-size:0.68rem;color:#6b7280;margin-top:0.2rem}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .res-grid{grid-template-columns:1fr}
+  .res-c.wide{grid-column:span 1}
+  .sust-strip{flex-direction:column}
+  .ms-grid{grid-template-columns:1fr}
+  .inc-grid{grid-template-columns:1fr}
+}
+</style>
+
+<div id="ret-page">
+<div class="rt-wrap">
+
+  <!-- Hero -->
+  <div class="rt-hero">
+    <h1>Retirement Calculator 2025</h1>
+    <p>Plan your retirement corpus with inflation, step-up SIP, sustainability analysis & FIRE tracking</p>
+    <div class="hero-chips">
+      <span class="hero-chip">Inflation-adjusted</span>
+      <span class="hero-chip">Step-up SIP</span>
+      <span class="hero-chip">Corpus Sustainability</span>
+      <span class="hero-chip">FIRE Tracking</span>
+      <span class="hero-chip">Retirement Income</span>
     </div>
+  </div>
 
-    <div class="calc-grid">
-      <div class="card">
-        <div class="form-group">
-          <label for="currentAgeValue">Current Age</label>
-          <input type="number" id="currentAgeValue" value="30" min="18" max="80" step="1">
-          <div class="slider-container"><input type="range" id="currentAgeSlider" min="18" max="80" value="30" step="1" class="slider"></div>
-        </div>
-        <div class="form-group">
-          <label for="retirementAgeValue">Retirement Age</label>
-          <input type="number" id="retirementAgeValue" value="60" min="40" max="80" step="1">
-          <div class="slider-container"><input type="range" id="retirementAgeSlider" min="40" max="80" value="60" step="1" class="slider"></div>
-        </div>
-        <div class="form-group">
-          <label for="currentExpensesValue">Current Monthly Expenses (₹)</label>
-          <input type="number" id="currentExpensesValue" value="50000" min="10000" max="500000" step="5000">
-          <div class="slider-container"><input type="range" id="currentExpensesSlider" min="10000" max="200000" value="50000" step="5000" class="slider"></div>
-        </div>
-        <div class="form-group">
-          <label for="currentSavingsValue">Current Savings (₹)</label>
-          <input type="number" id="currentSavingsValue" value="500000" min="0" max="50000000" step="50000">
-          <div class="slider-container"><input type="range" id="currentSavingsSlider" min="0" max="5000000" value="500000" step="50000" class="slider"></div>
-        </div>
-        <div class="form-group">
-          <label for="monthlySavingsValue">Monthly Savings (₹)</label>
-          <input type="number" id="monthlySavingsValue" value="25000" min="1000" max="200000" step="1000">
-          <div class="slider-container"><input type="range" id="monthlySavingsSlider" min="1000" max="100000" value="25000" step="1000" class="slider"></div>
-        </div>
-        <div class="form-group">
-          <label for="expectedReturnValue">Expected Annual Return (%)</label>
-          <input type="number" id="expectedReturnValue" value="12" min="5" max="20" step="0.5">
-          <div class="slider-container"><input type="range" id="expectedReturnSlider" min="5" max="20" value="12" step="0.5" class="slider"></div>
-        </div>
-        <div class="form-group">
-          <label for="inflationValue">Inflation Rate (%)</label>
-          <input type="number" id="inflationValue" value="6" min="3" max="10" step="0.5">
-          <div class="slider-container"><input type="range" id="inflationSlider" min="3" max="10" value="6" step="0.5" class="slider"></div>
-        </div>
-        <div class="form-group">
-          <label for="lifeExpectancyValue">Life Expectancy</label>
-          <input type="number" id="lifeExpectancyValue" value="85" min="70" max="100" step="1">
-          <div class="slider-container"><input type="range" id="lifeExpectancySlider" min="70" max="100" value="85" step="1" class="slider"></div>
+  <div class="rt-body">
+
+    <!-- LEFT: Inputs -->
+    <div class="rt-card">
+      <div class="sec-lbl">Your profile</div>
+
+      <div class="fg">
+        <label>Current Age</label>
+        <div class="srow">
+          <input type="range" id="sl-cage" min="18" max="70" value={currentAge} step="1">
+          <input type="number" id="in-cage" class="nb" value={currentAge} min="18" max="70" step="1">
         </div>
       </div>
 
-      <div class="card">
-        <div class="results">
-          <div class="result-item">
-            <div class="result-label">Years to Retirement</div>
-            <div id="yearsToRetirement" class="result-value">{yearsToRetirement}</div>
+      <div class="fg">
+        <label>Retirement Age</label>
+        <div class="srow">
+          <input type="range" id="sl-rage" min="35" max="75" value={retirementAge} step="1">
+          <input type="number" id="in-rage" class="nb" value={retirementAge} min="35" max="75" step="1">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Life Expectancy</label>
+        <div class="srow">
+          <input type="range" id="sl-life" min="60" max="100" value={lifeExpectancy} step="1">
+          <input type="number" id="in-life" class="nb" value={lifeExpectancy} min="60" max="100" step="1">
+        </div>
+      </div>
+
+      <div class="sec-lbl">Monthly expenses &amp; savings</div>
+
+      <div class="fg">
+        <label>Current Monthly Expenses (&#8377;)</label>
+        <div class="srow">
+          <input type="range" id="sl-expense" min="5000" max="500000" value={currentExpenses} step="1000">
+          <input type="number" id="in-expense" class="nb" value={currentExpenses} min="1000" max="1000000" step="1000">
+        </div>
+        <div class="hint" id="expense-words" style="font-size:0.75rem;color:#6b7280;margin-top:0.35rem"></div>
+      </div>
+
+      <div class="fg">
+        <label>Current Savings / Investments (&#8377;)</label>
+        <div class="srow">
+          <input type="range" id="sl-savings" min="0" max="50000000" value={currentSavings} step="50000">
+          <input type="number" id="in-savings" class="nb" value={currentSavings} min="0" max="100000000" step="10000">
+        </div>
+        <div class="hint" id="savings-words" style="font-size:0.75rem;color:#6b7280;margin-top:0.35rem"></div>
+      </div>
+
+      <div class="fg">
+        <label>Monthly SIP / Investment (&#8377;)</label>
+        <div class="srow">
+          <input type="range" id="sl-sip" min="500" max="500000" value={monthlySIP} step="500">
+          <input type="number" id="in-sip" class="nb" value={monthlySIP} min="0" max="1000000" step="500">
+        </div>
+      </div>
+
+      <label class="tog" id="tog-stepup">
+        <span class="tog-sw">
+          <input type="checkbox" id="cb-stepup">
+          <span class="tog-track"></span>
+        </span>
+        <span class="tog-lbl">Step-up SIP (increase by 10% yearly)<br><small style="font-weight:400;color:#9ca3af">Matches salary growth</small></span>
+      </label>
+
+      <div class="sec-lbl">Growth assumptions</div>
+
+      <div class="fg">
+        <label>Expected Annual Return (%)</label>
+        <div class="srow">
+          <input type="range" id="sl-return" min="4" max="20" value="12" step="0.5">
+          <input type="number" id="in-return" class="nb" value="12" min="1" max="25" step="0.5">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Expected Inflation (%)</label>
+        <div class="srow">
+          <input type="range" id="sl-infl" min="2" max="12" value="6" step="0.5">
+          <input type="number" id="in-infl" class="nb" value="6" min="0" max="15" step="0.5">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Post-retirement Return (%)</label>
+        <div class="srow">
+          <input type="range" id="sl-postret" min="3" max="15" value="8" step="0.5">
+          <input type="number" id="in-postret" class="nb" value="8" min="1" max="20" step="0.5">
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div>
+
+      <!-- FIRE Status Banner -->
+      <div id="fire-banner" class={`fire-banner ${fireAchieved ? 'achieved' : 'shortfall'}`}>
+        <span class="fire-icon" id="fire-icon">{fireAchieved ? '\u2705' : '\u26A0\uFE0F'}</span>
+        <div class="fire-title" id="fire-title">{fireAchieved ? 'FIRE Goal Achieved!' : 'Shortfall — Increase SIP or Extend Timeline'}</div>
+        <div class="fire-sub" id="fire-sub">Your projected corpus covers {(fireRatio * 100).toFixed(0)}% of the required retirement corpus</div>
+        <div class="fire-pbar">
+          <div class="fire-pfill" id="fire-pfill" style={`width:${Math.min(100, fireRatio * 100).toFixed(0)}%;background:${fireAchieved ? '#22c55e' : '#f97316'}`}></div>
+        </div>
+      </div>
+
+      <!-- Result cards -->
+      <div class="rt-card" style="margin-bottom:1.25rem">
+        <div class="res-grid">
+          <div class="res-c neutral">
+            <div class="res-lbl">Years to Retire</div>
+            <div id="rv-yrs" class="res-val">{yearsToRetire}</div>
           </div>
-          <div class="result-item">
-            <div class="result-label">Retirement Corpus Needed</div>
-            <div id="retirementCorpus" class="result-value">{fmtLarge(Math.round(retirementCorpusNeeded))}</div>
+          <div class="res-c primary">
+            <div class="res-lbl">Corpus Needed (25x Rule)</div>
+            <div id="rv-needed" class="res-val rose">{fmtL(Math.round(corpusNeeded))}</div>
           </div>
-          <div class="result-item">
-            <div class="result-label">Projected Corpus at Retirement</div>
-            <div id="projectedCorpus" class="result-value">{fmtLarge(Math.round(finalProjectedCorpus))}</div>
+          <div class="res-c success">
+            <div class="res-lbl">Projected Corpus</div>
+            <div id="rv-projected" class="res-val green">{fmtL(Math.round(projectedCorpus))}</div>
           </div>
-          <div class="result-item fire-result">
-            <div class="result-label">FIRE Status</div>
-            <div id="fireStatus" class="result-value">
-              {fireRatio >= 1 ? '🔥 FIRE Achieved!' : `${(fireRatio * 100).toFixed(0)}% of FIRE Goal`}
+          <div class="res-c warn">
+            <div class="res-lbl">Monthly Expense at Retirement</div>
+            <div id="rv-futexp" class="res-val orange">{fmt(Math.round(monthlyExpenseAtRetirement))}</div>
+          </div>
+          <div class="res-c danger">
+            <div class="res-lbl">{surplus >= 0 ? 'Surplus' : 'Shortfall'}</div>
+            <div id="rv-surplus" class="res-val" style={`color:${surplus >= 0 ? '#059669' : '#dc2626'}`}>{fmtL(Math.round(Math.abs(surplus)))}</div>
+          </div>
+          <div class="res-c neutral">
+            <div class="res-lbl">Required Monthly SIP</div>
+            <div id="rv-reqsip" class="res-val blue">{fmt(Math.round(requiredMonthlySIP))}</div>
+          </div>
+        </div>
+
+        <!-- Corpus progress bar -->
+        <div class="corpus-pbar">
+          <div class="cpb-label">
+            <span>Projected: <strong id="cpb-proj">{fmtL(Math.round(projectedCorpus))}</strong></span>
+            <span>Needed: <strong id="cpb-need">{fmtL(Math.round(corpusNeeded))}</strong></span>
+          </div>
+          <div class="cpb-track">
+            <div class="cpb-fill" id="cpb-fill" style={`width:${Math.min(100, fireRatio * 100).toFixed(0)}%;background:${fireAchieved ? 'linear-gradient(90deg,#22c55e,#059669)' : 'linear-gradient(90deg,#f97316,#ef4444)'}`}></div>
+          </div>
+        </div>
+
+        <!-- Sustainability strip -->
+        <div class="sust-strip">
+          <div class={`sust-card ${corpusLastsAge >= lifeExpectancy ? 'ok' : 'alert'}`} id="sust-lasts">
+            <div class="sust-lbl">Corpus Lasts Until</div>
+            <div class="sust-val" id="sust-age">Age {corpusLastsAge}</div>
+          </div>
+          <div class="sust-card">
+            <div class="sust-lbl">Retirement Span</div>
+            <div class="sust-val" id="sust-span">{retirementYears} years</div>
+          </div>
+          <div class="sust-card">
+            <div class="sust-lbl">Real Return (Post-infl.)</div>
+            <div class="sust-val" id="sust-real">{(((1 + expectedReturn) / (1 + inflation) - 1) * 100).toFixed(1)}%</div>
+          </div>
+        </div>
+
+        <!-- Donut chart -->
+        <div class="chart-box" style="margin-top:0.5rem">
+          <div class="chart-ttl">Corpus Breakdown</div>
+          <canvas id="cv-donut" style="width:100%;height:180px;display:block"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="rt-card">
+        <div class="tabs" role="tablist">
+          <button class="tab-b act" data-tab="growth" role="tab">Portfolio Growth</button>
+          <button class="tab-b" data-tab="yearly" role="tab">Year-wise</button>
+          <button class="tab-b" data-tab="milestones" role="tab">Milestones</button>
+          <button class="tab-b" data-tab="strategy" role="tab">Strategy</button>
+          <button class="tab-b" data-tab="income" role="tab">Retirement Income</button>
+        </div>
+
+        <!-- Portfolio Growth Chart -->
+        <div class="tab-p act" id="tp-growth">
+          <div class="chart-box" style="background:#fff;border:1px solid #f3f4f6">
+            <div class="chart-ttl">Portfolio growth vs required corpus</div>
+            <canvas id="cv-line" style="width:100%;height:300px;display:block"></canvas>
+          </div>
+          <div class="callout rose" style="margin-top:0.75rem">
+            <h4>How to read this chart</h4>
+            <ul>
+              <li>The <strong>solid line</strong> shows your projected portfolio value over time</li>
+              <li>The <strong>dashed line</strong> shows the corpus needed at each age (inflation-adjusted 25x expenses)</li>
+              <li>The <strong>vertical marker</strong> indicates your retirement age — corpus should ideally be above the dashed line by then</li>
+              <li>After retirement, the portfolio line shows drawdown as you withdraw expenses</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Year-wise Table -->
+        <div class="tab-p" id="tp-yearly">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Age</th>
+                  <th style="text-align:right">Portfolio</th>
+                  <th style="text-align:right">Annual Expense</th>
+                  <th style="text-align:right">SIP Contrib.</th>
+                  <th style="text-align:right">Surplus / Deficit</th>
+                </tr>
+              </thead>
+              <tbody id="tb-yearly"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Milestones -->
+        <div class="tab-p" id="tp-milestones">
+          <div class="ms-grid" id="ms-grid">
+            <div class="ms-card highlight">
+              <span class="ms-icon">&#127919;</span>
+              <div class="ms-label">Retirement Year</div>
+              <div class="ms-value" id="ms-retire">Age {retirementAge}</div>
+              <div class="ms-sub" id="ms-retire-sub">{yearsToRetire} years from now</div>
+            </div>
+            <div class="ms-card green-hl">
+              <span class="ms-icon">&#128176;</span>
+              <div class="ms-label">Hit &#8377;1 Crore</div>
+              <div class="ms-value" id="ms-1cr">--</div>
+              <div class="ms-sub" id="ms-1cr-sub"></div>
+            </div>
+            <div class="ms-card warn-hl">
+              <span class="ms-icon">&#9888;&#65039;</span>
+              <div class="ms-label">Expenses Exceed Savings</div>
+              <div class="ms-value" id="ms-exceed">--</div>
+              <div class="ms-sub" id="ms-exceed-sub"></div>
+            </div>
+            <div class="ms-card" id="ms-deplete-card">
+              <span class="ms-icon">&#128308;</span>
+              <div class="ms-label">Corpus Depletion</div>
+              <div class="ms-value" id="ms-deplete">--</div>
+              <div class="ms-sub" id="ms-deplete-sub"></div>
             </div>
           </div>
+          <div class="callout blue" style="margin-top:0.875rem">
+            <h4>About Milestones</h4>
+            <ul>
+              <li><strong>&#8377;1 Crore</strong> — your first major financial milestone in the accumulation phase</li>
+              <li><strong>Expenses exceed savings</strong> — the age when annual inflation-adjusted expenses surpass your annual SIP contribution (this is expected and normal after retirement)</li>
+              <li><strong>Corpus depletion</strong> — the age at which your retirement corpus runs out if returns and expenses track projections</li>
+            </ul>
+          </div>
         </div>
-        <div class="chart-container"><canvas id="portfolioChart" class="chart"></canvas></div>
-        <div class="chart-container"><canvas id="expenseChart" class="chart"></canvas></div>
+
+        <!-- Strategy -->
+        <div class="tab-p" id="tp-strategy">
+          <div class="callout teal">
+            <h4>EPF + PPF + NPS Combination</h4>
+            <ul>
+              <li><strong>EPF (12% of basic):</strong> Employer-matched, 8.15% tax-free return. Don't withdraw early — compounding is key</li>
+              <li><strong>PPF (&#8377;1.5L/yr max):</strong> 7.1% tax-free, 15-year lock-in. Best debt instrument for retirement due to EEE status</li>
+              <li><strong>NPS (&#8377;50K extra under 80CCD(1B)):</strong> Market-linked, 60% lump sum tax-free at 60. Choose aggressive allocation if under 40</li>
+              <li>Together, these 3 cover the debt portion of your retirement portfolio with tax efficiency</li>
+            </ul>
+          </div>
+          <div class="callout blue" style="margin-top:0.75rem">
+            <h4>Asset Allocation by Age (100-Age Rule)</h4>
+            <ul>
+              <li><strong>Age 25–35:</strong> 70–75% equity, 20–25% debt, 5% gold/alternatives</li>
+              <li><strong>Age 35–45:</strong> 60–65% equity, 30–35% debt, 5% gold</li>
+              <li><strong>Age 45–55:</strong> 45–55% equity, 40–45% debt, 5–10% gold</li>
+              <li><strong>Age 55–60:</strong> 30–40% equity, 50–60% debt, 10% gold/cash</li>
+              <li><strong>Post-retirement:</strong> 20–30% equity (for growth), 60–70% debt/FD, 10% liquid/cash</li>
+              <li>Rule of thumb: <strong>Equity % = 100 minus your age</strong>, adjust +/-10% based on risk appetite</li>
+            </ul>
+          </div>
+          <div class="callout amber" style="margin-top:0.75rem">
+            <h4>Healthcare Costs in Retirement</h4>
+            <ul>
+              <li>Healthcare inflation in India is <strong>12–15% per year</strong> — much higher than general inflation</li>
+              <li>A &#8377;10L medical bill today could be &#8377;57L in 30 years at 12% medical inflation</li>
+              <li>Get <strong>health insurance early</strong> — premiums are 3x cheaper at 30 vs 50, and no pre-existing conditions</li>
+              <li>Maintain <strong>super top-up cover</strong> of &#8377;50L–1Cr in addition to base cover</li>
+              <li>Set aside <strong>10–15% of retirement corpus</strong> as a separate healthcare reserve</li>
+            </ul>
+          </div>
+          <div class="callout green" style="margin-top:0.75rem">
+            <h4>Senior Citizen Benefits (60+)</h4>
+            <ul>
+              <li><strong>Tax:</strong> Basic exemption limit &#8377;3L (old regime), Section 80TTB: &#8377;50K interest exemption</li>
+              <li><strong>FD:</strong> +0.25% to +0.75% extra rate from most banks</li>
+              <li><strong>SCSS:</strong> 8.2% per year (quarterly), &#8377;30L max, Section 80C eligible — best risk-free option</li>
+              <li><strong>PMVVY/POMIS:</strong> Regular monthly pension from government schemes</li>
+              <li><strong>Health:</strong> CGHS, Ayushman Bharat (if eligible), tax deduction up to &#8377;1L on premiums (80D)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Retirement Income -->
+        <div class="tab-p" id="tp-income">
+          <p style="font-size:0.82rem;color:#6b7280;margin-bottom:0.875rem">Key income sources for Indian retirees (indicative rates as of 2025):</p>
+          <div class="inc-grid">
+            <div class="inc-card">
+              <h5>SWP from MF</h5>
+              <div class="rate">8–12%</div>
+              <div class="meta">Flexible withdrawals</div>
+            </div>
+            <div class="inc-card">
+              <h5>SCSS</h5>
+              <div class="rate">8.2%</div>
+              <div class="meta">&#8377;30L max · Govt backed</div>
+            </div>
+            <div class="inc-card">
+              <h5>POMIS</h5>
+              <div class="rate">7.4%</div>
+              <div class="meta">&#8377;9L single · &#8377;15L joint</div>
+            </div>
+            <div class="inc-card">
+              <h5>PPF Maturity</h5>
+              <div class="rate">7.1%</div>
+              <div class="meta">Tax-free · EEE status</div>
+            </div>
+            <div class="inc-card">
+              <h5>NPS Annuity</h5>
+              <div class="rate">5–7%</div>
+              <div class="meta">40% mandatory annuity</div>
+            </div>
+            <div class="inc-card">
+              <h5>EPF Lump Sum</h5>
+              <div class="rate">8.15%</div>
+              <div class="meta">Tax-free if 5yr+ service</div>
+            </div>
+          </div>
+          <div class="callout teal" style="margin-top:0.875rem">
+            <h4>Building a Retirement Income Ladder</h4>
+            <ul>
+              <li><strong>Base expenses (60–70%):</strong> SCSS + POMIS + NPS annuity — guaranteed monthly income</li>
+              <li><strong>Variable expenses (20–30%):</strong> SWP from balanced advantage / equity fund — inflation-beating growth</li>
+              <li><strong>Emergency buffer (10%):</strong> Liquid fund + FD ladder — instant access for medical/unexpected expenses</li>
+              <li>Reinvest surplus into equity via SIP during good years to extend corpus life</li>
+              <li>Review and rebalance income sources every 2–3 years</li>
+            </ul>
+          </div>
+          <div class="tbl-wrap" style="margin-top:0.875rem">
+            <table class="tbl">
+              <thead><tr><th>Scheme</th><th style="text-align:right">Rate (%)</th><th>Max Limit</th><th>Tax Treatment</th></tr></thead>
+              <tbody>
+                <tr><td style="font-weight:600">SCSS</td><td style="text-align:right;color:#e11d48;font-weight:700">8.20</td><td>&#8377;30L</td><td>80C + TDS above &#8377;50K</td></tr>
+                <tr><td style="font-weight:600">POMIS</td><td style="text-align:right;color:#e11d48;font-weight:700">7.40</td><td>&#8377;9L / &#8377;15L (joint)</td><td>Taxable at slab</td></tr>
+                <tr><td style="font-weight:600">PPF</td><td style="text-align:right;color:#059669;font-weight:700">7.10</td><td>&#8377;1.5L/yr</td><td>EEE (fully tax-free)</td></tr>
+                <tr><td style="font-weight:600">NPS</td><td style="text-align:right;color:#d97706;font-weight:700">~9–11</td><td>No limit</td><td>60% tax-free, 40% annuity taxable</td></tr>
+                <tr><td style="font-weight:600">EPF</td><td style="text-align:right;color:#059669;font-weight:700">8.15</td><td>12% of basic</td><td>Tax-free (5yr+ service)</td></tr>
+                <tr><td style="font-weight:600">Bank FD (Sr.)</td><td style="text-align:right;color:#d97706;font-weight:700">7.0–8.5</td><td>No limit</td><td>TDS above &#8377;50K, slab rate</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+</div>
 
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr><th>Age</th><th>Year</th><th>Annual Savings</th><th>Portfolio Value</th><th>Annual Expenses</th><th>Surplus/Deficit</th></tr>
-        </thead>
-        <tbody id="analysisTableBody">
-          <tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7280">Loading analysis...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
+<script is:inline>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmtINR=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n);
+  function fmtL(n){
+    if(n>=10000000)return'\u20B9'+(n/10000000).toFixed(2)+' Cr';
+    if(n>=100000)return'\u20B9'+(n/100000).toFixed(2)+' L';
+    return fmtINR(n);
+  }
+  function numWords(n){
+    if(n>=10000000)return(n/10000000).toFixed(2)+' Crore';
+    if(n>=100000)return(n/100000).toFixed(2)+' Lakh';
+    if(n>=1000)return(n/1000).toFixed(1)+' Thousand';
+    return n.toString();
+  }
+  function setSl(el,min,max,val){el.style.setProperty('--pct',((val-min)/(max-min)*100)+'%')}
 
-  <script is:inline defer>
-  document.addEventListener('DOMContentLoaded', function() {
-    function drawLineChart(canvas, data, options = {}) {
-        const ctx = canvas.getContext('2d');
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * 2;
-        canvas.height = rect.height * 2;
-        ctx.scale(2, 2);
-        const width = rect.width, height = rect.height;
-        const padding = { top: 20, right: 20, bottom: 60, left: 80 };
-        const chartWidth = width - padding.left - padding.right;
-        const chartHeight = height - padding.top - padding.bottom;
-        ctx.clearRect(0, 0, width, height);
-        if (!data || data.length === 0) return;
-        const maxValue = Math.max(...data.map(d => d.value));
-        const minValue = Math.min(...data.map(d => d.value));
-        const valueRange = maxValue - minValue;
-        const adjustedMax = maxValue + (valueRange * 0.1);
-        const adjustedMin = Math.max(0, minValue - (valueRange * 0.1));
-        ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 1;
-        for (let i = 0; i <= 5; i++) {
-            const y = padding.top + (chartHeight * i / 5);
-            ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + chartWidth, y); ctx.stroke();
-        }
-        for (let i = 0; i <= Math.min(data.length - 1, 10); i++) {
-            const x = padding.left + (chartWidth * i / Math.min(data.length - 1, 10));
-            ctx.beginPath(); ctx.moveTo(x, padding.top); ctx.lineTo(x, padding.top + chartHeight); ctx.stroke();
-        }
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(padding.left, padding.top); ctx.lineTo(padding.left, padding.top + chartHeight); ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight); ctx.stroke();
-        ctx.fillStyle = '#666'; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-        for (let i = 0; i <= 5; i++) {
-            const value = adjustedMax - ((adjustedMax - adjustedMin) * i / 5);
-            const y = padding.top + (chartHeight * i / 5);
-            const label = value >= 10000000 ? `₹${(value/10000000).toFixed(1)}Cr` : value >= 100000 ? `₹${(value/100000).toFixed(1)}L` : `₹${(value/1000).toFixed(0)}K`;
-            ctx.fillText(label, padding.left - 10, y);
-        }
-        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-        const labelStep = Math.max(1, Math.floor(data.length / 10));
-        for (let i = 0; i < data.length; i += labelStep) {
-            const x = padding.left + (chartWidth * i / (data.length - 1));
-            ctx.fillText((data[i].year || (new Date().getFullYear() + i)).toString(), x, padding.top + chartHeight + 10);
-        }
-        if (options.title) { ctx.fillStyle = '#333'; ctx.font = 'bold 14px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(options.title, width / 2, 5); }
-        ctx.strokeStyle = options.color || '#4f46e5'; ctx.lineWidth = 3; ctx.beginPath();
-        data.forEach((point, index) => {
-            const x = padding.left + (chartWidth * index / (data.length - 1));
-            const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
-            if (index === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
-        });
-        ctx.stroke();
-        ctx.fillStyle = options.color || '#4f46e5';
-        data.forEach((point, index) => {
-            const x = padding.left + (chartWidth * index / (data.length - 1));
-            const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
-            ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * Math.PI); ctx.fill();
-        });
+  /* ── Donut ── */
+  function drawDonut(can,slices){
+    var dpr=window.devicePixelRatio||1;
+    var W=can.parentElement.clientWidth-32,H=180;
+    can.width=W*dpr;can.height=H*dpr;can.style.width=W+'px';can.style.height=H+'px';
+    var ctx=can.getContext('2d');ctx.scale(dpr,dpr);
+    var cx=W/2,cy=H/2,R=Math.min(cx,cy)*0.78,ri=R*0.56;
+    var total=slices.reduce(function(s,v){return s+v.v},0);
+    var angle=-Math.PI/2;
+    slices.forEach(function(s){var a=(s.v/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,angle,angle+a);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();angle+=a;});
+    ctx.beginPath();ctx.arc(cx,cy,ri,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+    ctx.fillStyle='#111827';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold '+Math.round(R*0.16)+'px system-ui';ctx.fillText(fmtL(Math.round(total)),cx,cy);
+    var fs=Math.round(R*0.12);
+    slices.forEach(function(s,i){
+      ctx.fillStyle=s.c;ctx.fillRect(8,H-20+i*13,9,9);
+      ctx.fillStyle='#374151';ctx.font=fs+'px system-ui';ctx.textAlign='left';
+      ctx.fillText(s.l+': '+fmtL(Math.round(s.v)),20,H-12+i*13);
+    });
+  }
+
+  /* ── Dual line chart ── */
+  function drawDualLine(can,projPts,needPts,retireIdx){
+    var dpr=window.devicePixelRatio||1;
+    var W=can.parentElement.clientWidth-32,H=300;
+    can.width=W*dpr;can.height=H*dpr;can.style.width=W+'px';can.style.height=H+'px';
+    var ctx=can.getContext('2d');ctx.scale(dpr,dpr);
+    if(!projPts||projPts.length<2)return;
+    var pad={t:20,r:12,b:36,l:72};
+    var cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+    var allV=projPts.map(function(p){return p.v}).concat(needPts.map(function(p){return p.v}));
+    var mn=0,mx=Math.max.apply(null,allV)*1.08;
+    // grid
+    for(var i=0;i<=4;i++){
+      var y=pad.t+ch*(1-i/4);
+      ctx.strokeStyle='#f3f4f6';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();
+      var v=mn+(mx-mn)*(i/4);
+      var lbl=v>=10000000?'\u20B9'+(v/10000000).toFixed(1)+'Cr':v>=100000?'\u20B9'+(v/100000).toFixed(0)+'L':'\u20B9'+(v/1000).toFixed(0)+'K';
+      ctx.fillStyle='#9ca3af';ctx.font='10px system-ui';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(lbl,pad.l-4,y);
     }
-    function drawDualLineChart(canvas, data1, data2, options = {}) {
-        const ctx = canvas.getContext('2d');
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * 2; canvas.height = rect.height * 2; ctx.scale(2, 2);
-        const width = rect.width, height = rect.height;
-        const padding = { top: 40, right: 20, bottom: 60, left: 80 };
-        const chartWidth = width - padding.left - padding.right;
-        const chartHeight = height - padding.top - padding.bottom;
-        ctx.clearRect(0, 0, width, height);
-        if (!data1 || data1.length === 0 || !data2 || data2.length === 0) return;
-        const allValues = [...data1.map(d => d.value), ...data2.map(d => d.value)];
-        const maxValue = Math.max(...allValues), minValue = Math.min(...allValues);
-        const valueRange = maxValue - minValue;
-        const adjustedMax = maxValue + (valueRange * 0.1);
-        const adjustedMin = Math.max(0, minValue - (valueRange * 0.1));
-        ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 1;
-        for (let i = 0; i <= 5; i++) {
-            const y = padding.top + (chartHeight * i / 5);
-            ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + chartWidth, y); ctx.stroke();
-        }
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(padding.left, padding.top); ctx.lineTo(padding.left, padding.top + chartHeight); ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight); ctx.stroke();
-        ctx.fillStyle = '#666'; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-        for (let i = 0; i <= 5; i++) {
-            const value = adjustedMax - ((adjustedMax - adjustedMin) * i / 5);
-            const y = padding.top + (chartHeight * i / 5);
-            const label = value >= 10000000 ? `₹${(value/10000000).toFixed(1)}Cr` : value >= 100000 ? `₹${(value/100000).toFixed(1)}L` : `₹${(value/1000).toFixed(0)}K`;
-            ctx.fillText(label, padding.left - 10, y);
-        }
-        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-        const labelStep = Math.max(1, Math.floor(data1.length / 10));
-        for (let i = 0; i < data1.length; i += labelStep) {
-            const x = padding.left + (chartWidth * i / (data1.length - 1));
-            ctx.fillText((data1[i].year || (new Date().getFullYear() + i)).toString(), x, padding.top + chartHeight + 10);
-        }
-        const legendY = 25; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'left';
-        ctx.fillStyle = options.color1 || '#4f46e5'; ctx.fillRect(padding.left, legendY, 15, 3);
-        ctx.fillStyle = '#333'; ctx.fillText(options.label1 || 'Series 1', padding.left + 20, legendY + 1);
-        const legend2X = padding.left + 120;
-        ctx.fillStyle = options.color2 || '#10b981'; ctx.fillRect(legend2X, legendY, 15, 3);
-        ctx.fillStyle = '#333'; ctx.fillText(options.label2 || 'Series 2', legend2X + 20, legendY + 1);
-        function drawLine(data, color) {
-            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath();
-            data.forEach((point, index) => {
-                const x = padding.left + (chartWidth * index / (data.length - 1));
-                const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
-                if (index === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
-            });
-            ctx.stroke();
-            ctx.fillStyle = color;
-            data.forEach((point, index) => {
-                const x = padding.left + (chartWidth * index / (data.length - 1));
-                const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
-                ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * Math.PI); ctx.fill();
-            });
-        }
-        drawLine(data1, options.color1 || '#4f46e5');
-        drawLine(data2, options.color2 || '#10b981');
+    // retirement vertical marker
+    if(retireIdx>0&&retireIdx<projPts.length){
+      var rx=pad.l+cw*retireIdx/(projPts.length-1);
+      ctx.strokeStyle='#e11d48';ctx.lineWidth=1.5;ctx.setLineDash([5,5]);
+      ctx.beginPath();ctx.moveTo(rx,pad.t);ctx.lineTo(rx,pad.t+ch);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle='#e11d48';ctx.font='bold 10px system-ui';ctx.textAlign='left';
+      ctx.fillText('Retire',rx+4,pad.t+12);
     }
-    const elements = {
-        currentAgeSlider: document.getElementById('currentAgeSlider'), currentAgeValue: document.getElementById('currentAgeValue'),
-        retirementAgeSlider: document.getElementById('retirementAgeSlider'), retirementAgeValue: document.getElementById('retirementAgeValue'),
-        currentExpensesSlider: document.getElementById('currentExpensesSlider'), currentExpensesValue: document.getElementById('currentExpensesValue'),
-        currentSavingsSlider: document.getElementById('currentSavingsSlider'), currentSavingsValue: document.getElementById('currentSavingsValue'),
-        monthlySavingsSlider: document.getElementById('monthlySavingsSlider'), monthlySavingsValue: document.getElementById('monthlySavingsValue'),
-        expectedReturnSlider: document.getElementById('expectedReturnSlider'), expectedReturnValue: document.getElementById('expectedReturnValue'),
-        inflationSlider: document.getElementById('inflationSlider'), inflationValue: document.getElementById('inflationValue'),
-        lifeExpectancySlider: document.getElementById('lifeExpectancySlider'), lifeExpectancyValue: document.getElementById('lifeExpectancyValue'),
-        yearsToRetirement: document.getElementById('yearsToRetirement'), retirementCorpus: document.getElementById('retirementCorpus'),
-        projectedCorpus: document.getElementById('projectedCorpus'), fireStatus: document.getElementById('fireStatus'),
-        analysisTableBody: document.getElementById('analysisTableBody'),
-        portfolioChart: document.getElementById('portfolioChart'), expenseChart: document.getElementById('expenseChart')
-    };
-    function formatCurrency(num) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num); }
-    function formatLargeNumber(num) {
-        if (num >= 10000000) return '₹' + (num / 10000000).toFixed(2) + ' Cr';
-        if (num >= 100000) return '₹' + (num / 100000).toFixed(2) + ' L';
-        return formatCurrency(num);
+    // needed corpus dashed line
+    ctx.strokeStyle='#9ca3af';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+    ctx.beginPath();
+    needPts.forEach(function(p,i){var x=pad.l+cw*i/(needPts.length-1);var yy=pad.t+ch-(p.v-mn)/(mx-mn)*ch;i?ctx.lineTo(x,yy):ctx.moveTo(x,yy);});
+    ctx.stroke();ctx.setLineDash([]);
+    // projected area
+    ctx.beginPath();
+    projPts.forEach(function(p,i){var x=pad.l+cw*i/(projPts.length-1);var yy=pad.t+ch-(p.v-mn)/(mx-mn)*ch;i?ctx.lineTo(x,yy):ctx.moveTo(x,yy);});
+    var ag=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);ag.addColorStop(0,'rgba(225,29,72,0.12)');ag.addColorStop(1,'rgba(225,29,72,0)');
+    ctx.lineTo(pad.l+cw,pad.t+ch);ctx.lineTo(pad.l,pad.t+ch);ctx.closePath();ctx.fillStyle=ag;ctx.fill();
+    // projected line
+    var lg=ctx.createLinearGradient(pad.l,0,pad.l+cw,0);lg.addColorStop(0,'#e11d48');lg.addColorStop(1,'#7c3aed');
+    ctx.strokeStyle=lg;ctx.lineWidth=2.5;
+    ctx.beginPath();projPts.forEach(function(p,i){var x=pad.l+cw*i/(projPts.length-1);var yy=pad.t+ch-(p.v-mn)/(mx-mn)*ch;i?ctx.lineTo(x,yy):ctx.moveTo(x,yy);});ctx.stroke();
+    // legend
+    ctx.fillStyle='#e11d48';ctx.fillRect(pad.l,pad.t+ch+18,10,3);
+    ctx.fillStyle='#374151';ctx.font='10px system-ui';ctx.textAlign='left';ctx.fillText('Projected',pad.l+14,pad.t+ch+22);
+    ctx.strokeStyle='#9ca3af';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(pad.l+80,pad.t+ch+20);ctx.lineTo(pad.l+90,pad.t+ch+20);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#374151';ctx.fillText('Needed',pad.l+94,pad.t+ch+22);
+    // x labels
+    var step=Math.ceil(projPts.length/10);
+    ctx.fillStyle='#9ca3af';ctx.font='10px system-ui';ctx.textAlign='center';ctx.textBaseline='top';
+    projPts.forEach(function(p,i){if(i%step&&i!==projPts.length-1)return;var x=pad.l+cw*i/(projPts.length-1);ctx.fillText(p.lbl,x,pad.t+ch+5);});
+  }
+
+  /* ── Main compute ── */
+  function calc(){
+    var cAge=parseInt($('in-cage').value)||30;
+    var rAge=parseInt($('in-rage').value)||60;
+    var life=parseInt($('in-life').value)||85;
+    var expense=parseFloat($('in-expense').value)||0;
+    var savings=parseFloat($('in-savings').value)||0;
+    var sip=parseFloat($('in-sip').value)||0;
+    var ret=(parseFloat($('in-return').value)||12)/100;
+    var infl=(parseFloat($('in-infl').value)||6)/100;
+    var postRet=(parseFloat($('in-postret').value)||8)/100;
+    var stepUp=$('cb-stepup').checked;
+    var stepR=0.10;
+
+    if(rAge<=cAge)rAge=cAge+1;
+    if(life<=rAge)life=rAge+1;
+    var ytr=rAge-cAge;
+    var retYrs=life-rAge;
+
+    // Future monthly expense at retirement
+    var futMoExp=expense*Math.pow(1+infl,ytr);
+    var futAnExp=futMoExp*12;
+    var corpusNeeded=futAnExp*25;
+
+    // Projected corpus: FV of savings + FV of SIP stream
+    var projCorpus=savings*Math.pow(1+ret,ytr);
+    var totalSIP=0;
+    var sipContribByYear=[];
+    for(var y=0;y<ytr;y++){
+      var sipY=stepUp?sip*Math.pow(1+stepR,y):sip;
+      var annSIP=sipY*12;
+      totalSIP+=annSIP;
+      sipContribByYear.push(annSIP);
+      projCorpus+=annSIP*Math.pow(1+ret,ytr-y-1);
     }
-    function updateAnalysisTable(analysisData) {
-        elements.analysisTableBody.innerHTML = '';
-        if (analysisData.length === 0) { elements.analysisTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see analysis</td></tr>`; return; }
-        const filteredData = analysisData.filter((item, index) => index % 5 === 0 || index >= analysisData.length - 5);
-        filteredData.forEach(item => {
-            const row = document.createElement('tr');
-            const surplus = item.portfolioValue - item.annualExpenses;
-            const surplusClass = surplus >= 0 ? 'color:#059669' : 'color:#dc2626';
-            row.innerHTML = `<td style="font-weight:600">${item.age}</td><td>${item.year}</td><td style="text-align:right">${formatLargeNumber(item.annualSavings)}</td><td style="text-align:right;font-weight:600">${formatLargeNumber(item.portfolioValue)}</td><td style="text-align:right">${formatLargeNumber(item.annualExpenses)}</td><td style="text-align:right;${surplusClass}">${formatLargeNumber(surplus)}</td>`;
-            elements.analysisTableBody.appendChild(row);
-        });
+    var interestEarned=projCorpus-totalSIP-savings;
+    var surplus=projCorpus-corpusNeeded;
+    var ratio=corpusNeeded>0?projCorpus/corpusNeeded:0;
+    var achieved=ratio>=1;
+
+    // Required SIP
+    var fvFactor=ret>0?(Math.pow(1+ret,ytr)-1)/ret:ytr;
+    var fvSav=savings*Math.pow(1+ret,ytr);
+    var reqAnnSIP=fvFactor>0?Math.max(0,(corpusNeeded-fvSav)/fvFactor):0;
+    var reqMoSIP=reqAnnSIP/12;
+
+    // Post-retirement corpus sustainability
+    var postBal=projCorpus;
+    var corpusLastsAge=life;
+    var postData=[];
+    for(var py=0;py<retYrs;py++){
+      var annExp=futAnExp*Math.pow(1+infl,py);
+      var growth=postBal*postRet;
+      postBal=postBal+growth-annExp;
+      if(postBal<0){postBal=0;if(corpusLastsAge===life)corpusLastsAge=rAge+py;}
+      postData.push({age:rAge+py+1,bal:postBal,exp:annExp});
     }
-    function calculateRetirement() {
-        try {
-            const currentAge = parseInt(elements.currentAgeValue.value) || 30;
-            const retirementAge = parseInt(elements.retirementAgeValue.value) || 60;
-            const currentExpenses = parseFloat(elements.currentExpensesValue.value) || 50000;
-            const currentSavings = parseFloat(elements.currentSavingsValue.value) || 500000;
-            const monthlySavings = parseFloat(elements.monthlySavingsValue.value) || 25000;
-            const expectedReturn = parseFloat(elements.expectedReturnValue.value) / 100 || 0.12;
-            const inflation = parseFloat(elements.inflationValue.value) / 100 || 0.06;
-            const lifeExpectancy = parseInt(elements.lifeExpectancyValue.value) || 85;
-            if (currentAge >= retirementAge) { updateAnalysisTable([]); return; }
-            const yearsToRetirement = retirementAge - currentAge;
-            const futureMonthlyExpenses = currentExpenses * Math.pow(1 + inflation, yearsToRetirement);
-            const futureAnnualExpenses = futureMonthlyExpenses * 12;
-            const retirementCorpusNeeded = futureAnnualExpenses * 25;
-            const annualSavings = monthlySavings * 12;
-            let projectedCorpus = currentSavings;
-            let analysisData = [], portfolioValues = [], expenseValues = [];
-            for (let year = 0; year <= lifeExpectancy - currentAge; year++) {
-                const age = currentAge + year;
-                const currentYear = new Date().getFullYear() + year;
-                if (age < retirementAge) {
-                    projectedCorpus = projectedCorpus * (1 + expectedReturn) + annualSavings;
-                    const currentAnnualExpenses = currentExpenses * 12 * Math.pow(1 + inflation, year);
-                    analysisData.push({ age, year: currentYear, annualSavings, portfolioValue: projectedCorpus, annualExpenses: currentAnnualExpenses });
-                } else {
-                    const annualWithdrawal = futureAnnualExpenses * Math.pow(1 + inflation, age - retirementAge);
-                    projectedCorpus = projectedCorpus * (1 + expectedReturn) - annualWithdrawal;
-                    if (projectedCorpus < 0) projectedCorpus = 0;
-                    analysisData.push({ age, year: currentYear, annualSavings: 0, portfolioValue: projectedCorpus, annualExpenses: annualWithdrawal });
-                }
-                portfolioValues.push(projectedCorpus);
-                expenseValues.push(age >= retirementAge ? futureAnnualExpenses * Math.pow(1 + inflation, age - retirementAge) : currentExpenses * 12 * Math.pow(1 + inflation, year));
-            }
-            const finalProjectedCorpus = currentSavings * Math.pow(1 + expectedReturn, yearsToRetirement) + annualSavings * (Math.pow(1 + expectedReturn, yearsToRetirement) - 1) / expectedReturn;
-            elements.yearsToRetirement.textContent = yearsToRetirement;
-            elements.retirementCorpus.textContent = formatLargeNumber(retirementCorpusNeeded);
-            elements.projectedCorpus.textContent = formatLargeNumber(finalProjectedCorpus);
-            const fireRatio = finalProjectedCorpus / retirementCorpusNeeded;
-            if (fireRatio >= 1) { elements.fireStatus.textContent = '🔥 FIRE Achieved!'; elements.fireStatus.style.color = '#059669'; }
-            else { const shortfall = retirementCorpusNeeded - finalProjectedCorpus; elements.fireStatus.innerHTML = `${(fireRatio * 100).toFixed(0)}% of FIRE<br>Short: ${formatLargeNumber(shortfall)}`; elements.fireStatus.style.color = '#dc2626'; }
-            updateAnalysisTable(analysisData);
-            drawLineChart(elements.portfolioChart, portfolioValues.map((value, index) => ({ value, year: new Date().getFullYear() + index })), { title: 'Portfolio Growth', color: '#4f46e5' });
-            drawDualLineChart(elements.expenseChart, portfolioValues.map((value, index) => ({ value, year: new Date().getFullYear() + index })), expenseValues.map((value, index) => ({ value, year: new Date().getFullYear() + index })), { title: 'Portfolio vs Annual Expenses', label1: 'Portfolio Value', color1: '#4f46e5', label2: 'Annual Expenses', color2: '#059669' });
-        } catch(error) { console.error("Error in retirement calculation:", error); }
+
+    var realRet=((1+ret)/(1+infl)-1)*100;
+
+    // Update FIRE banner
+    var fb=$('fire-banner');
+    fb.className='fire-banner '+(achieved?'achieved':'shortfall');
+    $('fire-icon').textContent=achieved?'\u2705':'\u26A0\uFE0F';
+    $('fire-title').textContent=achieved?'FIRE Goal Achieved!':'Shortfall \u2014 Increase SIP or Extend Timeline';
+    $('fire-sub').textContent='Your projected corpus covers '+(ratio*100).toFixed(0)+'% of the required retirement corpus';
+    $('fire-pfill').style.width=Math.min(100,ratio*100).toFixed(0)+'%';
+    $('fire-pfill').style.background=achieved?'#22c55e':'#f97316';
+
+    // Result cards
+    $('rv-yrs').textContent=ytr;
+    $('rv-needed').textContent=fmtL(Math.round(corpusNeeded));
+    $('rv-projected').textContent=fmtL(Math.round(projCorpus));
+    $('rv-futexp').textContent=fmtINR(Math.round(futMoExp))+'/mo';
+    var surplusEl=$('rv-surplus');
+    surplusEl.textContent=fmtL(Math.round(Math.abs(surplus)));
+    surplusEl.style.color=surplus>=0?'#059669':'#dc2626';
+    surplusEl.parentElement.querySelector('.res-lbl').textContent=surplus>=0?'Surplus':'Shortfall';
+    surplusEl.parentElement.className='res-c '+(surplus>=0?'success':'danger');
+    $('rv-reqsip').textContent=fmtINR(Math.round(reqMoSIP));
+
+    // Corpus progress bar
+    $('cpb-proj').textContent=fmtL(Math.round(projCorpus));
+    $('cpb-need').textContent=fmtL(Math.round(corpusNeeded));
+    var pf=$('cpb-fill');
+    pf.style.width=Math.min(100,ratio*100).toFixed(0)+'%';
+    pf.style.background=achieved?'linear-gradient(90deg,#22c55e,#059669)':'linear-gradient(90deg,#f97316,#ef4444)';
+
+    // Sustainability strip
+    var sustCard=$('sust-lasts');
+    sustCard.className='sust-card '+(corpusLastsAge>=life?'ok':'alert');
+    $('sust-age').textContent='Age '+corpusLastsAge;
+    $('sust-span').textContent=retYrs+' years';
+    $('sust-real').textContent=(realRet>=0?'+':'')+realRet.toFixed(1)+'%';
+
+    $('expense-words').textContent='\u20B9 '+numWords(expense)+'/month';
+    $('savings-words').textContent='\u20B9 '+numWords(savings);
+
+    // Donut chart
+    drawDonut($('cv-donut'),[
+      {l:'Savings',v:savings,c:'#e11d48'},
+      {l:'SIP Total',v:totalSIP,c:'#f97316'},
+      {l:'Interest',v:Math.max(0,interestEarned),c:'#7c3aed'}
+    ]);
+
+    // Dual line chart — accumulation + drawdown
+    var projPts=[],needPts=[];
+    // Pre-retirement: accumulation phase
+    var runBal=savings;
+    for(var a=0;a<=ytr;a++){
+      projPts.push({v:runBal,lbl:''+( cAge+a)});
+      var neededAtAge=(expense*12*Math.pow(1+infl,a))*25;
+      needPts.push({v:neededAtAge,lbl:''+(cAge+a)});
+      if(a<ytr){
+        var sipThisY=stepUp?sip*12*Math.pow(1+stepR,a):sip*12;
+        runBal=(runBal+sipThisY)*(1+ret);
+      }
     }
-    function syncSliderAndInput(sliderElement, inputElement) {
-        sliderElement.addEventListener('input', function() { inputElement.value = sliderElement.value; calculateRetirement(); });
-        inputElement.addEventListener('input', function() {
-            const value = parseFloat(inputElement.value);
-            if (value >= parseFloat(sliderElement.min) && value <= parseFloat(sliderElement.max)) sliderElement.value = value;
-            calculateRetirement();
-        });
+    var retireIdx=ytr;
+    // Post-retirement: drawdown phase
+    var drawBal=projPts[projPts.length-1].v;
+    for(var p=1;p<=retYrs;p++){
+      var annExpP=futAnExp*Math.pow(1+infl,p-1);
+      var gp=drawBal*postRet;
+      drawBal=drawBal+gp-annExpP;
+      if(drawBal<0)drawBal=0;
+      projPts.push({v:drawBal,lbl:''+(rAge+p)});
+      var neededP=(expense*12*Math.pow(1+infl,ytr+p))*25;
+      needPts.push({v:neededP,lbl:''+(rAge+p)});
     }
-    syncSliderAndInput(elements.currentAgeSlider, elements.currentAgeValue);
-    syncSliderAndInput(elements.retirementAgeSlider, elements.retirementAgeValue);
-    syncSliderAndInput(elements.currentExpensesSlider, elements.currentExpensesValue);
-    syncSliderAndInput(elements.currentSavingsSlider, elements.currentSavingsValue);
-    syncSliderAndInput(elements.monthlySavingsSlider, elements.monthlySavingsValue);
-    syncSliderAndInput(elements.expectedReturnSlider, elements.expectedReturnValue);
-    syncSliderAndInput(elements.inflationSlider, elements.inflationValue);
-    syncSliderAndInput(elements.lifeExpectancySlider, elements.lifeExpectancyValue);
-    calculateRetirement();
+    drawDualLine($('cv-line'),projPts,needPts,retireIdx);
+
+    // Year-wise table (every 5 years pre-retirement + every 5 post-retirement + last 5 years)
+    var tb=$('tb-yearly');tb.innerHTML='';
+    var accBal=savings;
+    var tableRows=[];
+    for(var ty=0;ty<=ytr;ty++){
+      var sipTY=ty<ytr?(stepUp?sip*12*Math.pow(1+stepR,ty):sip*12):0;
+      var annExpTY=expense*12*Math.pow(1+infl,ty);
+      var neededTY=annExpTY*25;
+      var surpTY=accBal-neededTY;
+      tableRows.push({age:cAge+ty,bal:accBal,exp:annExpTY,sip:sipTY,surp:surpTY,phase:'pre'});
+      if(ty<ytr)accBal=(accBal+sipTY)*(1+ret);
+    }
+    var postBal2=accBal;
+    for(var py2=1;py2<=retYrs;py2++){
+      var annExpPY=futAnExp*Math.pow(1+infl,py2-1);
+      var gr=postBal2*postRet;
+      postBal2=postBal2+gr-annExpPY;
+      if(postBal2<0)postBal2=0;
+      tableRows.push({age:rAge+py2,bal:postBal2,exp:annExpPY,sip:0,surp:postBal2,phase:'post'});
+    }
+    // Filter: every 5 years + retirement age + last 5 years
+    var shown={};
+    tableRows.forEach(function(r,i){
+      var age=r.age;
+      var show=false;
+      if(age===cAge)show=true;
+      else if(age%5===0)show=true;
+      else if(age===rAge)show=true;
+      else if(i===tableRows.length-1)show=true;
+      else if(age>=life-5)show=true;
+      if(show&&!shown[age]){
+        shown[age]=true;
+        var cls='';
+        if(age===rAge)cls='milestone';
+        if(r.phase==='post'&&r.bal<=0)cls='depleted';
+        tb.innerHTML+='<tr class="'+cls+'"><td style="font-weight:600">'+(age===rAge?'\u{1F3AF} ':'')+age+'</td><td style="text-align:right;font-weight:700">'+fmtL(Math.round(r.bal))+'</td><td style="text-align:right;color:#d97706">'+fmtINR(Math.round(r.exp))+'</td><td style="text-align:right;color:'+(r.sip>0?'#059669':'#9ca3af')+'">'+(r.sip>0?fmtINR(Math.round(r.sip)):'\u2014')+'</td><td style="text-align:right;color:'+(r.surp>=0?'#059669':'#dc2626')+';font-weight:600">'+fmtL(Math.round(r.surp))+'</td></tr>';
+      }
+    });
+
+    // Milestones
+    $('ms-retire').textContent='Age '+rAge;
+    $('ms-retire-sub').textContent=ytr+' years from now';
+
+    // Hit 1 Crore milestone
+    var hit1Cr=null;
+    var mBal=savings;
+    for(var my=0;my<ytr;my++){
+      var mSip=stepUp?sip*12*Math.pow(1+stepR,my):sip*12;
+      mBal=(mBal+mSip)*(1+ret);
+      if(mBal>=10000000&&!hit1Cr){hit1Cr=cAge+my+1;break;}
+    }
+    if(!hit1Cr&&mBal>=10000000)hit1Cr=rAge;
+    $('ms-1cr').textContent=hit1Cr?'Age '+hit1Cr:'Not reached';
+    $('ms-1cr-sub').textContent=hit1Cr?(hit1Cr-cAge)+' years from now':'Increase SIP or timeline';
+
+    // Expenses exceed savings (when annual expense > annual SIP)
+    var exceedAge=null;
+    for(var ey=0;ey<ytr;ey++){
+      var aExp=expense*12*Math.pow(1+infl,ey);
+      var aSip=stepUp?sip*12*Math.pow(1+stepR,ey):sip*12;
+      if(aExp>aSip){exceedAge=cAge+ey;break;}
+    }
+    if(!exceedAge&&expense*12>sip*12)exceedAge=cAge;
+    $('ms-exceed').textContent=exceedAge?'Age '+exceedAge:'After retirement';
+    $('ms-exceed-sub').textContent=exceedAge?(exceedAge<=cAge?'Already exceeded':'In '+(exceedAge-cAge)+' years'):'SIP stays ahead of expenses';
+
+    // Corpus depletion
+    var depCard=$('ms-deplete-card');
+    if(corpusLastsAge<life){
+      $('ms-deplete').textContent='Age '+corpusLastsAge;
+      $('ms-deplete-sub').textContent=(corpusLastsAge-rAge)+' years after retirement';
+      depCard.className='ms-card warn-hl';
+    } else {
+      $('ms-deplete').textContent='Never (within plan)';
+      $('ms-deplete-sub').textContent='Corpus survives until age '+life;
+      depCard.className='ms-card green-hl';
+    }
+  }
+
+  /* ── Slider sync ── */
+  function pair(slId,inId){
+    var sl=$(slId),ip=$(inId);if(!sl||!ip)return;
+    setSl(sl,+sl.min,+sl.max,+sl.value);
+    sl.addEventListener('input',function(){ip.value=sl.value;setSl(sl,+sl.min,+sl.max,+sl.value);calc();});
+    ip.addEventListener('input',function(){sl.value=ip.value;setSl(sl,+sl.min,+sl.max,+ip.value);calc();});
+  }
+  pair('sl-cage','in-cage');
+  pair('sl-rage','in-rage');
+  pair('sl-life','in-life');
+  pair('sl-expense','in-expense');
+  pair('sl-savings','in-savings');
+  pair('sl-sip','in-sip');
+  pair('sl-return','in-return');
+  pair('sl-infl','in-infl');
+  pair('sl-postret','in-postret');
+
+  /* ── Toggle ── */
+  $('cb-stepup').addEventListener('change',function(){
+    this.closest('.tog').classList.toggle('on',this.checked);
+    calc();
   });
-  </script>
+
+  /* ── Tabs ── */
+  document.querySelectorAll('#ret-page .tab-b').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var card=this.closest('.rt-card');
+      card.querySelectorAll('.tab-b').forEach(function(b){b.classList.remove('act')});
+      card.querySelectorAll('.tab-p').forEach(function(p){p.classList.remove('act')});
+      this.classList.add('act');
+      $('tp-'+this.dataset.tab).classList.add('act');
+      if(this.dataset.tab==='growth')calc();
+    });
+  });
+
+  /* ── Init ── */
+  calc();
+  window.addEventListener('resize',calc);
+})();
+</script>
 </CalcLayout>
