@@ -2,343 +2,700 @@
 import CalcLayout from '../layouts/CalcLayout.astro';
 
 // SSR defaults
-const investment = 1000000;
-const monthlyWithdrawal = 8000;
-const annualReturn = 0.12;
+const investment = 2500000;
+const monthlyWithdrawal = 15000;
+const annualReturn = 0.10;
 const inflation = 0.06;
-const years = 20;
+const years = 25;
 const taxRate = 0.10;
 
 function fmt(n: number) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 }
 
+// SSR computation
 let bal = investment;
-let totalWithdrawals = 0, totalInterest = 0, totalTax = 0;
+let totalW = 0, totalI = 0, totalT = 0, corpusDepletedYear = 0;
+const rows: { y: number; open: number; wd: number; int: number; tax: number; close: number }[] = [];
 for (let y = 1; y <= years; y++) {
-  const annualWithdrawal = monthlyWithdrawal * 12 * Math.pow(1 + inflation, y - 1);
-  const interest = bal * annualReturn;
-  const tax = interest * taxRate;
-  bal = bal + (interest - tax) - annualWithdrawal;
-  if (bal < 0) bal = 0;
-  totalWithdrawals += annualWithdrawal;
-  totalInterest += interest;
-  totalTax += tax;
+  const open = bal;
+  const wd = monthlyWithdrawal * 12 * Math.pow(1 + inflation, y - 1);
+  const int = bal * annualReturn;
+  const tax = int * taxRate;
+  bal = bal + (int - tax) - wd;
+  if (bal < 0) { bal = 0; if (!corpusDepletedYear) corpusDepletedYear = y; }
+  totalW += wd; totalI += int; totalT += tax;
+  rows.push({ y, open, wd, int, tax, close: bal });
 }
+const safeWdRate = ((annualReturn - inflation) * 100).toFixed(1);
 ---
 <CalcLayout
-  title="Advanced SWP Calculator - AscentInvestor"
-  description="Calculate your Systematic Withdrawal Plan (SWP) with inflation adjustment and tax implications. Plan your retirement income with our advanced SWP calculator."
+  title="SWP Calculator 2025 — Systematic Withdrawal Plan with Inflation & Tax"
+  description="India's most advanced SWP calculator. Plan retirement withdrawals with inflation adjustment, tax on LTCG, corpus depletion analysis, safe withdrawal rate, and year-wise breakdown."
+  navCurrent="tools"
 >
-  <style is:global slot="head">
-.title{text-align:center;margin-bottom:2rem;position:relative;padding:3rem 1.5rem;background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 50%,#0ea5e9 100%);border-radius:1rem;overflow:hidden}
-.title::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
-.title h1{font-size:2.5rem;font-weight:800;color:white;margin-bottom:0.5rem;position:relative;z-index:1;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
-.title p{font-size:1.125rem;color:rgba(255,255,255,0.9);position:relative;z-index:1}
-.calc-grid{display:grid;grid-template-columns:1fr 2fr;gap:2rem;margin-bottom:2rem}
-@media (max-width:768px){.calc-grid{grid-template-columns:1fr}}
-.result-value.primary{color:#4f46e5}
-.result-value.success{color:#059669}
-.result-value.danger{color:#dc2626}
-.chart-container{width:100%;height:300px;margin:2rem 0;background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-.chart{width:100%;height:100%}
-  </style>
+<style is:global slot="head">
+/* ── Page scope ── */
+#swp-page *{box-sizing:border-box}
+#swp-page h1,#swp-page h2,#swp-page h3,#swp-page h4{margin:0;font-weight:700}
+#swp-page p{margin:0}
+#swp-page button{cursor:pointer}
+#swp-page{padding:1.5rem 0 4rem;background:#f4f5f7;min-height:100vh}
+.sw-wrap{max-width:1200px;margin:0 auto;padding:0 1rem}
 
-  <main class="container main">
-    <div class="title">
-      <h1>Advanced SWP Calculator</h1>
-      <p>Calculate your Systematic Withdrawal Plan with inflation adjustment and tax implications</p>
+/* ── Hero ── */
+.sw-hero{background:linear-gradient(135deg,#0e7490 0%,#0891b2 45%,#6366f1 100%);border-radius:1.25rem;padding:2.5rem 2rem;margin-bottom:1.75rem;text-align:center;position:relative;overflow:hidden}
+.sw-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(255,255,255,0.15),transparent 60%);pointer-events:none}
+.sw-hero h1{font-size:clamp(1.6rem,3.5vw,2.25rem)!important;font-weight:800!important;color:#fff!important;letter-spacing:-0.02em;margin-bottom:0.4rem}
+.sw-hero p{color:rgba(255,255,255,0.85)!important;font-size:1rem;margin-bottom:1rem}
+.hero-chips{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.72rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:99px;letter-spacing:0.03em}
+
+/* ── 2-col ── */
+.sw-body{display:grid;grid-template-columns:420px 1fr;gap:1.5rem;align-items:start}
+@media(max-width:900px){.sw-body{grid-template-columns:1fr}}
+
+/* ── Card ── */
+.sw-card{background:#fff;border-radius:1rem;padding:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.04)}
+
+/* ── Form ── */
+.fg{margin-bottom:1.25rem}
+.fg>label{display:block;font-size:0.8rem;font-weight:600;color:#374151;margin-bottom:0.4rem;letter-spacing:0.02em;text-transform:uppercase}
+.fg>input[type=number],
+.fg>select{width:100%!important;padding:0.65rem 0.875rem;border:1.5px solid #e5e7eb!important;border-radius:0.625rem;font-size:0.95rem;color:#111827;background:#fff;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.fg>input[type=number]:focus,
+.fg>select:focus{border-color:#0891b2!important;box-shadow:0 0 0 3px rgba(8,145,178,0.12)!important}
+.fg>select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.75rem center;padding-right:2.5rem}
+.fg .hint{font-size:0.75rem;color:#6b7280;margin-top:0.35rem}
+
+/* ── Sliders ── */
+.srow{display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;overflow:hidden}
+.srow input[type=range]{flex:1;height:5px;border-radius:99px;background:linear-gradient(to right,#0891b2 var(--pct,50%),#e5e7eb var(--pct,50%));outline:none;-webkit-appearance:none;appearance:none;border:none!important;box-shadow:none!important}
+.srow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#0891b2;cursor:pointer;box-shadow:0 1px 4px rgba(8,145,178,0.4)}
+.srow input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#0891b2;cursor:pointer;border:none}
+.srow .nb{width:110px!important;min-width:110px!important;max-width:110px!important;flex:0 0 110px!important;padding:0.5rem 0.65rem;border:1.5px solid #e5e7eb!important;border-radius:0.5rem;font-size:0.9rem;font-weight:600;color:#111827;text-align:right;outline:none;background:#fff;-webkit-appearance:none;appearance:none}
+.srow .nb:focus{border-color:#0891b2!important;box-shadow:0 0 0 3px rgba(8,145,178,0.12)!important}
+
+/* ── Section divider ── */
+.sec-lbl{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9ca3af;padding:0.75rem 0 0.25rem;margin-bottom:0.25rem;border-top:1px solid #f3f4f6;margin-top:0.25rem}
+.sec-lbl:first-child{border-top:none;margin-top:0;padding-top:0}
+
+/* ── Toggle ── */
+.tog{display:flex;align-items:center;gap:0.6rem;background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:0.75rem;padding:0.75rem;cursor:pointer;transition:all .2s;user-select:none;margin-bottom:1.25rem}
+.tog.on{background:#ccfbf1;border-color:#0891b2}
+.tog-sw{position:relative;width:38px;height:21px;flex-shrink:0}
+.tog-sw input{position:absolute;opacity:0;width:0;height:0}
+.tog-track{position:absolute;inset:0;background:#d1d5db;border-radius:99px;transition:.25s}
+.tog-track::before{content:'';position:absolute;width:15px;height:15px;top:3px;left:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.tog-sw input:checked~.tog-track{background:#0891b2}
+.tog-sw input:checked~.tog-track::before{transform:translateX(17px)}
+.tog-lbl{font-size:0.78rem;font-weight:600;color:#4b5563;line-height:1.3}
+
+/* ── Result cards ── */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.875rem;margin-bottom:1rem}
+.res-c{border-radius:0.875rem;padding:1rem 1.125rem;border:1.5px solid #f3f4f6}
+.res-c.primary{background:linear-gradient(135deg,#ecfeff,#f0fdfa);border-color:#67e8f9}
+.res-c.success{background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-color:#6ee7b7}
+.res-c.warn{background:linear-gradient(135deg,#fff7ed,#fffbeb);border-color:#fcd34d}
+.res-c.danger{background:linear-gradient(135deg,#fff1f2,#fef2f2);border-color:#fca5a5}
+.res-c.neutral{background:#f8fafc;border-color:#e2e8f0}
+.res-c.wide{grid-column:span 2}
+.res-lbl{font-size:0.7rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;margin-bottom:0.3rem}
+.res-val{font-size:1.25rem;font-weight:800;letter-spacing:-0.02em}
+.res-val.cyan{color:#0e7490}
+.res-val.green{color:#059669}
+.res-val.orange{color:#d97706}
+.res-val.red{color:#dc2626}
+.res-val.blue{color:#1d4ed8}
+
+/* ── Safe WD badge ── */
+.swr-strip{display:flex;gap:0.75rem;align-items:stretch;margin:0.5rem 0 1rem}
+.swr-card{flex:1;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.75rem;padding:0.75rem 0.5rem}
+.swr-lbl{font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#6b7280;margin-bottom:0.2rem}
+.swr-val{font-size:1.1rem;font-weight:800;color:#0e7490}
+.swr-card.alert{border-color:#fca5a5;background:#fff1f2}
+.swr-card.alert .swr-val{color:#dc2626}
+.swr-card.ok{border-color:#6ee7b7;background:#ecfdf5}
+.swr-card.ok .swr-val{color:#059669}
+
+/* ── Depletion warning ── */
+.deplete-warn{background:#fff7ed;border:1.5px solid #fb923c;border-radius:0.75rem;padding:0.875rem;text-align:center;margin-bottom:1rem}
+.deplete-warn.ok{background:#ecfdf5;border-color:#22c55e}
+.deplete-warn p{font-size:0.85rem;font-weight:600}
+.deplete-warn .icon{font-size:1.5rem;display:block;margin-bottom:0.25rem}
+
+/* ── Chart ── */
+.chart-box{background:#f8fafc;border-radius:0.75rem;padding:1rem}
+.chart-ttl{font-size:0.72rem;font-weight:700;color:#374151;text-align:center;margin-bottom:0.5rem;letter-spacing:0.04em;text-transform:uppercase}
+
+/* ── Tabs ── */
+.tabs{display:flex;border-bottom:2px solid #e5e7eb;overflow-x:auto;scrollbar-width:none;gap:0;margin-bottom:1.25rem}
+.tabs::-webkit-scrollbar{display:none}
+.tab-b{background:none!important;border:none!important;padding:0.7rem 1rem;font-size:0.82rem;font-weight:600;color:#6b7280;cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent!important;margin-bottom:-2px;transition:color .2s,border-color .2s;flex-shrink:0}
+.tab-b.act{color:#0891b2!important;border-bottom-color:#0891b2!important}
+.tab-p{display:none}
+.tab-p.act{display:block}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto;margin-top:0.5rem}
+.tbl{width:100%;border-collapse:collapse;font-size:0.82rem}
+.tbl th{background:#f9fafb;padding:0.6rem 0.75rem;font-size:0.72rem;font-weight:700;color:#374151;letter-spacing:0.05em;text-transform:uppercase;border-bottom:1.5px solid #e5e7eb;white-space:nowrap;text-align:left}
+.tbl td{padding:0.6rem 0.75rem;border-bottom:1px solid #f3f4f6;color:#374151}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+.tbl tr.depleted td{background:#fff7ed;color:#c2410c}
+
+/* ── Callout ── */
+.callout{border-radius:0.75rem;padding:0.875rem 1rem;margin-top:0.875rem}
+.callout.amber{background:#fffbeb;border:1px solid #fde68a}
+.callout.blue{background:#eff6ff;border:1px solid #bfdbfe}
+.callout.green{background:#f0fdf4;border:1px solid #bbf7d0}
+.callout.teal{background:#f0fdfa;border:1px solid #99f6e4}
+.callout h4{font-size:0.8rem;font-weight:700;margin-bottom:0.4rem;display:flex;align-items:center;gap:0.35rem}
+.callout.amber h4{color:#92400e}
+.callout.blue h4{color:#1e40af}
+.callout.green h4{color:#166534}
+.callout.teal h4{color:#115e59}
+.callout ul{margin:0.3rem 0 0 1rem;padding:0}
+.callout li{font-size:0.78rem;line-height:1.65;color:#374151}
+
+/* ── Fund category grid ── */
+.fund-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-top:0.5rem}
+.fund-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.75rem;padding:0.875rem;text-align:center}
+.fund-card h5{font-size:0.72rem;font-weight:700;color:#374151;margin:0 0 0.4rem;text-transform:uppercase;letter-spacing:0.04em}
+.fund-card .rate{font-size:1rem;font-weight:800;color:#0891b2}
+.fund-card .meta{font-size:0.68rem;color:#6b7280;margin-top:0.2rem}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .res-grid{grid-template-columns:1fr}
+  .res-c.wide{grid-column:span 1}
+  .swr-strip{flex-direction:column}
+  .fund-grid{grid-template-columns:1fr}
+}
+</style>
+
+<div id="swp-page">
+<div class="sw-wrap">
+
+  <!-- Hero -->
+  <div class="sw-hero">
+    <h1>SWP Calculator 2025</h1>
+    <p>Plan systematic withdrawals from mutual funds with inflation, tax & corpus depletion analysis</p>
+    <div class="hero-chips">
+      <span class="hero-chip">Inflation-adjusted</span>
+      <span class="hero-chip">LTCG Tax</span>
+      <span class="hero-chip">Corpus Depletion</span>
+      <span class="hero-chip">Safe Withdrawal Rate</span>
+      <span class="hero-chip">Year-wise Breakdown</span>
     </div>
+  </div>
 
-    <div class="calc-grid">
-      <div class="card">
-        <div class="form-group">
-          <label for="investmentValue">Initial Investment Amount</label>
-          <input type="number" id="investmentValue" value="1000000" min="1000" max="100000000" step="1000">
-          <div class="slider-container">
-            <input type="range" id="investmentSlider" min="100000" max="10000000" value="1000000" step="10000" class="slider">
-          </div>
-          <p id="investmentInWords" style="font-size:0.875rem;color:#6b7280;margin-top:0.5rem"></p>
+  <div class="sw-body">
+
+    <!-- LEFT: Inputs -->
+    <div class="sw-card">
+      <div class="sec-lbl">Investment</div>
+      <div class="fg">
+        <label>Total Corpus / Initial Investment (₹)</label>
+        <div class="srow">
+          <input type="range" id="sl-invest" min="100000" max="50000000" value={investment} step="50000">
+          <input type="number" id="in-invest" class="nb" value={investment} min="10000" max="100000000" step="10000">
         </div>
-        <div class="form-group">
-          <label for="withdrawalValue">Monthly Withdrawal Amount</label>
-          <input type="number" id="withdrawalValue" value="8000" min="500" max="500000" step="500">
-          <div class="slider-container">
-            <input type="range" id="withdrawalSlider" min="1000" max="100000" value="8000" step="500" class="slider">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="returnValue">Annual Return (%)</label>
-          <input type="number" id="returnValue" value="12" min="1" max="30" step="0.5">
-          <div class="slider-container">
-            <input type="range" id="returnSlider" min="1" max="30" value="12" step="0.5" class="slider">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="inflationValue">Inflation Rate (%)</label>
-          <input type="number" id="inflationValue" value="6" min="0" max="15" step="0.5">
-          <div class="slider-container">
-            <input type="range" id="inflationSlider" min="0" max="15" value="6" step="0.5" class="slider">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="timePeriodValue">Time Period (Years)</label>
-          <input type="number" id="timePeriodValue" value="20" min="1" max="50" step="1">
-          <div class="slider-container">
-            <input type="range" id="timePeriodSlider" min="1" max="50" value="20" step="1" class="slider">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="taxRateValue">Tax Rate on Gains (%)</label>
-          <input type="number" id="taxRateValue" value="10" min="0" max="30" step="0.5">
-          <div class="slider-container">
-            <input type="range" id="taxRateSlider" min="0" max="30" value="10" step="0.5" class="slider">
-          </div>
+        <div class="hint" id="invest-words"></div>
+      </div>
+
+      <div class="fg">
+        <label>Monthly Withdrawal (₹)</label>
+        <div class="srow">
+          <input type="range" id="sl-wd" min="1000" max="500000" value={monthlyWithdrawal} step="500">
+          <input type="number" id="in-wd" class="nb" value={monthlyWithdrawal} min="500" max="1000000" step="500">
         </div>
       </div>
 
-      <div class="card">
-        <div class="results">
-          <div class="result-item">
-            <div class="result-label">Total Withdrawals</div>
-            <div id="totalWithdrawals" class="result-value">{fmt(Math.round(totalWithdrawals))}</div>
-          </div>
-          <div class="result-item">
-            <div class="result-label">Total Interest Earned</div>
-            <div id="totalInterest" class="result-value success">{fmt(Math.round(totalInterest))}</div>
-          </div>
-          <div class="result-item">
-            <div class="result-label">Total Tax Paid</div>
-            <div id="totalTax" class="result-value danger">{fmt(Math.round(totalTax))}</div>
-          </div>
-          <div class="result-item">
-            <div class="result-label">Final Corpus</div>
-            <div id="finalCorpus" class="result-value primary">{fmt(Math.round(bal))}</div>
-          </div>
+      <label class="tog" id="tog-inflate">
+        <span class="tog-sw">
+          <input type="checkbox" id="cb-inflate" checked>
+          <span class="tog-track"></span>
+        </span>
+        <span class="tog-lbl">Increase withdrawal with inflation yearly<br><small style="font-weight:400;color:#9ca3af">Maintains purchasing power</small></span>
+      </label>
+
+      <div class="sec-lbl">Returns & duration</div>
+
+      <div class="fg">
+        <label>Expected Annual Return (%)</label>
+        <div class="srow">
+          <input type="range" id="sl-return" min="1" max="20" value="10" step="0.5">
+          <input type="number" id="in-return" class="nb" value="10" min="0.5" max="30" step="0.5">
         </div>
-        <div class="chart-container">
-          <canvas id="swpChart" class="chart"></canvas>
+      </div>
+
+      <div class="fg">
+        <label>Expected Inflation Rate (%)</label>
+        <div class="srow">
+          <input type="range" id="sl-inflation" min="0" max="12" value="6" step="0.5">
+          <input type="number" id="in-inflation" class="nb" value="6" min="0" max="15" step="0.5">
         </div>
+      </div>
+
+      <div class="fg">
+        <label>Withdrawal Period (years)</label>
+        <div class="srow">
+          <input type="range" id="sl-years" min="1" max="50" value={years} step="1">
+          <input type="number" id="in-years" class="nb" value={years} min="1" max="50" step="1">
+        </div>
+      </div>
+
+      <div class="sec-lbl">Tax on gains</div>
+
+      <div class="fg">
+        <label>Fund Type</label>
+        <select id="in-fundtype">
+          <option value="equity" selected>Equity / Hybrid Equity MF</option>
+          <option value="debt">Debt / Liquid / FoF MF</option>
+        </select>
+      </div>
+
+      <div class="fg">
+        <label>Tax Rate on Gains (%)</label>
+        <div class="srow">
+          <input type="range" id="sl-tax" min="0" max="30" value="10" step="0.5">
+          <input type="number" id="in-tax" class="nb" value="10" min="0" max="30" step="0.5">
+        </div>
+        <div class="hint" id="tax-hint">Equity LTCG: 12.5% above ₹1.25L; STCG: 20%</div>
       </div>
     </div>
 
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Year</th>
-            <th>Opening Balance</th>
-            <th>Withdrawal</th>
-            <th>Interest Earned</th>
-            <th>Tax Paid</th>
-            <th>Closing Balance</th>
-          </tr>
-        </thead>
-        <tbody id="yearlyBreakdownBody">
-          <tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7280">Loading breakdown...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
+    <!-- RIGHT: Results -->
+    <div>
+      <!-- Depletion indicator -->
+      <div id="deplete-box" class="deplete-warn ok">
+        <span class="icon" id="deplete-icon">✅</span>
+        <p id="deplete-msg">Corpus lasts the full {years}-year period with ₹{Math.round(bal).toLocaleString('en-IN')} remaining</p>
+      </div>
 
-  <script is:inline defer>
-  document.addEventListener('DOMContentLoaded', function() {
-    function drawChart(canvas, data, options = {}) {
-        const ctx = canvas.getContext('2d');
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * 2;
-        canvas.height = rect.height * 2;
-        ctx.scale(2, 2);
-        const width = rect.width;
-        const height = rect.height;
-        const padding = { top: 20, right: 20, bottom: 60, left: 80 };
-        const chartWidth = width - padding.left - padding.right;
-        const chartHeight = height - padding.top - padding.bottom;
-        ctx.clearRect(0, 0, width, height);
-        if (!data || data.length === 0) return;
-        const maxValue = Math.max(...data.map(d => d.value));
-        const minValue = Math.min(...data.map(d => d.value));
-        const valueRange = maxValue - minValue;
-        const adjustedMax = maxValue + (valueRange * 0.1);
-        const adjustedMin = Math.max(0, minValue - (valueRange * 0.1));
-        ctx.strokeStyle = '#f0f0f0';
-        ctx.lineWidth = 1;
-        const numHorizontalLines = 5;
-        for (let i = 0; i <= numHorizontalLines; i++) {
-            const y = padding.top + (chartHeight * i / numHorizontalLines);
-            ctx.beginPath();
-            ctx.moveTo(padding.left, y);
-            ctx.lineTo(padding.left + chartWidth, y);
-            ctx.stroke();
-        }
-        const numVerticalLines = Math.min(data.length - 1, 10);
-        for (let i = 0; i <= numVerticalLines; i++) {
-            const x = padding.left + (chartWidth * i / numVerticalLines);
-            ctx.beginPath();
-            ctx.moveTo(x, padding.top);
-            ctx.lineTo(x, padding.top + chartHeight);
-            ctx.stroke();
-        }
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(padding.left, padding.top);
-        ctx.lineTo(padding.left, padding.top + chartHeight);
-        ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
-        ctx.stroke();
-        ctx.fillStyle = '#666';
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        for (let i = 0; i <= numHorizontalLines; i++) {
-            const value = adjustedMax - ((adjustedMax - adjustedMin) * i / numHorizontalLines);
-            const y = padding.top + (chartHeight * i / numHorizontalLines);
-            const label = value >= 10000000 ? `₹${(value/10000000).toFixed(1)}Cr` : value >= 100000 ? `₹${(value/100000).toFixed(1)}L` : `₹${(value/1000).toFixed(0)}K`;
-            ctx.fillText(label, padding.left - 10, y);
-        }
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        const labelStep = Math.max(1, Math.floor(data.length / 10));
-        for (let i = 0; i < data.length; i += labelStep) {
-            const x = padding.left + (chartWidth * i / (data.length - 1));
-            const year = data[i].year || (new Date().getFullYear() + i);
-            ctx.fillText(year.toString(), x, padding.top + chartHeight + 10);
-        }
-        if ((data.length - 1) % labelStep !== 0) {
-            const x = padding.left + chartWidth;
-            const year = data[data.length - 1].year || (new Date().getFullYear() + data.length - 1);
-            ctx.fillText(year.toString(), x, padding.top + chartHeight + 10);
-        }
-        if (options.title) {
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 14px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillText(options.title, width / 2, 5);
-        }
-        ctx.strokeStyle = options.color || '#4f46e5';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        data.forEach((point, index) => {
-            const x = padding.left + (chartWidth * index / (data.length - 1));
-            const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
-            if (index === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
-        });
-        ctx.stroke();
-        ctx.fillStyle = options.color || '#4f46e5';
-        data.forEach((point, index) => {
-            const x = padding.left + (chartWidth * index / (data.length - 1));
-            const y = padding.top + chartHeight - ((point.value - adjustedMin) / (adjustedMax - adjustedMin)) * chartHeight;
-            ctx.beginPath();
-            ctx.arc(x, y, 4, 0, 2 * Math.PI);
-            ctx.fill();
-        });
-    }
-    const elements = {
-        investmentSlider: document.getElementById('investmentSlider'),
-        investmentValue: document.getElementById('investmentValue'),
-        investmentInWords: document.getElementById('investmentInWords'),
-        withdrawalSlider: document.getElementById('withdrawalSlider'),
-        withdrawalValue: document.getElementById('withdrawalValue'),
-        returnSlider: document.getElementById('returnSlider'),
-        returnValue: document.getElementById('returnValue'),
-        inflationSlider: document.getElementById('inflationSlider'),
-        inflationValue: document.getElementById('inflationValue'),
-        timePeriodSlider: document.getElementById('timePeriodSlider'),
-        timePeriodValue: document.getElementById('timePeriodValue'),
-        taxRateSlider: document.getElementById('taxRateSlider'),
-        taxRateValue: document.getElementById('taxRateValue'),
-        totalWithdrawals: document.getElementById('totalWithdrawals'),
-        totalInterest: document.getElementById('totalInterest'),
-        totalTax: document.getElementById('totalTax'),
-        finalCorpus: document.getElementById('finalCorpus'),
-        yearlyBreakdownBody: document.getElementById('yearlyBreakdownBody'),
-        swpChart: document.getElementById('swpChart')
-    };
-    function formatCurrency(num) {
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num);
-    }
-    function numberToWords(num) {
-        if (num === 0) return 'Zero Rupees';
-        const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-        const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-        const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-        function convertLessThanThousand(n) {
-            let result = '';
-            if (n >= 100) { result += ones[Math.floor(n / 100)] + ' Hundred '; n %= 100; }
-            if (n >= 20) { result += tens[Math.floor(n / 10)] + ' '; n %= 10; }
-            else if (n >= 10) { result += teens[n - 10] + ' '; n = 0; }
-            if (n > 0) { result += ones[n] + ' '; }
-            return result;
-        }
-        let result = '';
-        if (num >= 10000000) { result += convertLessThanThousand(Math.floor(num / 10000000)) + 'Crore '; num %= 10000000; }
-        if (num >= 100000) { result += convertLessThanThousand(Math.floor(num / 100000)) + 'Lakh '; num %= 100000; }
-        if (num >= 1000) { result += convertLessThanThousand(Math.floor(num / 1000)) + 'Thousand '; num %= 1000; }
-        if (num > 0) { result += convertLessThanThousand(num); }
-        return result.trim() + ' Rupees';
-    }
-    function updateBreakdownTable(yearlyData) {
-        elements.yearlyBreakdownBody.innerHTML = '';
-        if (yearlyData.length === 0) {
-            elements.yearlyBreakdownBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7280">Enter details to see breakdown</td></tr>`;
-            return;
-        }
-        yearlyData.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td style="font-weight:600">${item.year}</td><td style="text-align:right">${formatCurrency(item.openingBalance)}</td><td style="text-align:right">${formatCurrency(item.withdrawal)}</td><td style="text-align:right;color:#059669">${formatCurrency(item.interestEarned)}</td><td style="text-align:right;color:#dc2626">${formatCurrency(item.taxPaid)}</td><td style="text-align:right;font-weight:600">${formatCurrency(item.closingBalance)}</td>`;
-            elements.yearlyBreakdownBody.appendChild(row);
-        });
-    }
-    function calculateSWP() {
-        try {
-            const P = parseFloat(elements.investmentValue.value) || 0;
-            const monthlyWithdrawal = parseFloat(elements.withdrawalValue.value) || 0;
-            const annualReturn = parseFloat(elements.returnValue.value) / 100 || 0;
-            const inflation = parseFloat(elements.inflationValue.value) / 100 || 0;
-            const years = parseFloat(elements.timePeriodValue.value) || 0;
-            const taxRate = parseFloat(elements.taxRateValue.value) / 100 || 0;
-            if (P <= 0 || monthlyWithdrawal <= 0 || annualReturn <= 0 || years <= 0) { updateBreakdownTable([]); return; }
-            let yearlyData = [];
-            let currentBalance = P;
-            let totalWithdrawals = 0, totalInterest = 0, totalTax = 0;
-            for (let year = 1; year <= years; year++) {
-                const openingBalance = currentBalance;
-                const annualWithdrawal = monthlyWithdrawal * 12 * Math.pow(1 + inflation, year - 1);
-                const interestEarned = openingBalance * annualReturn;
-                const taxPaid = interestEarned * taxRate;
-                const netInterest = interestEarned - taxPaid;
-                currentBalance = openingBalance + netInterest - annualWithdrawal;
-                if (currentBalance < 0) currentBalance = 0;
-                totalWithdrawals += annualWithdrawal;
-                totalInterest += interestEarned;
-                totalTax += taxPaid;
-                yearlyData.push({ year: `Year ${year}`, openingBalance, withdrawal: annualWithdrawal, interestEarned, taxPaid, closingBalance: currentBalance, corpus: currentBalance });
-            }
-            elements.totalWithdrawals.textContent = formatCurrency(totalWithdrawals);
-            elements.totalInterest.textContent = formatCurrency(totalInterest);
-            elements.totalTax.textContent = formatCurrency(totalTax);
-            elements.finalCorpus.textContent = formatCurrency(currentBalance);
-            updateBreakdownTable(yearlyData);
-            drawChart(elements.swpChart, yearlyData.map((data, index) => ({ value: data.corpus, year: new Date().getFullYear() + index })), { title: 'Portfolio Value Over Time', color: '#4f46e5' });
-        } catch(error) { console.error("Error in calculation:", error); }
-    }
-    Object.keys(elements).forEach(key => {
-        if (key.includes('Slider') || key.includes('Value')) {
-            const element = elements[key];
-            if (element) {
-                element.addEventListener('input', () => {
-                    const baseKey = key.replace('Slider', '').replace('Value', '');
-                    if (key.includes('Slider') && elements[baseKey + 'Value']) elements[baseKey + 'Value'].value = element.value;
-                    if (key.includes('Value') && elements[baseKey + 'Slider']) elements[baseKey + 'Slider'].value = element.value;
-                    if (baseKey === 'investment') elements.investmentInWords.textContent = numberToWords(parseInt(element.value));
-                    calculateSWP();
-                });
-            }
-        }
+      <!-- Results cards -->
+      <div class="sw-card" style="margin-bottom:1.25rem">
+        <div class="res-grid">
+          <div class="res-c neutral">
+            <div class="res-lbl">Initial Corpus</div>
+            <div id="rv-invest" class="res-val">{fmt(investment)}</div>
+          </div>
+          <div class="res-c primary">
+            <div class="res-lbl">Final Corpus</div>
+            <div id="rv-corpus" class="res-val cyan">{fmt(Math.round(bal))}</div>
+          </div>
+          <div class="res-c success">
+            <div class="res-lbl">Total Withdrawn</div>
+            <div id="rv-withdrawn" class="res-val green">{fmt(Math.round(totalW))}</div>
+          </div>
+          <div class="res-c success">
+            <div class="res-lbl">Interest Earned</div>
+            <div id="rv-interest" class="res-val green">{fmt(Math.round(totalI))}</div>
+          </div>
+          <div class="res-c danger">
+            <div class="res-lbl">Tax Paid</div>
+            <div id="rv-tax" class="res-val red">{fmt(Math.round(totalT))}</div>
+          </div>
+          <div class="res-c warn">
+            <div class="res-lbl">Effective Monthly Income</div>
+            <div id="rv-effmonth" class="res-val orange">{fmt(monthlyWithdrawal)}</div>
+          </div>
+        </div>
+
+        <!-- Safe WD strip -->
+        <div class="swr-strip">
+          <div class="swr-card ok" id="swr-pct-card">
+            <div class="swr-lbl">Your Withdrawal Rate</div>
+            <div id="swr-pct" class="swr-val">{((monthlyWithdrawal * 12 / investment) * 100).toFixed(1)}%</div>
+          </div>
+          <div class="swr-card">
+            <div class="swr-lbl">Safe WD Rate (4% rule)</div>
+            <div class="swr-val">4.0%</div>
+          </div>
+          <div class="swr-card">
+            <div class="swr-lbl">Real Return (post-inflation)</div>
+            <div id="swr-real" class="swr-val">{safeWdRate}%</div>
+          </div>
+        </div>
+
+        <!-- Donut chart -->
+        <div class="chart-box" style="margin-top:0.5rem">
+          <div class="chart-ttl">Corpus Allocation</div>
+          <canvas id="cv-donut" style="width:100%;height:180px;display:block"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="sw-card">
+        <div class="tabs" role="tablist">
+          <button class="tab-b act" data-tab="chart" role="tab">📈 Corpus Over Time</button>
+          <button class="tab-b" data-tab="yearly" role="tab">📋 Year-wise</button>
+          <button class="tab-b" data-tab="strategy" role="tab">💡 SWP Strategy</button>
+          <button class="tab-b" data-tab="tax" role="tab">📌 Tax Rules</button>
+          <button class="tab-b" data-tab="funds" role="tab">🏦 Best Funds</button>
+        </div>
+
+        <!-- Chart -->
+        <div class="tab-p act" id="tp-chart">
+          <div class="chart-box" style="background:#fff;border:1px solid #f3f4f6">
+            <div class="chart-ttl">Corpus value over time (with withdrawals)</div>
+            <canvas id="cv-line" style="width:100%;height:280px;display:block"></canvas>
+          </div>
+        </div>
+
+        <!-- Yearly -->
+        <div class="tab-p" id="tp-yearly">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th style="text-align:right">Opening</th>
+                  <th style="text-align:right">Withdrawal</th>
+                  <th style="text-align:right">Interest</th>
+                  <th style="text-align:right">Tax</th>
+                  <th style="text-align:right">Closing</th>
+                </tr>
+              </thead>
+              <tbody id="tb-yearly">
+                {rows.map(r => (
+                  <tr class={r.close <= 0 ? 'depleted' : ''}>
+                    <td style="font-weight:600">Year {r.y}</td>
+                    <td style="text-align:right">{fmt(Math.round(r.open))}</td>
+                    <td style="text-align:right;color:#d97706">{fmt(Math.round(r.wd))}</td>
+                    <td style="text-align:right;color:#059669;font-weight:600">{fmt(Math.round(r.int))}</td>
+                    <td style="text-align:right;color:#dc2626">{fmt(Math.round(r.tax))}</td>
+                    <td style="text-align:right;font-weight:700">{fmt(Math.round(r.close))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Strategy -->
+        <div class="tab-p" id="tp-strategy">
+          <div class="callout teal">
+            <h4>🎯 The 4% Rule (Trinity Study)</h4>
+            <ul>
+              <li>Withdraw <strong>4% of your initial corpus per year</strong> — adjusted for inflation each year</li>
+              <li>For your corpus of {fmt(investment)}, that's {fmt(Math.round(investment * 0.04 / 12))}/month</li>
+              <li>Historically, this strategy has a <strong>95%+ success rate</strong> over 30-year periods (US data, global data similar)</li>
+              <li>In Indian context, higher returns but higher inflation — 3.5%–4.5% is a safer band</li>
+            </ul>
+          </div>
+          <div class="callout blue" style="margin-top:0.75rem">
+            <h4>📊 Bucket Strategy for SWP</h4>
+            <ul>
+              <li><strong>Bucket 1 (1–3 years):</strong> Liquid / ultra-short debt funds — for current withdrawals. Low risk.</li>
+              <li><strong>Bucket 2 (3–7 years):</strong> Short-duration debt / balanced advantage funds — moderate growth.</li>
+              <li><strong>Bucket 3 (7+ years):</strong> Equity large-cap / flexi-cap funds — for long-term growth to replenish Buckets 1 & 2.</li>
+              <li>Rebalance yearly: move gains from Bucket 3 → 2 → 1 as funds are depleted</li>
+            </ul>
+          </div>
+          <div class="callout green" style="margin-top:0.75rem">
+            <h4>💡 Tips for sustainable withdrawals</h4>
+            <ul>
+              <li>Start with SWP from <strong>debt portion</strong> of portfolio during market downturns (avoid selling equity at a loss)</li>
+              <li>If markets are up 15%+, consider <strong>rebalancing profit</strong> into debt fund before withdrawing</li>
+              <li>Keep <strong>6–12 months withdrawal</strong> in savings/liquid fund as buffer</li>
+              <li>Review SWP amount every 2–3 years — reduce if corpus is depleting faster than expected</li>
+              <li>Consider <strong>annuity for base expenses</strong> + SWP for flexible expenses</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Tax -->
+        <div class="tab-p" id="tp-tax">
+          <div class="callout amber">
+            <h4>📌 Tax on SWP — How it works</h4>
+            <ul>
+              <li>SWP = partial redemption of mutual fund units. <strong>Only the gains portion is taxed</strong>, not the full amount.</li>
+              <li>Gain per withdrawal = Withdrawal × (1 − Cost/NAV). FIFO method applies.</li>
+              <li><strong>Equity MF (LTCG):</strong> 12.5% on gains above ₹1.25L/year (holding &gt;12 months) — Budget 2024 rates</li>
+              <li><strong>Equity MF (STCG):</strong> 20% if redeemed within 12 months</li>
+              <li><strong>Debt MF:</strong> Gains taxed at your income tax slab rate (no LTCG benefit post Apr 2023)</li>
+              <li><strong>ELSS:</strong> 3-year lock-in; LTCG taxed at 12.5% above ₹1.25L</li>
+            </ul>
+          </div>
+          <div class="callout blue" style="margin-top:0.75rem">
+            <h4>💡 Tax optimisation tips</h4>
+            <ul>
+              <li>Stay below ₹1.25L LTCG per year to pay <strong>zero tax</strong> on equity gains</li>
+              <li>For ₹1.25L in LTCG, your corpus needs to have grown ~30–40% — plan accordingly</li>
+              <li>Book LTCG ₹1.25L per FY by partial redemption even if you don't need the cash (reinvest next day = tax harvesting)</li>
+              <li>Use <strong>SWP from debt fund</strong> for regular income if you're in a lower tax slab</li>
+              <li>Combine SWP from equity + debt to spread tax liability across fund types</li>
+            </ul>
+          </div>
+          <div class="tbl-wrap" style="margin-top:0.75rem">
+            <table class="tbl">
+              <thead><tr><th>Fund Type</th><th>Holding</th><th>Tax Rate</th><th>Exemption</th></tr></thead>
+              <tbody>
+                <tr><td style="font-weight:600">Equity MF</td><td>&gt;12 months (LTCG)</td><td style="color:#059669;font-weight:700">12.5%</td><td>₹1.25L/yr exempt</td></tr>
+                <tr><td style="font-weight:600">Equity MF</td><td>&lt;12 months (STCG)</td><td style="color:#d97706;font-weight:700">20%</td><td>None</td></tr>
+                <tr><td style="font-weight:600">Debt MF</td><td>Any duration</td><td style="color:#dc2626;font-weight:700">Slab rate</td><td>None (post Apr 2023)</td></tr>
+                <tr><td style="font-weight:600">Hybrid Equity (&gt;65%)</td><td>&gt;12 months</td><td style="color:#059669;font-weight:700">12.5%</td><td>₹1.25L/yr exempt</td></tr>
+                <tr><td style="font-weight:600">Hybrid Debt (&lt;65%)</td><td>Any</td><td style="color:#dc2626;font-weight:700">Slab rate</td><td>None</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Funds -->
+        <div class="tab-p" id="tp-funds">
+          <p style="font-size:0.82rem;color:#6b7280;margin-bottom:0.875rem">Popular fund categories for SWP (indicative 10-year CAGR):</p>
+          <div class="fund-grid">
+            <div class="fund-card">
+              <h5>Equity Large Cap</h5>
+              <div class="rate">12–14%</div>
+              <div class="meta">Higher returns · Higher volatility</div>
+            </div>
+            <div class="fund-card">
+              <h5>Balanced Advantage</h5>
+              <div class="rate">10–12%</div>
+              <div class="meta">Auto equity/debt rebalancing</div>
+            </div>
+            <div class="fund-card">
+              <h5>Equity Savings</h5>
+              <div class="rate">8–10%</div>
+              <div class="meta">Conservative hybrid · Low volatility</div>
+            </div>
+            <div class="fund-card">
+              <h5>Conservative Hybrid</h5>
+              <div class="rate">7–9%</div>
+              <div class="meta">75% debt · Stable</div>
+            </div>
+            <div class="fund-card">
+              <h5>Short Duration Debt</h5>
+              <div class="rate">6–8%</div>
+              <div class="meta">Low risk · Tax at slab</div>
+            </div>
+            <div class="fund-card">
+              <h5>Liquid / Money Market</h5>
+              <div class="rate">5–7%</div>
+              <div class="meta">Lowest risk · Emergency buffer</div>
+            </div>
+          </div>
+          <div class="callout teal" style="margin-top:0.875rem">
+            <h4>🎯 Picking funds for SWP</h4>
+            <ul>
+              <li>For 10+ year SWP: start from <strong>Balanced Advantage / Equity Savings</strong> — auto-rebalances</li>
+              <li>For 3–5 year SWP: prefer <strong>Conservative Hybrid / Short Duration Debt</strong></li>
+              <li>For emergency buffer: <strong>Liquid fund</strong> with instant redemption up to ₹50K</li>
+              <li>Avoid sector/thematic funds for SWP — too volatile for regular income</li>
+              <li>Consider <strong>direct plans</strong> — 0.5%–1% lower expense ratio than regular plans</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script is:inline>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmtINR=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n);
+  function setSl(el,min,max,val){el.style.setProperty('--pct',((val-min)/(max-min)*100)+'%')}
+  function numWords(n){
+    if(n>=10000000)return `${(n/10000000).toFixed(2)} Crore`;
+    if(n>=100000)return `${(n/100000).toFixed(2)} Lakh`;
+    if(n>=1000)return `${(n/1000).toFixed(1)} Thousand`;
+    return n.toString();
+  }
+
+  /* ── Donut ── */
+  function drawDonut(can,slices){
+    const dpr=window.devicePixelRatio||1;
+    const W=can.parentElement.clientWidth-32, H=180;
+    can.width=W*dpr;can.height=H*dpr;can.style.width=W+'px';can.style.height=H+'px';
+    const ctx=can.getContext('2d');ctx.scale(dpr,dpr);
+    const cx=W/2,cy=H/2,R=Math.min(cx,cy)*0.78,ri=R*0.56;
+    const total=slices.reduce((s,v)=>s+v.v,0);
+    let angle=-Math.PI/2;
+    slices.forEach(s=>{const a=(s.v/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,angle,angle+a);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();angle+=a;});
+    ctx.beginPath();ctx.arc(cx,cy,ri,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+    ctx.fillStyle='#111827';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=`bold ${Math.round(R*0.16)}px system-ui`;ctx.fillText(fmtINR(Math.round(total)),cx,cy);
+    // legend
+    const fs=Math.round(R*0.12);
+    slices.forEach((s,i)=>{
+      ctx.fillStyle=s.c;ctx.fillRect(8,H-20+i*13,9,9);
+      ctx.fillStyle='#374151';ctx.font=`${fs}px system-ui`;ctx.textAlign='left';
+      ctx.fillText(`${s.l}: ${fmtINR(Math.round(s.v))}`,20,H-12+i*13);
     });
-    calculateSWP();
-    elements.investmentInWords.textContent = numberToWords(parseInt(elements.investmentValue.value));
+  }
+
+  /* ── Line ── */
+  function drawLine(can,pts,depletedIdx){
+    const dpr=window.devicePixelRatio||1;
+    const W=can.parentElement.clientWidth-32, H=280;
+    can.width=W*dpr;can.height=H*dpr;can.style.width=W+'px';can.style.height=H+'px';
+    const ctx=can.getContext('2d');ctx.scale(dpr,dpr);
+    if(!pts||pts.length<2)return;
+    const pad={t:20,r:12,b:36,l:68};
+    const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+    const vals=pts.map(p=>p.v);
+    const mn=0, mx=Math.max(...vals)*1.08;
+    // grid
+    for(let i=0;i<=4;i++){
+      const y=pad.t+ch*(1-i/4);
+      ctx.strokeStyle='#f3f4f6';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();
+      const v=mn+(mx-mn)*(i/4);
+      const lbl=v>=10000000?`₹${(v/10000000).toFixed(1)}Cr`:v>=100000?`₹${(v/100000).toFixed(1)}L`:`₹${(v/1000).toFixed(0)}K`;
+      ctx.fillStyle='#9ca3af';ctx.font='10px system-ui';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(lbl,pad.l-4,y);
+    }
+    // depletion zone
+    if(depletedIdx>0&&depletedIdx<pts.length){
+      const dx=pad.l+cw*(depletedIdx)/(pts.length-1);
+      ctx.fillStyle='rgba(251,146,60,0.08)';
+      ctx.fillRect(dx,pad.t,pad.l+cw-dx,ch);
+      ctx.strokeStyle='#fb923c';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(dx,pad.t);ctx.lineTo(dx,pad.t+ch);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#fb923c';ctx.font='bold 10px system-ui';ctx.textAlign='left';ctx.fillText('Depleted',dx+4,pad.t+12);
+    }
+    // area
+    ctx.beginPath();
+    pts.forEach((p,i)=>{const x=pad.l+cw*i/(pts.length-1);const y=pad.t+ch-(p.v-mn)/(mx-mn)*ch;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+    const ag=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);ag.addColorStop(0,'rgba(8,145,178,0.15)');ag.addColorStop(1,'rgba(8,145,178,0)');
+    ctx.lineTo(pad.l+cw,pad.t+ch);ctx.lineTo(pad.l,pad.t+ch);ctx.closePath();ctx.fillStyle=ag;ctx.fill();
+    // line
+    const lg=ctx.createLinearGradient(pad.l,0,pad.l+cw,0);lg.addColorStop(0,'#0891b2');lg.addColorStop(1,depletedIdx>0?'#fb923c':'#059669');
+    ctx.strokeStyle=lg;ctx.lineWidth=2.5;
+    ctx.beginPath();pts.forEach((p,i)=>{const x=pad.l+cw*i/(pts.length-1);const y=pad.t+ch-(p.v-mn)/(mx-mn)*ch;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+    // x labels
+    const step=Math.ceil(pts.length/8);
+    ctx.fillStyle='#9ca3af';ctx.font='10px system-ui';ctx.textAlign='center';ctx.textBaseline='top';
+    pts.forEach((p,i)=>{if(i%step&&i!==pts.length-1)return;const x=pad.l+cw*i/(pts.length-1);ctx.fillText(p.lbl,x,pad.t+ch+5);});
+  }
+
+  /* ── Main compute ── */
+  function calc(){
+    const P=parseFloat($('in-invest').value)||0;
+    const mwd=parseFloat($('in-wd').value)||0;
+    const ret=(parseFloat($('in-return').value)||0)/100;
+    const infl=(parseFloat($('in-inflation').value)||0)/100;
+    const yrs=parseInt($('in-years').value)||0;
+    const taxR=(parseFloat($('in-tax').value)||0)/100;
+    const inflateWd=$('cb-inflate').checked;
+    if(P<=0||mwd<=0||yrs<=0)return;
+
+    let bal=P, totW=0, totI=0, totT=0, deplYr=0;
+    const tbl=[];
+    for(let y=1;y<=yrs;y++){
+      const op=bal;
+      const wd=inflateWd?(mwd*12*Math.pow(1+infl,y-1)):(mwd*12);
+      const int=bal*ret;
+      const tax=int*taxR;
+      bal=bal+(int-tax)-wd;
+      if(bal<0){bal=0;if(!deplYr)deplYr=y;}
+      totW+=wd;totI+=int;totT+=tax;
+      tbl.push({y,op,wd,int,tax,cl:bal});
+    }
+    const wdRate=((mwd*12)/P*100);
+    const realRet=((1+ret)/(1+infl)-1)*100;
+    const lastMoWd=inflateWd?mwd*Math.pow(1+infl,yrs-1):mwd;
+
+    // update DOM
+    $('rv-invest').textContent=fmtINR(P);
+    $('rv-corpus').textContent=fmtINR(Math.round(bal));
+    $('rv-withdrawn').textContent=fmtINR(Math.round(totW));
+    $('rv-interest').textContent=fmtINR(Math.round(totI));
+    $('rv-tax').textContent=fmtINR(Math.round(totT));
+    $('rv-effmonth').textContent=fmtINR(Math.round(lastMoWd))+'/mo (Y'+yrs+')';
+    $('swr-pct').textContent=wdRate.toFixed(1)+'%';
+    $('swr-real').textContent=(realRet>=0?'+':'')+realRet.toFixed(1)+'%';
+
+    const swrCard=$('swr-pct-card');
+    swrCard.className='swr-card'+(wdRate>6?' alert':wdRate>4?' ':' ok');
+
+    // depletion
+    const db=$('deplete-box');
+    if(deplYr>0){
+      db.className='deplete-warn';
+      $('deplete-icon').textContent='⚠️';
+      $('deplete-msg').textContent=`Corpus gets depleted in Year ${deplYr} of ${yrs}. Reduce withdrawal or increase corpus.`;
+    } else {
+      db.className='deplete-warn ok';
+      $('deplete-icon').textContent='✅';
+      $('deplete-msg').textContent=`Corpus lasts the full ${yrs}-year period with ${fmtINR(Math.round(bal))} remaining.`;
+    }
+
+    $('invest-words').textContent='₹ '+numWords(P);
+
+    // donut
+    drawDonut($('cv-donut'),[
+      {l:'Withdrawn',v:totW,c:'#0891b2'},
+      {l:'Interest',v:totI,c:'#10b981'},
+      {l:'Tax',v:totT,c:'#ef4444'},
+      {l:'Remaining',v:Math.max(0,bal),c:'#6366f1'},
+    ]);
+
+    // line chart
+    const pts=[{v:P,lbl:'Start'}];
+    tbl.forEach(r=>pts.push({v:r.cl,lbl:'Y'+r.y}));
+    drawLine($('cv-line'),pts,deplYr);
+
+    // yearly table
+    const tb=$('tb-yearly');tb.innerHTML='';
+    tbl.forEach(r=>{
+      const cls=r.cl<=0?'depleted':'';
+      tb.innerHTML+=`<tr class="${cls}"><td style="font-weight:600">Year ${r.y}</td><td style="text-align:right">${fmtINR(Math.round(r.op))}</td><td style="text-align:right;color:#d97706">${fmtINR(Math.round(r.wd))}</td><td style="text-align:right;color:#059669;font-weight:600">${fmtINR(Math.round(r.int))}</td><td style="text-align:right;color:#dc2626">${fmtINR(Math.round(r.tax))}</td><td style="text-align:right;font-weight:700">${fmtINR(Math.round(r.cl))}</td></tr>`;
+    });
+  }
+
+  /* ── Fund type hint ── */
+  $('in-fundtype')?.addEventListener('change',function(){
+    const eq=this.value==='equity';
+    $('in-tax').value=eq?10:20;
+    $('sl-tax').value=eq?10:20;
+    setSl($('sl-tax'),0,30,eq?10:20);
+    $('tax-hint').textContent=eq
+      ?'Equity LTCG: 12.5% above ₹1.25L; STCG: 20%'
+      :'Debt MF: gains taxed at your income tax slab rate';
+    calc();
   });
-  </script>
+
+  /* ── Slider sync ── */
+  function pair(slId,inId){
+    const sl=$(slId),ip=$(inId);if(!sl||!ip)return;
+    setSl(sl,+sl.min,+sl.max,+sl.value);
+    sl.addEventListener('input',()=>{ip.value=sl.value;setSl(sl,+sl.min,+sl.max,+sl.value);calc();});
+    ip.addEventListener('input',()=>{sl.value=ip.value;setSl(sl,+sl.min,+sl.max,+ip.value);calc();});
+  }
+  pair('sl-invest','in-invest');
+  pair('sl-wd','in-wd');
+  pair('sl-return','in-return');
+  pair('sl-inflation','in-inflation');
+  pair('sl-years','in-years');
+  pair('sl-tax','in-tax');
+
+  /* ── Toggle ── */
+  $('cb-inflate')?.addEventListener('change',function(){
+    this.closest('.tog')?.classList.toggle('on',this.checked);
+    calc();
+  });
+
+  /* ── Tabs ── */
+  document.querySelectorAll('#swp-page .tab-b').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      const card=this.closest('.sw-card');
+      card.querySelectorAll('.tab-b').forEach(b=>b.classList.remove('act'));
+      card.querySelectorAll('.tab-p').forEach(p=>p.classList.remove('act'));
+      this.classList.add('act');
+      $('tp-'+this.dataset.tab)?.classList.add('act');
+      if(this.dataset.tab==='chart')calc();
+    });
+  });
+
+  /* ── Init ── */
+  calc();
+  window.addEventListener('resize',calc);
+})();
+</script>
 </CalcLayout>
