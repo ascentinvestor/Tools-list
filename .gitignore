@@ -12,6 +12,7 @@ node_modules/
 Thumbs.db
 .vscode/
 .idea/
+.qodo/
 
 # Logs
 *.log
