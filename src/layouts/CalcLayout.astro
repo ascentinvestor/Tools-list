@@ -1,0 +1,17 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import HeaderMain from '../components/HeaderMain.astro';
+import FooterCalc from '../components/FooterCalc.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+---
+<BaseLayout title={title} description={description}>
+  <slot name="head" slot="head" />
+  <HeaderMain navCurrent="tools" />
+  <slot />
+  <FooterCalc />
+</BaseLayout>

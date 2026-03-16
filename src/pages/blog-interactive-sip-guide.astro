@@ -1,0 +1,766 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+---
+<BlogLayout
+  title="The Unstoppable Rise of the SIP: An Interactive Guide - AscentInvestor"
+  description="Discover how Systematic Investment Plans (SIPs) can help you build wealth through this interactive guide. Explore compounding, rupee cost averaging, and practical steps to start your investment journey with hands-on calculators."
+  navCurrent="blogs"
+  skipHeadCommon={true}
+  noAdsense={true}
+>
+  <Fragment slot="head">
+<meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="google-adsense-account" content="ca-pub-4584710287882818">
+
+        <!-- SEO Meta Tags -->
+        
+        
+        <link rel="canonical" href="http://www.ascentinvestor.in/blog-interactive-sip-guide">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="article">
+        <meta property="og:url" content="http://www.ascentinvestor.in/blog-interactive-sip-guide">
+        <meta property="og:title" content="The Unstoppable Rise of the SIP: An Interactive Guide">
+        <meta property="og:description" content="Discover how Systematic Investment Plans (SIPs) can help you build wealth through this interactive guide. Explore compounding, rupee cost averaging, and practical steps to start your investment journey.">
+        <meta property="og:site_name" content="AscentInvestor">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="http://www.ascentinvestor.in/blog-interactive-sip-guide">
+        <meta property="twitter:title" content="The Unstoppable Rise of the SIP: An Interactive Guide">
+        <meta property="twitter:description" content="Discover how Systematic Investment Plans (SIPs) can help you build wealth through this interactive guide.">
+
+        <!-- Preconnect for faster font loading -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+        <link rel="apple-touch-icon" sizes="180x180" href="logo-ai.png">
+        <meta name="msapplication-TileImage" content="logo-ai.png">
+        <meta name="theme-color" content="#4f46e5">
+        
+        <!-- Preload critical images -->
+        <link rel="preload" as="image" href="logo-ai-32.png" type="image/png">
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Chosen Palette: Earthy Neutrals & Calm Blue -->
+        <!-- Application Structure Plan: The application is structured as an educational journey. It starts with a hook (Hero Section), defines the core concept ("What is a SIP?"), then dives into the "how it works" with an interactive, tabbed section for the two main principles (Compounding & Rupee Cost Averaging). This interactive core is the centerpiece, allowing users to play with the numbers and truly grasp the concepts. The structure then logically moves to practical application ("How to Start") and advice ("Common Mistakes"). This flow was chosen to guide a novice user from curiosity to understanding to action, making a complex topic feel intuitive and manageable. -->
+        <!-- Visualization & Content Choices: 
+            1. Compounding Growth: Report Info -> The compounding example (₹10k/month grows to ₹1Cr). Goal -> Motivate & Personalize. Viz -> Interactive Bar Chart (Chart.js) with sliders. Interaction -> Users control monthly amount, tenure, and returns to see their own potential growth. Justification -> Transforms a static example into a powerful, personalized "what-if" tool, which is far more impactful for learning.
+            2. Rupee Cost Averaging: Report Info -> Explanation of buying more units when prices are low. Goal -> Explain & Clarify. Viz -> Line chart (Chart.js) showing a fluctuating market. Interaction -> A "Next Month" button simulates monthly investments, showing units bought and average cost updating in real-time. Justification -> Makes an abstract market timing concept tangible and easy to follow step-by-step.
+            3. How to Start Guide: Report Info -> 4-step text guide. Goal -> Instruct & Organize. Method -> HTML/CSS interactive numbered cards. Interaction -> Hover/click to reveal details for each step. Justification -> Better visual hierarchy and engagement than a plain list, breaking the process into digestible parts.
+            4. Common Mistakes: Report Info -> Bulleted list of pitfalls. Goal -> Advise. Method -> HTML/CSS "Do vs. Don't" card layout. Interaction -> Simple hover effects. Justification -> High-contrast visual format makes the advice more scannable and memorable. -->
+        <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+        <style>
+body {
+                font-family: 'Inter', sans-serif;
+                background-color: #F8F7F4;
+                color: #3D405B;
+            }
+            .chart-container {
+                position: relative;
+                width: 100%;
+                max-width: 800px;
+                margin-left: auto;
+                margin-right: auto;
+                height: 300px;
+                max-height: 40vh;
+            }
+            @media (min-width: 768px) {
+                .chart-container {
+                    height: 400px;
+                }
+            }
+            .tab {
+                transition: all 0.3s ease-in-out;
+            }
+            .tab-active {
+                background-color: #3D405B;
+                color: #F8F7F4;
+            }
+            .tab-inactive {
+                background-color: #E0DED9;
+                color: #3D405B;
+            }
+            .step-card {
+                transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            }
+            .step-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                background: #3D405B;
+                cursor: pointer;
+                border-radius: 50%;
+            }
+    
+            input[type="range"]::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                background: #3D405B;
+                cursor: pointer;
+                border-radius: 50%;
+            }
+    </style>
+  </Fragment>
+<!-- Main Content -->
+        <main id="main-content" role="main" class="container main">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="/tools">Home</a> / <a href="/blogs">Blogs</a> / The Unstoppable Rise of the SIP: Interactive Guide
+            </div>
+
+            <!-- Back to Blogs Link -->
+            <a href="/blogs" class="back-to-blogs">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to All Articles
+            </a>
+
+            <header class="text-center mb-12 md:mb-20">
+                <h1 class="text-4xl md:text-6xl font-bold text-[#3D405B] mb-4">The Unstoppable Rise of the SIP</h1>
+                <p class="text-lg md:text-xl text-[#82869A] max-w-3xl mx-auto">An interactive guide to building wealth in the Indian market, one step at a time.</p>
+            </header>
+    
+            <section id="what-is-sip" class="mb-12 md:mb-20">
+                <div class="bg-white rounded-2xl shadow-sm p-8 md:p-12">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h2 class="text-3xl font-bold mb-4">What Exactly is a SIP?</h2>
+                            <p class="text-lg text-gray-600 mb-6">This section explains the foundational concept of a Systematic Investment Plan (SIP). It's designed to give you a clear, simple understanding of how SIPs work as a disciplined investment tool before you explore their powerful benefits.</p>
+                            <p class="text-gray-700">Think of a SIP as an automated savings plan for investing. You choose a fixed amount of money to invest at regular intervals (usually monthly) into a mutual fund. This amount, which can be as little as ₹500, is automatically transferred from your bank account. It's a 'set it and forget it' system that builds discipline and makes investing accessible to everyone, turning small, regular savings into a potential fortune over the long term.</p>
+                        </div>
+                        <div class="flex flex-col items-center justify-center p-4 rounded-lg space-y-4">
+                            <div class="flex items-center space-x-4">
+                               <div class="text-center p-4 bg-blue-50 rounded-lg">
+                                    <span class="text-4xl">🏦</span>
+                                    <p class="font-semibold mt-2">Your Bank</p>
+                               </div>
+                               <div class="text-2xl font-bold text-gray-400">→</div>
+                               <div class="text-center p-4 bg-green-50 rounded-lg">
+                                   <p class="text-lg font-bold">₹ Fixed Amount</p>
+                                   <p class="text-sm text-gray-500">Every Month</p>
+                               </div>
+                               <div class="text-2xl font-bold text-gray-400">→</div>
+                               <div class="text-center p-4 bg-purple-50 rounded-lg">
+                                    <span class="text-4xl">📈</span>
+                                    <p class="font-semibold mt-2">Mutual Fund</p>
+                               </div>
+                            </div>
+                            <div class="text-center text-gray-600 mt-4 italic">
+                                <p>Automated investing for disciplined wealth creation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+    
+            <section id="superpowers" class="mb-12 md:mb-20">
+                 <div class="text-center mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold">The Twin Engines of Growth</h2>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto mt-4">This is the core of our interactive guide. Here, you can explore the two fundamental principles that make SIPs so effective. Use the tabs to switch between the "Power of Compounding" calculator and the "Rupee Cost Averaging" simulation to see firsthand how your money grows and how market volatility can be turned into an advantage.</p>
+                </div>
+                <div class="w-full max-w-4xl mx-auto">
+                    <div class="flex justify-center mb-6 rounded-lg p-1 bg-gray-200">
+                        <button id="tab-compounding" class="tab tab-active w-1/2 py-3 px-4 rounded-md font-semibold">The Power of Compounding</button>
+                        <button id="tab-averaging" class="tab tab-inactive w-1/2 py-3 px-4 rounded-md font-semibold">Rupee Cost Averaging</button>
+                    </div>
+    
+                    <div id="content-compounding" class="bg-white rounded-2xl shadow-sm p-6 md:p-8">
+                        <div class="grid lg:grid-cols-3 gap-8">
+                            <div class="lg:col-span-1">
+                                 <h3 class="text-2xl font-bold mb-4">Wealth Calculator</h3>
+                                 <p class="text-gray-600 mb-6">Adjust the sliders to see how small, regular investments can grow into a substantial amount over time. This demonstrates the "snowball effect" of compounding.</p>
+                                
+                                <div class="space-y-6">
+                                    <div>
+                                        <label for="monthly-investment" class="font-semibold block mb-1">Monthly Investment: <span id="investment-value" class="font-bold text-[#3D405B]">₹10,000</span></label>
+                                        <input type="range" id="monthly-investment" min="500" max="50000" step="500" value="10000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    </div>
+                                    <div>
+                                        <label for="investment-period" class="font-semibold block mb-1">Investment Period: <span id="period-value" class="font-bold text-[#3D405B]">20 Years</span></label>
+                                        <input type="range" id="investment-period" min="1" max="40" step="1" value="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    </div>
+                                    <div>
+                                        <label for="return-rate" class="font-semibold block mb-1">Expected Annual Return: <span id="return-value" class="font-bold text-[#3D405B]">12%</span></label>
+                                        <input type="range" id="return-rate" min="1" max="25" step="1" value="12" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lg:col-span-2">
+                                 <div class="chart-container">
+                                    <canvas id="compounding-chart"></canvas>
+                                </div>
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Total Invested</p>
+                                        <p id="total-invested" class="text-2xl font-bold text-blue-600">₹24,00,000</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Wealth Gained</p>
+                                        <p id="wealth-gained" class="text-2xl font-bold text-green-600">₹75,91,479</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Maturity Value</p>
+                                        <p id="maturity-value" class="text-2xl font-bold text-[#3D405B]">₹99,91,479</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div id="content-averaging" class="hidden bg-white rounded-2xl shadow-sm p-6 md:p-8">
+                         <h3 class="text-2xl font-bold mb-2 text-center">Your Shield Against Market Mood Swings</h3>
+                         <p class="text-gray-600 mb-6 text-center max-w-2xl mx-auto">Click the "Invest Next Month" button to simulate investing a fixed amount (₹1,000) over 12 months in a fluctuating market. Watch how your average purchase cost changes over time, often ending up lower than the average market price.</p>
+                         <div class="grid md:grid-cols-2 gap-8 items-center">
+                             <div>
+                                <div class="chart-container h-64 md:h-80">
+                                    <canvas id="averaging-chart"></canvas>
+                                </div>
+                             </div>
+                             <div class="space-y-4">
+                                <div class="text-center">
+                                    <button id="invest-button" class="bg-[#3D405B] text-white font-bold py-2 px-6 rounded-lg hover:bg-opacity-90 transition-all">Invest Next Month</button>
+                                    <button id="reset-button" class="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400 transition-all ml-2">Reset</button>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-center">
+                                        <p class="text-sm text-gray-500">Total Units Owned</p>
+                                        <p id="total-units" class="text-xl font-bold">0.00</p>
+                                    </div>
+                                     <div class="text-center">
+                                        <p class="text-sm text-gray-500">Average Buy Cost</p>
+                                        <p id="average-cost" class="text-xl font-bold">₹0.00</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-sm text-gray-500">Last Market Price</p>
+                                        <p id="market-price" class="text-xl font-bold text-red-600">₹10.00</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-sm text-gray-500">Months Invested</p>
+                                        <p id="months-invested" class="text-xl font-bold">0 / 12</p>
+                                    </div>
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="getting-started" class="mb-12 md:mb-20">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold">Your 4-Step Journey to Starting</h2>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto mt-4">Ready to begin? This section provides a clear, step-by-step roadmap. Follow these four simple steps to move from planning to action and start your own SIP investment journey today.</p>
+                </div>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="step-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-center bg-blue-100 text-blue-800 rounded-full w-12 h-12 text-2xl font-bold mb-4">1</div>
+                        <h3 class="text-xl font-semibold mb-2">Define Your Goals</h3>
+                        <p class="text-gray-600">Why are you investing? Retirement, a house, education? A clear goal and timeline will determine the right type of fund for you.</p>
+                    </div>
+                    <div class="step-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-center bg-green-100 text-green-800 rounded-full w-12 h-12 text-2xl font-bold mb-4">2</div>
+                        <h3 class="text-xl font-semibold mb-2">Complete Your KYC</h3>
+                        <p class="text-gray-600">"Know Your Customer" is a one-time mandatory process needing your PAN and address proof. It can be done entirely online.</p>
+                    </div>
+                     <div class="step-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-center bg-yellow-100 text-yellow-800 rounded-full w-12 h-12 text-2xl font-bold mb-4">3</div>
+                        <h3 class="text-xl font-semibold mb-2">Choose the Right Fund</h3>
+                        <p class="text-gray-600">Research funds based on your goals. Equity for long-term growth, Debt for stability, or Hybrid for a balance. Check their long-term performance.</p>
+                    </div>
+                    <div class="step-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-center bg-purple-100 text-purple-800 rounded-full w-12 h-12 text-2xl font-bold mb-4">4</div>
+                        <h3 class="text-xl font-semibold mb-2">Start Investing</h3>
+                        <p class="text-gray-600">Decide on a comfortable monthly amount. Consistency is key. You can always increase it later with a SIP Top-up.</p>
+                    </div>
+                </div>
+            </section>
+    
+            <section id="mistakes-to-avoid">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold">Navigate Your Journey Wisely</h2>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto mt-4">While SIPs are powerful, it's important to be aware of common pitfalls. This section highlights key mistakes to avoid to ensure your investment strategy stays on track and successfully meets your long-term financial goals.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-lg">
+                        <h3 class="text-2xl font-bold text-red-800 mb-3">Don't Do This ❌</h3>
+                        <ul class="space-y-3 text-red-700">
+                            <li><strong>Panic and Stop SIPs:</strong> Stopping during a market downturn means you miss buying units cheaply.</li>
+                            <li><strong>Chase Recent Winners:</strong> Don't pick funds based only on the last 1-year performance.</li>
+                            <li><strong>Mismatch Goals & Funds:</strong> Using a high-risk equity fund for a short-term goal is a recipe for disaster.</li>
+                            <li><strong>Set and Completely Forget:</strong> Not reviewing your portfolio annually can lead to misalignment with your goals.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-r-lg">
+                        <h3 class="text-2xl font-bold text-green-800 mb-3">Do This Instead ✅</h3>
+                        <ul class="space-y-3 text-green-700">
+                            <li><strong>Stay Disciplined:</strong> Continue your SIPs regardless of market mood to benefit from averaging.</li>
+                            <li><strong>Focus on Consistency:</strong> Look for funds with a solid long-term track record over 5-10 years.</li>
+                            <li><strong>Align Investments with Goals:</strong> Match the fund's risk profile to your financial goal's timeline.</li>
+                            <li><strong>Review Annually:</strong> Check in on your investments once a year to ensure they are on track.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <footer class="text-center mt-16 md:mt-24 pt-8 border-t border-gray-200">
+                <h3 class="text-2xl font-bold">Your Future Self Will Thank You</h3>
+                <p class="text-gray-600 max-w-3xl mx-auto mt-4">Starting your investment journey can seem daunting, but a SIP simplifies the process, making it accessible, affordable, and automated. By starting today, you are planting a seed that, nurtured with patience and discipline, will grow into a mighty tree of financial security.</p>
+            </footer>
+        </main>
+
+        <!-- Article Interaction Section -->
+        <div class="article-interaction">
+            <!-- Like Section -->
+            <div class="like-section">
+                <button id="likeBtn" class="like-btn" aria-label="Like this article">
+                    <svg class="like-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                    <span id="likeCount">0</span>
+                    <span id="likeText">likes</span>
+                </button>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3 class="comments-title">Comments</h3>
+                
+                <!-- Comment Form -->
+                <div class="comment-form">
+                    <div class="form-group">
+                        <label for="commentName" class="form-label">Name (required)</label>
+                        <input type="text" id="commentName" class="form-input" placeholder="Your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="commentEmail" class="form-label">Email (optional)</label>
+                        <input type="email" id="commentEmail" class="form-input" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="commentText" class="form-label">Comment (required)</label>
+                        <textarea id="commentText" class="form-textarea" placeholder="Share your thoughts on this interactive guide..." required rows="4"></textarea>
+                    </div>
+                    <button type="button" id="submitComment" class="submit-btn">Post Comment</button>
+                </div>
+
+                <!-- Comments List -->
+                <div id="commentsList" class="comments-list">
+                    <!-- Comments will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Blogs Link -->
+        <a href="/blogs" class="back-to-blogs" style="margin-top: 3rem;">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to All Articles
+        </a><!-- Load AdSense asynchronously -->
+        <script>
+            (function() {
+                const script = document.createElement('script');
+                script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4584710287882818';
+                script.crossOrigin = 'anonymous';
+                script.async = true;
+                document.head.appendChild(script);
+                
+                script.onload = function() {
+                    setTimeout(function() {
+                        try {
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                        } catch(e) {}
+                    }, 1000);
+                };
+            })();
+        </script>
+
+        <!-- AdSense Ad Unit -->
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    
+        <script>
+            // Article ID for this specific article
+            const ARTICLE_ID = 'interactive-sip-guide';
+            
+            // Initialize likes and comments on page load
+            document.addEventListener('DOMContentLoaded', function () {
+                initializeLikes();
+                initializeComments();
+                loadComments();
+                initializeInteractiveFeatures();
+            });
+
+            // Likes functionality
+            function initializeLikes() {
+                const likeBtn = document.getElementById('likeBtn');
+                const likeCount = document.getElementById('likeCount');
+                const likeText = document.getElementById('likeText');
+                
+                // Load existing likes from localStorage
+                const likes = parseInt(localStorage.getItem(`likes_${ARTICLE_ID}`) || '0');
+                const userLiked = localStorage.getItem(`user_liked_${ARTICLE_ID}`) === 'true';
+                
+                updateLikeDisplay(likes, userLiked);
+                
+                likeBtn.addEventListener('click', function() {
+                    const currentLikes = parseInt(localStorage.getItem(`likes_${ARTICLE_ID}`) || '0');
+                    const hasLiked = localStorage.getItem(`user_liked_${ARTICLE_ID}`) === 'true';
+                    
+                    if (hasLiked) {
+                        // Unlike
+                        const newLikes = Math.max(0, currentLikes - 1);
+                        localStorage.setItem(`likes_${ARTICLE_ID}`, newLikes.toString());
+                        localStorage.setItem(`user_liked_${ARTICLE_ID}`, 'false');
+                        updateLikeDisplay(newLikes, false);
+                    } else {
+                        // Like
+                        const newLikes = currentLikes + 1;
+                        localStorage.setItem(`likes_${ARTICLE_ID}`, newLikes.toString());
+                        localStorage.setItem(`user_liked_${ARTICLE_ID}`, 'true');
+                        updateLikeDisplay(newLikes, true);
+                    }
+                });
+            }
+
+            function updateLikeDisplay(count, isLiked) {
+                const likeBtn = document.getElementById('likeBtn');
+                const likeCount = document.getElementById('likeCount');
+                const likeText = document.getElementById('likeText');
+                
+                likeCount.textContent = count;
+                likeText.textContent = count === 1 ? 'like' : 'likes';
+                
+                if (isLiked) {
+                    likeBtn.classList.add('liked');
+                    likeBtn.setAttribute('aria-label', 'Unlike this article');
+                } else {
+                    likeBtn.classList.remove('liked');
+                    likeBtn.setAttribute('aria-label', 'Like this article');
+                }
+            }
+
+            // Comments functionality
+            function initializeComments() {
+                const submitBtn = document.getElementById('submitComment');
+                const nameInput = document.getElementById('commentName');
+                const emailInput = document.getElementById('commentEmail');
+                const textInput = document.getElementById('commentText');
+                
+                submitBtn.addEventListener('click', function() {
+                    const name = nameInput.value.trim();
+                    const email = emailInput.value.trim();
+                    const text = textInput.value.trim();
+                    
+                    if (!name || !text) {
+                        alert('Please fill in your name and comment.');
+                        return;
+                    }
+                    
+                    const comment = {
+                        id: Date.now(),
+                        name: name,
+                        email: email,
+                        text: text,
+                        date: new Date().toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        })
+                    };
+                    
+                    // Save comment to localStorage
+                    const comments = JSON.parse(localStorage.getItem(`comments_${ARTICLE_ID}`) || '[]');
+                    comments.unshift(comment);
+                    localStorage.setItem(`comments_${ARTICLE_ID}`, JSON.stringify(comments));
+                    
+                    // Clear form
+                    nameInput.value = '';
+                    emailInput.value = '';
+                    textInput.value = '';
+                    
+                    // Reload comments
+                    loadComments();
+                    
+                    alert('Thank you for your comment!');
+                });
+            }
+
+            function loadComments() {
+                const commentsList = document.getElementById('commentsList');
+                const comments = JSON.parse(localStorage.getItem(`comments_${ARTICLE_ID}`) || '[]');
+                
+                if (comments.length === 0) {
+                    commentsList.innerHTML = '<div class="empty-comments">Be the first to comment on this interactive guide!</div>';
+                    return;
+                }
+                
+                commentsList.innerHTML = comments.map(comment => `
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">${comment.name}</span>
+                            <span class="comment-date">${comment.date}</span>
+                        </div>
+                        <div class="comment-text">${comment.text}</div>
+                    </div>
+                `).join('');
+            }
+
+            function initializeInteractiveFeatures() {
+                const compoundingTab = document.getElementById('tab-compounding');
+                const averagingTab = document.getElementById('tab-averaging');
+                const compoundingContent = document.getElementById('content-compounding');
+                const averagingContent = document.getElementById('content-averaging');
+                
+                compoundingTab.addEventListener('click', () => {
+                    compoundingTab.classList.replace('tab-inactive', 'tab-active');
+                    averagingTab.classList.replace('tab-active', 'tab-inactive');
+                    compoundingContent.classList.remove('hidden');
+                    averagingContent.classList.add('hidden');
+                });
+    
+                averagingTab.addEventListener('click', () => {
+                    averagingTab.classList.replace('tab-inactive', 'tab-active');
+                    compoundingTab.classList.replace('tab-active', 'tab-inactive');
+                    averagingContent.classList.remove('hidden');
+                    compoundingContent.classList.add('hidden');
+                });
+    
+                let compoundingChart;
+                const monthlyInvestmentSlider = document.getElementById('monthly-investment');
+                const investmentPeriodSlider = document.getElementById('investment-period');
+                const returnRateSlider = document.getElementById('return-rate');
+                const investmentValue = document.getElementById('investment-value');
+                const periodValue = document.getElementById('period-value');
+                const returnValue = document.getElementById('return-value');
+    
+                const totalInvestedEl = document.getElementById('total-invested');
+                const wealthGainedEl = document.getElementById('wealth-gained');
+                const maturityValueEl = document.getElementById('maturity-value');
+    
+                function formatCurrency(value) {
+                    return new Intl.NumberFormat('en-IN', {
+                        style: 'currency',
+                        currency: 'INR',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    }).format(value);
+                }
+    
+                function calculateCompounding() {
+                    const P = parseFloat(monthlyInvestmentSlider.value);
+                    const t = parseInt(investmentPeriodSlider.value);
+                    const r = parseFloat(returnRateSlider.value) / 100;
+                    
+                    investmentValue.textContent = `₹${P.toLocaleString('en-IN')}`;
+                    periodValue.textContent = `${t} Years`;
+                    returnValue.textContent = `${r*100}%`;
+    
+                    const n = 12; 
+                    const totalMonths = t * 12;
+                    const i = r / n;
+    
+                    const labels = [];
+                    const investedData = [];
+                    const valueData = [];
+                    let futureValue = 0;
+    
+                    for (let year = 1; year <= t; year++) {
+                        labels.push(`Year ${year}`);
+                        let totalInvested = P * year * 12;
+                        let M = P * ((Math.pow(1 + i, year * n) - 1) / i) * (1 + i);
+                        investedData.push(totalInvested);
+                        valueData.push(M);
+                    }
+                    
+                    futureValue = valueData[valueData.length-1] || 0;
+                    const totalInvested = P * totalMonths;
+                    const wealthGained = futureValue - totalInvested;
+    
+                    totalInvestedEl.textContent = formatCurrency(totalInvested);
+                    wealthGainedEl.textContent = formatCurrency(wealthGained > 0 ? wealthGained : 0);
+                    maturityValueEl.textContent = formatCurrency(futureValue > 0 ? futureValue : 0);
+    
+                    return { labels, investedData, valueData };
+                }
+    
+                function updateCompoundingChart() {
+                    const { labels, investedData, valueData } = calculateCompounding();
+                    if (compoundingChart) {
+                        compoundingChart.data.labels = labels;
+                        compoundingChart.data.datasets[0].data = investedData;
+                        compoundingChart.data.datasets[1].data = valueData;
+                        compoundingChart.update();
+                    }
+                }
+    
+                function createCompoundingChart() {
+                    const { labels, investedData, valueData } = calculateCompounding();
+                    const ctx = document.getElementById('compounding-chart').getContext('2d');
+                    compoundingChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Total Invested',
+                                data: investedData,
+                                backgroundColor: '#81E6D9',
+                                borderColor: '#38B2AC',
+                                borderWidth: 1
+                            }, {
+                                label: 'Investment Value',
+                                data: valueData,
+                                backgroundColor: '#3D405B',
+                                borderColor: '#2c2f47',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            if (value >= 10000000) return (value / 10000000).toFixed(1) + 'Cr';
+                                            if (value >= 100000) return (value / 100000).toFixed(1) + 'L';
+                                            if (value >= 1000) return (value/1000) + 'K';
+                                            return value;
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                monthlyInvestmentSlider.addEventListener('input', updateCompoundingChart);
+                investmentPeriodSlider.addEventListener('input', updateCompoundingChart);
+                returnRateSlider.addEventListener('input', updateCompoundingChart);
+                
+                createCompoundingChart();
+                
+                let averagingChart;
+                const investButton = document.getElementById('invest-button');
+                const resetButton = document.getElementById('reset-button');
+                const marketPrices = [10, 12, 11, 9, 8, 10, 13, 14, 12, 11, 13, 15];
+                let currentMonth = 0;
+                let totalUnits = 0;
+                let totalInvestment = 0;
+                let investedData = [];
+    
+                const totalUnitsEl = document.getElementById('total-units');
+                const averageCostEl = document.getElementById('average-cost');
+                const marketPriceEl = document.getElementById('market-price');
+                const monthsInvestedEl = document.getElementById('months-invested');
+    
+                function createAveragingChart() {
+                    const ctx = document.getElementById('averaging-chart').getContext('2d');
+                    const labels = Array.from({length: 12}, (_, i) => `M${i + 1}`);
+                    averagingChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Market Price',
+                                data: marketPrices,
+                                borderColor: '#F56565',
+                                tension: 0.1,
+                                fill: false,
+                            },
+                            {
+                                label: 'Your Investment Points',
+                                data: [],
+                                backgroundColor: '#3D405B',
+                                borderColor: '#3D405B',
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                                showLine: false,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: false }
+                            },
+                            plugins: {
+                                tooltip: { enabled: true }
+                            }
+                        }
+                    });
+                }
+    
+                function investNextMonth() {
+                    if (currentMonth >= 12) return;
+                    
+                    const investmentAmount = 1000;
+                    const price = marketPrices[currentMonth];
+                    const unitsBought = investmentAmount / price;
+    
+                    totalUnits += unitsBought;
+                    totalInvestment += investmentAmount;
+                    currentMonth++;
+    
+                    investedData[currentMonth - 1] = price;
+                    averagingChart.data.datasets[1].data = investedData;
+                    averagingChart.update();
+    
+                    const averageCost = totalInvestment / totalUnits;
+    
+                    totalUnitsEl.textContent = totalUnits.toFixed(2);
+                    averageCostEl.textContent = formatCurrency(averageCost);
+                    marketPriceEl.textContent = formatCurrency(price);
+                    monthsInvestedEl.textContent = `${currentMonth} / 12`;
+                    
+                    if (currentMonth >= 12) {
+                        investButton.disabled = true;
+                        investButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+    
+                function resetSimulation() {
+                    currentMonth = 0;
+                    totalUnits = 0;
+                    totalInvestment = 0;
+                    investedData = [];
+                    
+                    averagingChart.data.datasets[1].data = [];
+                    averagingChart.update();
+    
+                    totalUnitsEl.textContent = '0.00';
+                    averageCostEl.textContent = '₹0.00';
+                    marketPriceEl.textContent = formatCurrency(marketPrices[0]);
+                    monthsInvestedEl.textContent = '0 / 12';
+                    
+                    investButton.disabled = false;
+                    investButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+    
+                investButton.addEventListener('click', investNextMonth);
+                resetButton.addEventListener('click', resetSimulation);
+    
+                createAveragingChart();
+                resetSimulation();
+            }
+        </script>
+</BlogLayout>

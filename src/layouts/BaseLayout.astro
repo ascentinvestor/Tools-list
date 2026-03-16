@@ -1,0 +1,27 @@
+---
+import HeadCommon from '../components/HeadCommon.astro';
+import FontsAsync from '../components/FontsAsync.astro';
+import AdSense from '../components/AdSense.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  skipHeadCommon?: boolean;
+  noAdsense?: boolean;
+}
+const { title, description = '', skipHeadCommon = false, noAdsense = false } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {!skipHeadCommon && <HeadCommon />}
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  <slot name="head" />
+</head>
+<body>
+  <slot />
+  <FontsAsync />
+  {!noAdsense && <AdSense />}
+</body>
+</html>
