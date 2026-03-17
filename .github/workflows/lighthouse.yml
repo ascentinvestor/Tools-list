@@ -1,0 +1,63 @@
+name: Lighthouse CI
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'   # Every Monday at 02:00 UTC
+  workflow_dispatch:        # Allow manual trigger from GitHub UI
+    inputs:
+      urls:
+        description: 'Comma-separated URLs to audit (leave blank for all sitemap URLs)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write   # needed to commit results.db back to the repo
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Use a PAT if you want the commit to trigger other workflows;
+          # GITHUB_TOKEN is sufficient for just persisting the DB.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Chrome is pre-installed on ubuntu-latest; ensure it's available
+      - name: Verify Chrome
+        run: google-chrome --version || chromium-browser --version
+
+      - name: Run Lighthouse audits
+        run: |
+          if [ -n "${{ github.event.inputs.urls }}" ]; then
+            node lighthouse/run.mjs --urls "${{ github.event.inputs.urls }}"
+          else
+            node lighthouse/run.mjs
+          fi
+
+      - name: Commit results to repo
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add lighthouse/results.db
+          git diff --staged --quiet \
+            || git commit -m "chore: lighthouse audit $(date -u +'%Y-%m-%d')" \
+            && git push
+
+      - name: Upload DB as artifact (90-day backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results-${{ github.run_id }}
+          path: lighthouse/results.db
+          retention-days: 90
