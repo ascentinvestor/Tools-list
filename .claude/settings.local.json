@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr:*)",
+      "Bash(git:*)",
+      "Bash(wc -l /Users/asingh73/dev/Learnings/Tools-list/*.html | sort -rn)",
+      "Bash(grep -h \"^    <link rel=\" /Users/asingh73/dev/Learnings/Tools-list/*.html 2>/dev/null | sort | uniq)",
+      "Bash(grep -h \"^    <script\" /Users/asingh73/dev/Learnings/Tools-list/*.html 2>/dev/null | head -20)",
+      "Bash(grep -c \"class=\\\\\"header\\\\\"\" /Users/asingh73/dev/Learnings/Tools-list/*.html)",
+      "Bash(grep -c \"class=\\\\\"footer\\\\\"\" /Users/asingh73/dev/Learnings/Tools-list/*.html)",
+      "Bash(grep -h \"formatCurrency\\\\|formatDate\" /Users/asingh73/dev/Learnings/Tools-list/*.html | head -10)",
+      "Bash(wc -l /Users/asingh73/dev/Learnings/Tools-list/*.html)",
+      "Bash(node migrate.js)",
+      "Bash(node build.js)",
+      "Bash(echo \"=== Final directory structure ===\" && find /Users/asingh73/dev/Learnings/Tools-list/src -type f | sort && echo \"\" && echo \"=== dist files ===\" && ls /Users/asingh73/dev/Learnings/Tools-list/dist/ && echo \"\" && echo \"=== CSS file sizes ===\" && wc -l src/assets/css/*.css && echo \"\" && echo \"=== JS file sizes ===\" && wc -l src/assets/js/*.js)",
+      "Bash(ls /Users/asingh73/dev/Learnings/Tools-list/blog-*.html 2>/dev/null)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(echo \"=== $f.html ===\")",
+      "Read(//Users/asingh73/dev/Learnings/Tools-list/src/pages/**)",
+      "Bash(sed -n '/<style>/,/<\\\\/style>/p' /Users/asingh73/dev/Learnings/Tools-list/src/pages/$f.html)",
+      "Bash(done)",
+      "Bash(node migrate.js 2>&1; echo \"Exit: $?\")",
+      "Bash(node build.js 2>&1; echo \"Exit: $?\")",
+      "Bash(yarn install:*)",
+      "Bash(mkdir:*)",
+      "Bash(yarn build:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn test:*)",
+      "Bash(npx playwright:*)",
+      "Bash(yarn:*)",
+      "Bash(grep:*)",
+      "Bash(npm_config_registry=https://registry.npmjs.org yarn install 2>&1 | tail -5)",
+      "Bash(rm:*)",
+      "Bash(npm -v)",
+      "Bash(corepack enable:*)"
+    ]
+  }
+}

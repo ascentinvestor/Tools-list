@@ -1,0 +1,25 @@
+2026/05/05-12:10:45.959 423f0 Reusing MANIFEST /Users/asingh73/dev/Learnings/Tools-list/scripts/.browser-profile/Default/IndexedDB/https_groww.in_0.indexeddb.leveldb/MANIFEST-000001
+2026/05/05-12:10:45.960 423f0 Recovering log #20
+2026/05/05-12:10:45.960 423f0 Reusing old log /Users/asingh73/dev/Learnings/Tools-list/scripts/.browser-profile/Default/IndexedDB/https_groww.in_0.indexeddb.leveldb/000020.log 
+2026/05/05-12:10:45.961 423f0 Delete type=2 #16
+2026/05/05-12:10:45.965 42522 Level-0 table #25: started
+2026/05/05-12:10:45.966 42522 Level-0 table #25: 2058 bytes OK
+2026/05/05-12:10:45.968 42522 Delete type=0 #20
+2026/05/05-12:10:45.970 42520 Manual compaction at level-0 from '\x00\x09\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x0a\x00\x00\x00' @ 0 : 0; will stop at '\x00\x0a\x01\x02\x01\x0d\x00f\x00i\x00l\x00t\x00e\x00r\x00s\x00-\x00s\x00t\x00o\x00r\x00e' @ 406 : 1
+2026/05/05-12:10:45.970 42520 Compacting 1@0 + 1@1 files
+2026/05/05-12:10:45.971 42520 Generated table #26@0: 104 keys, 1704 bytes
+2026/05/05-12:10:45.971 42520 Compacted 1@0 + 1@1 files => 1704 bytes
+2026/05/05-12:10:45.972 42520 compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/05/05-12:10:45.973 42520 Delete type=2 #25
+2026/05/05-12:10:45.973 42520 Manual compaction at level-0 from '\x00\x0a\x01\x02\x01\x0d\x00f\x00i\x00l\x00t\x00e\x00r\x00s\x00-\x00s\x00t\x00o\x00r\x00e' @ 406 : 1 .. '\x00\x0a\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/05/05-12:10:45.976 42520 Level-0 table #28: started
+2026/05/05-12:10:45.977 42520 Level-0 table #28: 680 bytes OK
+2026/05/05-12:10:45.979 42520 Delete type=2 #22
+2026/05/05-12:10:45.979 42520 Delete type=0 #24
+2026/05/05-12:10:45.979 423f0 Manual compaction at level-0 from '\x00\x0a\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x0b\x00\x00\x00' @ 0 : 0; will stop at '\x00\x0b\x00\x00\x05' @ 438 : 1
+2026/05/05-12:10:45.979 423f0 Compacting 1@0 + 1@1 files
+2026/05/05-12:10:45.981 423f0 Generated table #29@0: 92 keys, 1145 bytes
+2026/05/05-12:10:45.981 423f0 Compacted 1@0 + 1@1 files => 1145 bytes
+2026/05/05-12:10:45.982 423f0 compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/05/05-12:10:45.982 423f0 Delete type=2 #28
+2026/05/05-12:10:45.982 423f0 Manual compaction at level-0 from '\x00\x0b\x00\x00\x05' @ 438 : 1 .. '\x00\x0b\x00\x00\x00' @ 0 : 0; will stop at (end)
