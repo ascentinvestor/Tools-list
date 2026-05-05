@@ -34,3 +34,7 @@ lighthouse/*.db-shm
 
 # Playwright capture script — browser profile contains session data
 scripts/.browser-profile/
+
+# Claude workspace (worktrees break Netlify)
+.claude/
+scripts/.browser-profile/
