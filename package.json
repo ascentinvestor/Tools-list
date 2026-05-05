@@ -8,6 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "sync": "astro sync",
+    "capture": "node scripts/capture-portfolio.js",
+    "capture:force": "node scripts/capture-portfolio.js --force",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

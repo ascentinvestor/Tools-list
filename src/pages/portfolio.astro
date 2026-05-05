@@ -2,336 +2,601 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeaderMain from '../components/HeaderMain.astro';
 import FooterMain from '../components/FooterMain.astro';
+import fs from 'fs';
+import path from 'path';
+
+// Read portfolio data from the static JSON file (SSR)
+let portfolioData = [];
+try {
+  const dataFile = path.join(process.cwd(), 'public', 'portfolio-data.json');
+  if (fs.existsSync(dataFile)) {
+    portfolioData = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+    // Ensure newest first
+    portfolioData.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+} catch (e) {
+  portfolioData = [];
+}
+
+const portfolioJSON = JSON.stringify(portfolioData);
 ---
 <BaseLayout
   title="Portfolio Tracker - AscentInvestor"
-  description="Upload and track your mutual funds portfolio screenshots on a daily basis. Monitor your investment journey with AscentInvestor."
+  description="Track your Groww mutual funds portfolio daily with automated screenshots, timeline chart, and day-over-day progress."
 >
   <Fragment slot="head">
     <style is:global>
+      /* ── Layout ──────────────────────────────────────────────────── */
+      .title-section{text-align:center;margin-bottom:2rem;position:relative;padding:4rem 0;background:linear-gradient(135deg,#10b981 0%,#059669 50%,#047857 100%);border-radius:1rem;color:white;overflow:hidden}
+      .title-section::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:0.3}
+      .title-section *{position:relative;z-index:1}
+      @media(min-width:640px){.title-section{margin-bottom:3rem;padding:5rem 0}}
+      .title{font-size:2.25rem;font-weight:700;color:white;margin-bottom:1rem;text-shadow:0 2px 4px rgba(0,0,0,0.3)}
+      @media(min-width:640px){.title{font-size:3rem}}
+      @media(min-width:768px){.title{font-size:3.75rem}}
+      .subtitle{font-size:1.125rem;color:rgba(255,255,255,0.9);max-width:42rem;margin:0 auto;text-shadow:0 1px 2px rgba(0,0,0,0.2)}
 
-.title-section{text-align:center;margin-bottom:2rem;position:relative;padding:4rem 0;background:linear-gradient(135deg,#10b981 0%,#059669 50%,#047857 100%);border-radius:1rem;color:white;overflow:hidden}
-        .title-section::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:0.3}
-        .title-section *{position:relative;z-index:1}
-        @media (min-width:640px){.title-section{margin-bottom:3rem;padding:5rem 0}}
-        .title{font-size:2.25rem;font-weight:700;color:white;margin-bottom:1rem;text-shadow:0 2px 4px rgba(0,0,0,0.3)}
-        @media (min-width:640px){.title{font-size:3rem}}
-        @media (min-width:768px){.title{font-size:3.75rem}}
-        .subtitle{font-size:1.125rem;color:rgba(255,255,255,0.9);max-width:42rem;margin:0 auto;text-shadow:0 1px 2px rgba(0,0,0,0.2)}
-        .upload-section{background:white;padding:2rem;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);margin-bottom:2rem;display:none}
-        .upload-section.admin-only{display:block}
-        .admin-badge{position:fixed;bottom:1rem;right:1rem;background:#4f46e5;color:white;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:600;box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:100}
-        .admin-login-btn{background:#4f46e5;color:white;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:600;border:none;cursor:pointer;position:fixed;bottom:1rem;right:1rem;box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:100}
-        .admin-login-btn:hover{background:#4338ca}
-        .upload-area{border:2px dashed #d1d5db;border-radius:0.75rem;padding:3rem 2rem;text-align:center;transition:all 0.3s ease;background:#f9fafb}
-        .upload-area:hover{border-color:#4f46e5;background:#f3f4f6}
-        .upload-area.dragover{border-color:#4f46e5;background:#eef2ff}
-        .upload-icon{width:4rem;height:4rem;margin:0 auto 1rem;color:#9ca3af}
-        .upload-text{font-size:1.125rem;font-weight:600;color:#111827;margin-bottom:0.5rem}
-        .upload-subtext{color:#6b7280;margin-bottom:1.5rem}
-        .upload-btn{background:#4f46e5;color:white;padding:0.75rem 1.5rem;border-radius:0.5rem;font-weight:600;border:none;cursor:pointer;transition:background 0.2s}
-        .upload-btn:hover{background:#4338ca}
-        .file-input{display:none}
-        .portfolio-grid{display:grid;grid-template-columns:1fr;gap:1.5rem}
-        @media (min-width:768px){.portfolio-grid{grid-template-columns:repeat(2,1fr)}}
-        @media (min-width:1024px){.portfolio-grid{grid-template-columns:repeat(3,1fr)}}
-        .portfolio-card{background:white;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);overflow:hidden;transition:all 0.3s ease}
-        .portfolio-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
-        .portfolio-image{width:100%;height:16rem;object-fit:contain;background:#f3f4f6;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;image-rendering:high-quality}
-        .portfolio-info{padding:1rem}
-        .portfolio-date{font-weight:600;color:#111827;margin-bottom:0.5rem}
-        .portfolio-actions{display:flex;gap:0.5rem}
-        .action-btn{padding:0.5rem 1rem;border-radius:0.375rem;font-size:0.875rem;font-weight:500;border:none;cursor:pointer;transition:all 0.2s}
-        .view-btn{background:#10b981;color:white}
-        .view-btn:hover{background:#059669}
-        .delete-btn{background:#ef4444;color:white}
-        .delete-btn:hover{background:#dc2626}
-        .empty-state{text-align:center;padding:4rem 2rem;color:#6b7280}
-        .empty-icon{width:6rem;height:6rem;margin:0 auto 1rem;color:#d1d5db}
-        
-        
-        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;padding:1rem}
-        .modal.active{display:flex}
-        .modal-content{background:white;border-radius:0.75rem;max-width:90%;max-height:90%;overflow:auto;position:relative}
-        .modal-close{position:absolute;top:1rem;right:1rem;background:white;border-radius:50%;width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:1}
-        .modal-close:hover{background:#f3f4f6}
-        .modal-image{width:100%;height:auto;display:block;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;image-rendering:high-quality;max-width:100%;object-fit:contain}
-    
+      /* ── Stats bar ───────────────────────────────────────────────── */
+      .stats-bar{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:2rem}
+      @media(min-width:640px){.stats-bar{grid-template-columns:repeat(4,1fr)}}
+      .stat-card{background:white;border-radius:0.75rem;padding:1.25rem 1rem;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center}
+      .stat-value{font-size:1.5rem;font-weight:700;color:#111827;line-height:1.2}
+      .stat-label{font-size:0.75rem;color:#6b7280;margin-top:0.25rem;text-transform:uppercase;letter-spacing:0.05em}
+      .stat-value.positive{color:#059669}
+      .stat-value.negative{color:#dc2626}
+
+      /* ── Chart section ───────────────────────────────────────────── */
+      .chart-section{background:white;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);padding:1.5rem;margin-bottom:2rem}
+      .section-heading{font-size:1.125rem;font-weight:700;color:#111827;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
+      .chart-wrapper{position:relative;height:220px}
+      canvas#timelineChart{width:100%!important;height:220px!important}
+      .chart-hint{font-size:0.8rem;color:#9ca3af;margin-top:0.5rem;text-align:center}
+
+      /* ── Upload section ──────────────────────────────────────────── */
+      .upload-section{background:white;padding:2rem;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);margin-bottom:2rem;display:none}
+      .upload-section.admin-only{display:block}
+      .upload-area{border:2px dashed #d1d5db;border-radius:0.75rem;padding:3rem 2rem;text-align:center;transition:all 0.3s ease;background:#f9fafb}
+      .upload-area:hover,.upload-area.dragover{border-color:#4f46e5;background:#eef2ff}
+      .upload-icon{width:4rem;height:4rem;margin:0 auto 1rem;color:#9ca3af}
+      .upload-text{font-size:1.125rem;font-weight:600;color:#111827;margin-bottom:0.5rem}
+      .upload-subtext{color:#6b7280;margin-bottom:1.5rem}
+      .upload-btn{background:#4f46e5;color:white;padding:0.75rem 1.5rem;border-radius:0.5rem;font-weight:600;border:none;cursor:pointer;transition:background 0.2s}
+      .upload-btn:hover{background:#4338ca}
+      .file-input{display:none}
+
+      /* ── Portfolio grid ──────────────────────────────────────────── */
+      .portfolio-grid{display:grid;grid-template-columns:1fr;gap:1.5rem}
+      @media(min-width:768px){.portfolio-grid{grid-template-columns:repeat(2,1fr)}}
+      @media(min-width:1024px){.portfolio-grid{grid-template-columns:repeat(3,1fr)}}
+
+      .portfolio-card{background:white;border-radius:0.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);overflow:hidden;transition:all 0.3s ease}
+      .portfolio-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+      .portfolio-image{width:100%;height:16rem;object-fit:contain;background:#f3f4f6;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges}
+      .portfolio-info{padding:1rem}
+      .portfolio-date{font-weight:700;color:#111827;margin-bottom:0.25rem;font-size:0.95rem}
+
+      /* diff badge */
+      .diff-badge{display:inline-flex;align-items:center;gap:0.25rem;padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.78rem;font-weight:600;margin-bottom:0.75rem}
+      .diff-badge.positive{background:#d1fae5;color:#065f46}
+      .diff-badge.negative{background:#fee2e2;color:#991b1b}
+      .diff-badge.neutral{background:#f3f4f6;color:#6b7280}
+
+      /* value input */
+      .value-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem}
+      .value-label{font-size:0.75rem;color:#6b7280;white-space:nowrap}
+      .value-input{flex:1;border:1px solid #e5e7eb;border-radius:0.375rem;padding:0.35rem 0.5rem;font-size:0.875rem;color:#111827;width:0}
+      .value-input:focus{outline:none;border-color:#10b981;box-shadow:0 0 0 2px rgba(16,185,129,0.2)}
+      .value-save-btn{background:#10b981;color:white;border:none;border-radius:0.375rem;padding:0.35rem 0.75rem;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap}
+      .value-save-btn:hover{background:#059669}
+
+      /* notes */
+      .notes-area{width:100%;border:1px solid #e5e7eb;border-radius:0.375rem;padding:0.5rem;font-size:0.8rem;color:#374151;resize:vertical;min-height:56px;font-family:inherit;box-sizing:border-box}
+      .notes-area:focus{outline:none;border-color:#10b981;box-shadow:0 0 0 2px rgba(16,185,129,0.2)}
+      .notes-area::placeholder{color:#d1d5db}
+
+      /* action row */
+      .portfolio-actions{display:flex;gap:0.5rem;margin-top:0.75rem}
+      .action-btn{padding:0.5rem 1rem;border-radius:0.375rem;font-size:0.875rem;font-weight:500;border:none;cursor:pointer;transition:all 0.2s}
+      .view-btn{background:#10b981;color:white}
+      .view-btn:hover{background:#059669}
+      .delete-btn{background:#ef4444;color:white}
+      .delete-btn:hover{background:#dc2626}
+
+      /* empty */
+      .empty-state{text-align:center;padding:4rem 2rem;color:#6b7280}
+      .empty-icon{width:6rem;height:6rem;margin:0 auto 1rem;color:#d1d5db}
+
+      /* modal */
+      .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;padding:1rem}
+      .modal.active{display:flex}
+      .modal-content{background:white;border-radius:0.75rem;max-width:90%;max-height:90%;overflow:auto;position:relative}
+      .modal-close{position:absolute;top:1rem;right:1rem;background:white;border-radius:50%;width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:1}
+      .modal-close:hover{background:#f3f4f6}
+      .modal-image{width:100%;height:auto;display:block;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;max-width:100%;object-fit:contain}
+
+      /* admin */
+      .admin-badge{position:fixed;bottom:1rem;right:1rem;background:#4f46e5;color:white;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:600;box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:100}
+      .admin-login-btn{background:#4f46e5;color:white;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:600;border:none;cursor:pointer;position:fixed;bottom:1rem;right:1rem;box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:100}
+      .admin-login-btn:hover{background:#4338ca}
+
+      /* capture tip banner */
+      .capture-tip{background:#eff6ff;border:1px solid #bfdbfe;border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:2rem;display:flex;gap:0.75rem;align-items:flex-start;font-size:0.875rem;color:#1e40af}
+      .capture-tip svg{flex-shrink:0;width:1.25rem;height:1.25rem;margin-top:0.1rem}
+      .capture-tip code{background:#dbeafe;padding:0.1rem 0.4rem;border-radius:0.25rem;font-size:0.8rem}
     </style>
   </Fragment>
+
   <HeaderMain navCurrent="portfolio" />
-<!-- Main Content -->
-    <main id="main-content" role="main" class="container main">
-        <!-- Title Section -->
-        <div class="title-section">
-            <h1 class="title">Portfolio Tracker</h1>
-            <p class="subtitle">Upload and track your mutual funds portfolio screenshots. Monitor your investment journey over time.</p>
-        </div>
+  <main id="main-content" role="main" class="container main">
 
-        <!-- Upload Section (Admin Only) -->
-        <section class="upload-section" id="uploadSection">
-            <div class="upload-area" id="uploadArea">
-                <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                </svg>
-                <p class="upload-text">Upload Portfolio Screenshot (Admin Only)</p>
-                <p class="upload-subtext">Drag and drop or click to browse</p>
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
-                <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
-            </div>
-        </section>
-
-        <!-- Portfolio Gallery -->
-        <section id="portfolioGallery">
-            <!-- Portfolio cards will be dynamically added here -->
-        </section>
-    </main>
-
-    <!-- Image Modal -->
-    <div id="imageModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-close" onclick="closeModal()">
-                <svg style="width:1.5rem;height:1.5rem" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </div>
-            <img id="modalImage" class="modal-image" src="" alt="Portfolio Screenshot">
-        </div>
+    <!-- Title -->
+    <div class="title-section">
+      <h1 class="title">Portfolio Tracker</h1>
+      <p class="subtitle">Daily Groww portfolio snapshots with progress tracking over time.</p>
     </div>
 
-    <!-- Admin Controls -->
-    <button id="adminLoginBtn" class="admin-login-btn" onclick="toggleAdminMode()">Admin Login</button>
-    <div id="adminBadge" class="admin-badge" style="display:none">
-        Admin Mode | <a href="#" onclick="logoutAdmin(); return false;" style="color:white;text-decoration:underline">Logout</a>
-    </div><!-- JavaScript -->
-    <script>
-        // Admin password (in production, use proper backend authentication)
-        const ADMIN_PASSWORD = 'ascentinvestor2026';
-        
-        // Check if user is admin
-        function isAdmin() {
-            return localStorage.getItem('isAdmin') === 'true';
-        }
+    <!-- Capture tip -->
+    <div class="capture-tip">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <div>
+        <strong>Auto-capture:</strong> Run <code>node scripts/capture-portfolio.js</code> (or <code>npm run capture</code>) to automatically screenshot your Groww portfolio and add it here. The script remembers your login session after the first run.
+      </div>
+    </div>
 
-        // Toggle admin mode
-        function toggleAdminMode() {
-            if (isAdmin()) {
-                logoutAdmin();
-            } else {
-                const password = prompt('Enter admin password:');
-                if (password === ADMIN_PASSWORD) {
-                    localStorage.setItem('isAdmin', 'true');
-                    updateAdminUI();
-                    renderPortfolio();
-                    alert('Admin access granted!');
-                } else if (password !== null) {
-                    alert('Incorrect password!');
-                }
-            }
-        }
+    <!-- Stats bar -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Snapshots</div></div>
+      <div class="stat-card"><div class="stat-value" id="statLatestValue">—</div><div class="stat-label">Latest Value</div></div>
+      <div class="stat-card"><div class="stat-value" id="statDayChange">—</div><div class="stat-label">Day Change</div></div>
+      <div class="stat-card"><div class="stat-value" id="statStreak">—</div><div class="stat-label">Day Streak</div></div>
+    </div>
 
-        // Logout admin
-        function logoutAdmin() {
-            localStorage.removeItem('isAdmin');
-            updateAdminUI();
-            renderPortfolio();
-            alert('Logged out from admin mode');
-        }
+    <!-- Timeline Chart -->
+    <div class="chart-section">
+      <div class="section-heading">
+        <svg style="width:1.25rem;height:1.25rem;color:#10b981" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+        Portfolio Value Timeline
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="timelineChart"></canvas>
+      </div>
+      <p class="chart-hint">Enter portfolio values on each card below to populate the chart.</p>
+    </div>
 
-        // Update UI based on admin status
-        function updateAdminUI() {
-            const adminBtn = document.getElementById('adminLoginBtn');
-            const adminBadge = document.getElementById('adminBadge');
-            const uploadSection = document.getElementById('uploadSection');
-            
-            if (isAdmin()) {
-                adminBtn.style.display = 'none';
-                adminBadge.style.display = 'block';
-                uploadSection.classList.add('admin-only');
-            } else {
-                adminBtn.style.display = 'block';
-                adminBadge.style.display = 'none';
-                uploadSection.classList.remove('admin-only');
-            }
-        }
-        
-        // Initialize portfolio storage with pre-loaded portfolio from 28 Jan 2026
-        let portfolioData = JSON.parse(localStorage.getItem('portfolioData')) || [];
-        
-        // Check if we need to add the 28 Jan 2026 portfolio
-        const jan28Portfolio = {
-            id: 'portfolio-28-jan-2026',
-            date: '2026-01-28T00:00:00.000Z',
-            image: 'portfolio-28-jan-2026.png',
-            name: 'Mutual Fund Portfolio - 28 Jan 2026',
-            isExternal: true // Flag to indicate this is an external file reference
+    <!-- Upload Section (Admin Only) -->
+    <section class="upload-section" id="uploadSection">
+      <div class="upload-area" id="uploadArea">
+        <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+        </svg>
+        <p class="upload-text">Manual Upload (Admin)</p>
+        <p class="upload-subtext">Drag & drop or click to upload a portfolio screenshot</p>
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+        <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
+      </div>
+    </section>
+
+    <!-- Portfolio Gallery -->
+    <section id="portfolioGallery"></section>
+  </main>
+
+  <!-- Modal -->
+  <div id="imageModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-close" onclick="closeModal()">
+        <svg style="width:1.5rem;height:1.5rem" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </div>
+      <img id="modalImage" class="modal-image" src="" alt="Portfolio Screenshot">
+    </div>
+  </div>
+
+  <!-- Admin controls -->
+  <button id="adminLoginBtn" class="admin-login-btn" onclick="toggleAdminMode()">Admin Login</button>
+  <div id="adminBadge" class="admin-badge" style="display:none">
+    Admin Mode | <a href="#" onclick="logoutAdmin();return false;" style="color:white;text-decoration:underline">Logout</a>
+  </div>
+
+  <script is:inline define:vars={{ portfolioJSON }}>
+    /* ── Constants ─────────────────────────────────────────────────────────── */
+    const ADMIN_PASSWORD = 'ascentinvestor2026';
+    const ANNOTATIONS_KEY = 'portfolioAnnotations'; // { [id]: { value, notes } }
+    const UPLOAD_KEY      = 'portfolioUploads';     // manually uploaded entries
+
+    /* ── Server-rendered data (SSR) ────────────────────────────────────────── */
+    const serverData = JSON.parse(portfolioJSON);   // [{id,date,screenshot,value,notes}]
+
+    /* ── Local annotations (values + notes, keyed by entry id) ─────────────── */
+    function loadAnnotations() {
+      try { return JSON.parse(localStorage.getItem(ANNOTATIONS_KEY)) || {}; }
+      catch { return {}; }
+    }
+    function saveAnnotations(ann) {
+      localStorage.setItem(ANNOTATIONS_KEY, JSON.stringify(ann));
+    }
+
+    /* ── Manually uploaded entries (localStorage) ───────────────────────────── */
+    function loadUploads() {
+      try { return JSON.parse(localStorage.getItem(UPLOAD_KEY)) || []; }
+      catch { return []; }
+    }
+    function saveUploads(uploads) {
+      localStorage.setItem(UPLOAD_KEY, JSON.stringify(uploads));
+    }
+
+    /* ── Merge server data + local uploads, apply annotations ───────────────── */
+    function buildPortfolio() {
+      const uploads     = loadUploads();
+      const annotations = loadAnnotations();
+      const merged      = [...serverData, ...uploads];
+
+      // Sort newest first
+      merged.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      // Apply annotations
+      return merged.map(item => {
+        const ann = annotations[item.id] || {};
+        return {
+          ...item,
+          value: ann.value !== undefined ? ann.value : item.value,
+          notes: ann.notes !== undefined ? ann.notes : item.notes,
         };
-        
-        // Add if not already present
-        if (!portfolioData.find(p => p.id === 'portfolio-28-jan-2026')) {
-            portfolioData.unshift(jan28Portfolio);
-            localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+      });
+    }
+
+    /* ── Admin helpers ──────────────────────────────────────────────────────── */
+    function isAdmin() { return localStorage.getItem('isAdmin') === 'true'; }
+
+    function toggleAdminMode() {
+      if (isAdmin()) { logoutAdmin(); return; }
+      const pw = prompt('Enter admin password:');
+      if (pw === ADMIN_PASSWORD) {
+        localStorage.setItem('isAdmin', 'true');
+        updateAdminUI(); render();
+        alert('Admin access granted!');
+      } else if (pw !== null) {
+        alert('Incorrect password!');
+      }
+    }
+
+    function logoutAdmin() {
+      localStorage.removeItem('isAdmin');
+      updateAdminUI(); render();
+      alert('Logged out from admin mode');
+    }
+
+    function updateAdminUI() {
+      const btn    = document.getElementById('adminLoginBtn');
+      const badge  = document.getElementById('adminBadge');
+      const upload = document.getElementById('uploadSection');
+      if (isAdmin()) {
+        btn.style.display = 'none';
+        badge.style.display = 'block';
+        upload.classList.add('admin-only');
+      } else {
+        btn.style.display = 'block';
+        badge.style.display = 'none';
+        upload.classList.remove('admin-only');
+      }
+    }
+
+    /* ── Formatting helpers ─────────────────────────────────────────────────── */
+    function formatDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function formatCurrency(v) {
+      if (v == null || v === '') return null;
+      const n = parseFloat(v);
+      if (isNaN(n)) return null;
+      if (n >= 1e7) return '₹' + (n / 1e7).toFixed(2) + ' Cr';
+      if (n >= 1e5) return '₹' + (n / 1e5).toFixed(2) + ' L';
+      return '₹' + n.toLocaleString('en-IN');
+    }
+
+    function diffBadgeHTML(portfolio, idx) {
+      if (idx >= portfolio.length - 1) return '<span class="diff-badge neutral">First entry</span>';
+      const curr = parseFloat(portfolio[idx].value);
+      const prev = parseFloat(portfolio[idx + 1].value); // older entry is further in array
+      if (isNaN(curr) || isNaN(prev) || prev === 0) return '<span class="diff-badge neutral">No value yet</span>';
+      const abs  = curr - prev;
+      const pct  = ((abs / prev) * 100).toFixed(2);
+      const sign = abs >= 0 ? '+' : '';
+      const cls  = abs >= 0 ? 'positive' : 'negative';
+      const arrow = abs >= 0 ? '▲' : '▼';
+      const absFmt = formatCurrency(Math.abs(abs));
+      return `<span class="diff-badge ${cls}">${arrow} ${sign}${pct}% (${abs >= 0 ? '+' : '-'}${absFmt})</span>`;
+    }
+
+    /* ── Stats bar ──────────────────────────────────────────────────────────── */
+    function updateStats(portfolio) {
+      document.getElementById('statTotal').textContent = portfolio.length;
+
+      const withValues = portfolio.filter(e => parseFloat(e.value) > 0);
+      if (withValues.length > 0) {
+        const latest = parseFloat(withValues[0].value);
+        document.getElementById('statLatestValue').textContent = formatCurrency(latest) || '—';
+        document.getElementById('statLatestValue').className   = 'stat-value';
+
+        if (withValues.length >= 2) {
+          const prev = parseFloat(withValues[1].value);
+          const diff = latest - prev;
+          const pct  = ((diff / prev) * 100).toFixed(2);
+          const el   = document.getElementById('statDayChange');
+          el.textContent = `${diff >= 0 ? '+' : ''}${pct}%`;
+          el.className   = 'stat-value ' + (diff >= 0 ? 'positive' : 'negative');
+        } else {
+          document.getElementById('statDayChange').textContent = '—';
         }
+      } else {
+        document.getElementById('statLatestValue').textContent = '—';
+        document.getElementById('statDayChange').textContent   = '—';
+      }
 
-        // Load existing portfolio on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateAdminUI();
-            renderPortfolio();
-        });
+      // Streak: consecutive days from today
+      const today = new Date().toISOString().split('T')[0];
+      let streak = 0;
+      const dates = portfolio.map(e => e.date).sort((a, b) => b.localeCompare(a));
+      for (let i = 0; i < dates.length; i++) {
+        const expected = new Date(today);
+        expected.setDate(expected.getDate() - i);
+        const exp = expected.toISOString().split('T')[0];
+        if (dates[i] === exp) streak++;
+        else break;
+      }
+      document.getElementById('statStreak').textContent = streak > 0 ? streak + ' day' + (streak > 1 ? 's' : '') : '—';
+    }
 
-        // File input change event
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            if (isAdmin()) {
-                handleFiles(e.target.files);
-            } else {
-                alert('Admin access required to upload files');
-                e.target.value = '';
-            }
-        });
+    /* ── Timeline Chart ─────────────────────────────────────────────────────── */
+    function drawTimeline(portfolio) {
+      const canvas = document.getElementById('timelineChart');
+      const ctx    = canvas.getContext('2d');
+      const dpr    = window.devicePixelRatio || 1;
+      const W      = canvas.parentElement.clientWidth;
+      const H      = 220;
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, W, H);
 
-        // Drag and drop functionality
-        const uploadArea = document.getElementById('uploadArea');
+      const pts = portfolio
+        .filter(e => parseFloat(e.value) > 0)
+        .map(e => ({ date: e.date, v: parseFloat(e.value) }))
+        .sort((a, b) => a.date.localeCompare(b.date));
 
-        uploadArea.addEventListener('dragover', function(e) {
-            if (isAdmin()) {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            }
-        });
+      if (pts.length < 2) {
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '14px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Enter portfolio values on at least 2 entries to see the chart', W / 2, H / 2);
+        return;
+      }
 
-        uploadArea.addEventListener('dragleave', function(e) {
-            if (isAdmin()) {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-            }
-        });
+      const PAD = { top: 20, right: 20, bottom: 40, left: 70 };
+      const cW = W - PAD.left - PAD.right;
+      const cH = H - PAD.top  - PAD.bottom;
 
-        uploadArea.addEventListener('drop', function(e) {
-            if (isAdmin()) {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                handleFiles(e.dataTransfer.files);
-            } else {
-                e.preventDefault();
-                alert('Admin access required to upload files');
-            }
-        });
+      const minV = Math.min(...pts.map(p => p.v)) * 0.98;
+      const maxV = Math.max(...pts.map(p => p.v)) * 1.02;
 
-        // Handle file upload
-        function handleFiles(files) {
-            if (!isAdmin()) {
-                alert('Admin access required to upload files');
-                return;
-            }
-            
-            for (let file of files) {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const portfolioItem = {
-                            id: Date.now() + Math.random(),
-                            date: new Date().toISOString(),
-                            image: e.target.result,
-                            name: file.name
-                        };
-                        portfolioData.unshift(portfolioItem);
-                        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
-                        renderPortfolio();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
+      function xOf(i) { return PAD.left + (i / (pts.length - 1)) * cW; }
+      function yOf(v) { return PAD.top + cH - ((v - minV) / (maxV - minV)) * cH; }
+
+      // Grid lines
+      ctx.strokeStyle = '#f3f4f6';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = PAD.top + (cH / 4) * i;
+        ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + cW, y); ctx.stroke();
+        const val = maxV - ((maxV - minV) / 4) * i;
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '11px system-ui, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(formatCurrency(val) || '', PAD.left - 6, y + 4);
+      }
+
+      // Fill under line
+      ctx.beginPath();
+      ctx.moveTo(xOf(0), yOf(pts[0].v));
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(xOf(i), yOf(pts[i].v));
+      ctx.lineTo(xOf(pts.length - 1), PAD.top + cH);
+      ctx.lineTo(xOf(0), PAD.top + cH);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+      grad.addColorStop(0, 'rgba(16,185,129,0.25)');
+      grad.addColorStop(1, 'rgba(16,185,129,0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(xOf(0), yOf(pts[0].v));
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(xOf(i), yOf(pts[i].v));
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Dots & x-axis labels
+      pts.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(xOf(i), yOf(p.v), 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#059669';
+        ctx.fill();
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Date label (show only a few to avoid clutter)
+        const step = Math.ceil(pts.length / 6);
+        if (i % step === 0 || i === pts.length - 1) {
+          ctx.fillStyle = '#9ca3af';
+          ctx.font = '10px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          const d = new Date(p.date + 'T00:00:00');
+          ctx.fillText(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }), xOf(i), H - PAD.bottom + 16);
         }
+      });
+    }
 
-        // Render portfolio gallery
-        function renderPortfolio() {
-            const gallery = document.getElementById('portfolioGallery');
-            
-            if (portfolioData.length === 0) {
-                gallery.innerHTML = `
-                    <div class="empty-state">
-                        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.5rem">No Portfolio Screenshots Yet</h3>
-                        <p>Upload your first portfolio screenshot to start tracking your investment journey.</p>
-                    </div>
-                `;
-                return;
-            }
+    /* ── Render gallery ─────────────────────────────────────────────────────── */
+    function render() {
+      const portfolio = buildPortfolio();
+      const adminMode = isAdmin();
 
-            const adminMode = isAdmin();
-            gallery.innerHTML = `<div class="portfolio-grid">${portfolioData.map(item => `
-                <div class="portfolio-card">
-                    <img src="${item.image}" alt="Portfolio ${new Date(item.date).toLocaleDateString()}" class="portfolio-image">
-                    <div class="portfolio-info">
-                        <p class="portfolio-date">${formatDate(item.date)}</p>
-                        <div class="portfolio-actions">
-                            <button class="action-btn view-btn" onclick="viewImage('${item.id}')">View Full</button>
-                            ${adminMode ? `<button class="action-btn delete-btn" onclick="deleteImage('${item.id}')">Delete</button>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `).join('')}</div>`;
-        }
+      updateStats(portfolio);
+      drawTimeline(portfolio);
 
-        // Format date
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const options = { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric'
-            };
-            // For the specific 28 Jan 2026 entry, return custom format
-            if (dateString === '2026-01-28T00:00:00.000Z') {
-                return '28 Jan 2026 - Mutual Fund Portfolio';
-            }
-            return date.toLocaleDateString('en-US', options);
-        }
+      const gallery = document.getElementById('portfolioGallery');
+      if (portfolio.length === 0) {
+        gallery.innerHTML = `
+          <div class="empty-state">
+            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.5rem">No Portfolio Screenshots Yet</h3>
+            <p>Run <code>node scripts/capture-portfolio.js</code> to add your first Groww snapshot.</p>
+          </div>`;
+        return;
+      }
 
-        // View image in modal
-        function viewImage(id) {
-            const item = portfolioData.find(p => p.id == id);
-            if (item) {
-                document.getElementById('modalImage').src = item.image;
-                document.getElementById('imageModal').classList.add('active');
-            }
-        }
+      gallery.innerHTML = `<div class="portfolio-grid">${portfolio.map((item, idx) => {
+        const valueFmt = formatCurrency(item.value);
+        const imgSrc   = item.image || item.screenshot || '';
+        return `
+          <div class="portfolio-card" data-id="${item.id}">
+            <img src="${imgSrc}" alt="Portfolio ${formatDate(item.date)}" class="portfolio-image" onerror="this.style.background='#f3f4f6';this.alt='Screenshot not found'">
+            <div class="portfolio-info">
+              <p class="portfolio-date">${formatDate(item.date)}</p>
+              ${diffBadgeHTML(portfolio, idx)}
 
-        // Close modal
-        function closeModal() {
-            document.getElementById('imageModal').classList.remove('active');
-        }
+              <div class="value-row">
+                <span class="value-label">Value (₹):</span>
+                <input type="number" class="value-input" id="val-${item.id}"
+                  placeholder="e.g. 125000"
+                  value="${item.value !== null && item.value !== '' ? item.value : ''}"
+                  onkeydown="if(event.key==='Enter')saveValue('${item.id}')">
+                <button class="value-save-btn" onclick="saveValue('${item.id}')">Save</button>
+              </div>
 
-        // Close modal on background click
-        document.getElementById('imageModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
+              <textarea class="notes-area" id="notes-${item.id}"
+                placeholder="Add a note… e.g. 'SIP credited', 'market rally'"
+                onblur="saveNote('${item.id}')">${item.notes || ''}</textarea>
 
-        // Close modal on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
+              <div class="portfolio-actions">
+                <button class="action-btn view-btn" onclick="viewImage('${item.id}')">View Full</button>
+                ${adminMode ? `<button class="action-btn delete-btn" onclick="deleteEntry('${item.id}')">Delete</button>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }).join('')}</div>`;
+    }
 
-        // Delete image
-        function deleteImage(id) {
-            if (!isAdmin()) {
-                alert('Admin access required to delete portfolios');
-                return;
-            }
-            
-            if (confirm('Are you sure you want to delete this portfolio screenshot?')) {
-                portfolioData = portfolioData.filter(p => p.id != id);
-                localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
-                renderPortfolio();
-            }
-        }
-    </script><!-- AdSense Ad Unit -->
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    /* ── Annotation saves ───────────────────────────────────────────────────── */
+    function saveValue(id) {
+      const input = document.getElementById('val-' + id);
+      const v     = input ? input.value.trim() : '';
+      const ann   = loadAnnotations();
+      if (!ann[id]) ann[id] = {};
+      ann[id].value = v === '' ? null : parseFloat(v);
+      saveAnnotations(ann);
+      render();  // re-render to update chart and diffs
+    }
+
+    function saveNote(id) {
+      const ta  = document.getElementById('notes-' + id);
+      const ann = loadAnnotations();
+      if (!ann[id]) ann[id] = {};
+      ann[id].notes = ta ? ta.value : '';
+      saveAnnotations(ann);
+    }
+
+    /* ── Modal ──────────────────────────────────────────────────────────────── */
+    function viewImage(id) {
+      const portfolio = buildPortfolio();
+      const item = portfolio.find(p => p.id == id);
+      if (item) {
+        document.getElementById('modalImage').src = item.image || item.screenshot || '';
+        document.getElementById('imageModal').classList.add('active');
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('imageModal').classList.remove('active');
+    }
+
+    document.getElementById('imageModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('imageModal')) closeModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    /* ── Delete entry ───────────────────────────────────────────────────────── */
+    function deleteEntry(id) {
+      if (!isAdmin()) { alert('Admin access required'); return; }
+      if (!confirm('Delete this portfolio entry? (The screenshot file is not deleted.)')) return;
+
+      // Remove from local uploads if present
+      const uploads = loadUploads().filter(u => u.id != id);
+      saveUploads(uploads);
+
+      // Remove annotation
+      const ann = loadAnnotations();
+      delete ann[id];
+      saveAnnotations(ann);
+
+      render();
+    }
+
+    /* ── Manual file upload (admin) ─────────────────────────────────────────── */
+    function handleFiles(files) {
+      if (!isAdmin()) { alert('Admin access required'); return; }
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) continue;
+        const reader = new FileReader();
+        reader.onload = e => {
+          const today = new Date().toISOString().split('T')[0];
+          const id    = 'upload-' + Date.now();
+          const uploads = loadUploads();
+          uploads.unshift({
+            id, date: today,
+            image: e.target.result,
+            screenshot: e.target.result,
+            name: file.name, value: null, notes: ''
+          });
+          saveUploads(uploads);
+          render();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    document.getElementById('fileInput').addEventListener('change', e => {
+      if (isAdmin()) handleFiles(e.target.files);
+      else { alert('Admin access required'); e.target.value = ''; }
+    });
+
+    const uploadArea = document.getElementById('uploadArea');
+    uploadArea.addEventListener('dragover',  e => { if(isAdmin()){ e.preventDefault(); uploadArea.classList.add('dragover'); }});
+    uploadArea.addEventListener('dragleave', e => { uploadArea.classList.remove('dragover'); });
+    uploadArea.addEventListener('drop',      e => {
+      e.preventDefault(); uploadArea.classList.remove('dragover');
+      if (isAdmin()) handleFiles(e.dataTransfer.files);
+      else alert('Admin access required');
+    });
+
+    /* ── Init ───────────────────────────────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAdminUI();
+      render();
+      window.addEventListener('resize', () => drawTimeline(buildPortfolio()));
+    });
+  </script>
+
+  <!-- AdSense Ad Unit -->
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4584710287882818" data-ad-slot="4101651637" data-ad-format="auto" data-full-width-responsive="true"></ins>
   <FooterMain />
 </BaseLayout>
