@@ -446,9 +446,9 @@ import CalcLayout from '../layouts/CalcLayout.astro';
                     <div class="metric-sub">from today</div>
                 </div>
                 <div class="metric sky" id="coastMetric">
-                    <div class="metric-label">Coast FIRE Number</div>
+                    <div class="metric-label" id="coastMetricLabel">Coast FIRE Number</div>
                     <div class="metric-value" id="coastFireNum">&#8377;0</div>
-                    <div class="metric-sub">stop investing &amp; coast</div>
+                    <div class="metric-sub" id="coastMetricSub">stop investing &amp; coast</div>
                 </div>
             </div>
 
@@ -926,6 +926,18 @@ function calculate() {
         el('projCorpus').innerHTML    = fmt(totalAtFire);
         el('yearsToFire').textContent = yearsToFIRE;
         el('coastFireNum').innerHTML  = fmt(coastFireNum);
+
+        // Update 4th metric card label to reflect the active FIRE mode
+        const coastCardCopy = {
+            regular: { label: 'Coast FIRE Number',    sub: 'stop investing & coast' },
+            lean:    { label: 'Lean Coast Number',     sub: 'coast to Lean FIRE' },
+            fat:     { label: 'Fat Coast Number',      sub: 'coast to Fat FIRE' },
+            barista: { label: 'Barista Coast Number',  sub: 'coast to Barista FIRE' },
+            coast:   { label: 'Coast FIRE Number',     sub: 'your primary FIRE target' }
+        };
+        const cc = coastCardCopy[currentMode] || coastCardCopy.regular;
+        el('coastMetricLabel').textContent = cc.label;
+        el('coastMetricSub').textContent   = cc.sub;
 
         // breakdown bars
         const parts = [
