@@ -28,3 +28,9 @@ playwright-report/
 # Lighthouse — keep results.db but exclude SQLite temp files
 lighthouse/*.db-wal
 lighthouse/*.db-shm
+
+# Claude workspace files (worktrees cause Netlify submodule errors)
+.claude/
+
+# Playwright capture script — browser profile contains session data
+scripts/.browser-profile/
