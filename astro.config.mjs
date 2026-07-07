@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
-import netlify from '@astrojs/netlify';
 
+// Static build for GitHub Pages, served at the custom domain root.
 export default defineConfig({
-  output: 'server',
-  adapter: netlify(),
+  site: 'https://www.ascentinvestor.in',
+  output: 'static',
 });
