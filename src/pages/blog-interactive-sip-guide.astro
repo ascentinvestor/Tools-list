@@ -12,38 +12,43 @@ import BlogLayout from '../layouts/BlogLayout.astro';
 <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="google-adsense-account" content="ca-pub-4584710287882818">
+        <!-- layout.css provides .container, .header, .nav, .footer etc. -->
+        <!-- skipHeadCommon=true skips reset.css & components.css to avoid Tailwind conflicts -->
+        <link rel="stylesheet" href="/assets/css/layout.css">
 
         <!-- SEO Meta Tags -->
         
         
-        <link rel="canonical" href="http://www.ascentinvestor.in/blog-interactive-sip-guide">
+        <link rel="canonical" href="https://www.ascentinvestor.in/blog-interactive-sip-guide">
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="article">
-        <meta property="og:url" content="http://www.ascentinvestor.in/blog-interactive-sip-guide">
+        <meta property="og:url" content="https://www.ascentinvestor.in/blog-interactive-sip-guide">
         <meta property="og:title" content="The Unstoppable Rise of the SIP: An Interactive Guide">
         <meta property="og:description" content="Discover how Systematic Investment Plans (SIPs) can help you build wealth through this interactive guide. Explore compounding, rupee cost averaging, and practical steps to start your investment journey.">
+        <meta property="og:image" content="https://www.ascentinvestor.in/logo-ai.png">
         <meta property="og:site_name" content="AscentInvestor">
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:url" content="http://www.ascentinvestor.in/blog-interactive-sip-guide">
+        <meta property="twitter:url" content="https://www.ascentinvestor.in/blog-interactive-sip-guide">
         <meta property="twitter:title" content="The Unstoppable Rise of the SIP: An Interactive Guide">
         <meta property="twitter:description" content="Discover how Systematic Investment Plans (SIPs) can help you build wealth through this interactive guide.">
+        <meta property="twitter:image" content="https://www.ascentinvestor.in/logo-ai.png">
 
         <!-- Preconnect for faster font loading -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="favicon.ico">
-        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-        <link rel="apple-touch-icon" sizes="180x180" href="logo-ai.png">
-        <meta name="msapplication-TileImage" content="logo-ai.png">
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="apple-touch-icon" sizes="180x180" href="/logo-ai.png">
+        <meta name="msapplication-TileImage" content="/logo-ai.png">
         <meta name="theme-color" content="#4f46e5">
-        
+
         <!-- Preload critical images -->
-        <link rel="preload" as="image" href="logo-ai-32.png" type="image/png">
+        <link rel="preload" as="image" href="/logo-ai-32.png" type="image/png">
 
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
