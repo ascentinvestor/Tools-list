@@ -94,6 +94,18 @@ describe('calcCardReward', () => {
     expect(calcCardReward(card('idfc-wealth'), 'offline', 10000).points).toBe(200);
   });
 
+  it('Axis Magnus for Burgundy earns 35 per ₹200 above ₹1.5L', () => {
+    // 6/₹100 on first ₹1.5L + 17.5/₹100 on next ₹50K = 9,000 + 8,750 points × ₹0.40
+    expect(calcCardReward(card('axis-magnus-burgundy'), 'offline', 200000)).toMatchObject({ points: 17750, worth: 7100 });
+    expect(calcCardReward(card('axis-magnus-burgundy'), 'dining', 10000)).toMatchObject({ points: 600, worth: 240 });
+    expect(calcCardReward(card('axis-magnus-burgundy'), 'rent', 10000).excluded).toBe(true);
+  });
+
+  it('HSBC Premier earns 3 points per ₹100 everywhere except exclusions', () => {
+    expect(calcCardReward(card('hsbc-premier'), 'travel', 10000)).toMatchObject({ points: 300, worth: 150 });
+    expect(calcCardReward(card('hsbc-premier'), 'fuel', 10000).excluded).toBe(true);
+  });
+
   it('handles zero and negative spend', () => {
     expect(calcCardReward(card('hdfc-millennia'), 'dining', 0)).toMatchObject({ worth: 0, rate: 0 });
     expect(calcCardReward(card('hdfc-millennia'), 'dining', -500)).toMatchObject({ worth: 0, rate: 0 });

@@ -162,6 +162,14 @@ export const CREDIT_CARDS: CreditCard[] = [
     highlight: '5 EDGE Miles per ₹100 on travel, transfers to airlines',
   },
   {
+    id: 'axis-magnus-burgundy', bank: 'Axis Bank', name: 'Magnus for Burgundy', rewardType: 'points', pointValue: 0.4,
+    pointValueNote: '₹0.40/point (5:4 airline transfers, valued like Atlas)',
+    earn: { base: 6 },
+    tier: { above: 150000, earn: 17.5 },
+    excluded: [...CASHBACK_EXCLUSIONS], annualFee: 30000, popular: true,
+    highlight: '12 points per ₹200, 35 per ₹200 on monthly spends above ₹1.5L',
+  },
+  {
     id: 'axis-flipkart', bank: 'Axis Bank', name: 'Flipkart', rewardType: 'cashback', pointValue: 1,
     earn: { base: 1, online: 5, travel: 5, dining: 4, entertainment: 4 },
     caps: { online: 1333, travel: 1333 },
@@ -256,6 +264,13 @@ export const CREDIT_CARDS: CreditCard[] = [
     caps: { dining: 1000, grocery: 1000 },
     excluded: CASHBACK_EXCLUSIONS, annualFee: 999, popular: true,
     highlight: '10% on dining, food delivery and groceries',
+  },
+  {
+    id: 'hsbc-premier', bank: 'HSBC', name: 'Premier', rewardType: 'points', pointValue: 0.5,
+    pointValueNote: '₹0.50/point (1:1 airline & hotel transfers)',
+    earn: { base: 3 },
+    excluded: COMMON_EXCLUSIONS, annualFee: 0,
+    highlight: '3 points per ₹100 on all spends, free for HSBC Premier customers',
   },
 
   // Federal Bank
