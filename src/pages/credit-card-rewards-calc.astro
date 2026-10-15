@@ -1,0 +1,531 @@
+---
+import CalcLayout from '../layouts/CalcLayout.astro';
+import { CC_CATEGORIES, CREDIT_CARDS, CC_DEFAULTS, SPEND_PRESETS, calcCardReward, rankCards, type CreditCard } from '../data/credit-cards';
+
+const banks = [...new Set(CREDIT_CARDS.map(c => c.bank))];
+const defCard = CREDIT_CARDS.find(c => c.id === CC_DEFAULTS.cardId)!;
+const defCat = CC_CATEGORIES.find(c => c.id === CC_DEFAULTS.category)!;
+const spend = CC_DEFAULTS.monthlySpend;
+
+const mine = calcCardReward(defCard, defCat.id, spend);
+const ranked = rankCards(defCat.id, spend);
+const best = ranked[0];
+const extraYearly = Math.max(0, (best.result.worth - mine.worth) * 12);
+const bankCards = CREDIT_CARDS.filter(c => c.bank === defCard.bank);
+
+const BANK_COLORS: Record<string, string> = {
+  'HDFC Bank': '#004c8f', 'ICICI Bank': '#b02a30', 'Axis Bank': '#97144d', 'SBI Card': '#1a1f71',
+  'IDFC FIRST Bank': '#9c1d26', 'American Express': '#016fd0', 'HSBC': '#db0011', 'Federal Bank': '#1b3e8f',
+};
+
+function fmt(n: number) {
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+}
+function presetLabel(n: number) {
+  return n >= 100000 ? `₹${n / 100000}L` : `₹${n / 1000}K`;
+}
+function rewardText(card: CreditCard, points: number) {
+  return card.rewardType === 'cashback' ? `${fmt(points)} cashback` : `${points.toLocaleString('en-IN')} points`;
+}
+function feeText(fee: number) {
+  return fee === 0 ? 'Lifetime free' : fmt(fee);
+}
+---
+<CalcLayout
+  title="Credit Card Rewards Calculator — Compare Cashback & Reward Points"
+  description="Find out how much cashback and reward points your credit card earns on dining, shopping, travel, fuel and more — and which Indian credit card earns the most for your spends."
+>
+<style is:global slot="head">
+/* ── Page reset overrides ── */
+#cc-page *{box-sizing:border-box}
+#cc-page h1,#cc-page h2,#cc-page h3,#cc-page h4{margin:0;font-weight:700}
+#cc-page p{margin:0}
+#cc-page button{cursor:pointer}
+
+/* ── Layout ── */
+#cc-page{padding:1.5rem 0 4rem;background:#f4f5f7;min-height:100vh}
+.cc-wrap{max-width:1200px;margin:0 auto;padding:0 1rem}
+.cc-body{display:grid;grid-template-columns:420px 1fr;gap:1.5rem;align-items:start}
+@media(max-width:900px){.cc-body{grid-template-columns:1fr}}
+.cc-card{background:#fff;border-radius:1rem;padding:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.04)}
+.cc-stack{display:flex;flex-direction:column;gap:1.25rem;min-width:0}
+
+/* ── Hero ── */
+.cc-hero{background:linear-gradient(135deg,#4338ca 0%,#6d28d9 50%,#9333ea 100%);border-radius:1.25rem;padding:2.5rem 2rem;margin-bottom:1.75rem;text-align:center;position:relative;overflow:hidden}
+.cc-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(255,255,255,0.15),transparent 60%);pointer-events:none}
+.cc-hero h1{font-size:clamp(1.6rem,3.5vw,2.25rem)!important;font-weight:800!important;color:#fff!important;letter-spacing:-0.02em;margin-bottom:0.4rem}
+.cc-hero p{color:rgba(255,255,255,0.85)!important;font-size:1rem;margin-bottom:1rem}
+.hero-chips{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.72rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:99px;letter-spacing:0.03em}
+
+/* ── Form ── */
+.sec-label{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9ca3af;padding:0.75rem 0 0.25rem;margin-bottom:0.25rem;border-top:1px solid #f3f4f6;margin-top:0.25rem}
+.sec-label:first-child{border-top:none;margin-top:0;padding-top:0}
+.fg{margin-bottom:1.25rem}
+.fg label{display:block;font-size:0.8rem;font-weight:600;color:#374151;margin-bottom:0.4rem;letter-spacing:0.02em;text-transform:uppercase}
+.fg>select{width:100%!important;padding:0.65rem 2.5rem 0.65rem 0.875rem;border:1.5px solid #e5e7eb!important;border-radius:0.625rem;font-size:0.95rem;color:#111827;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 0.75rem center;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.fg>select:focus{border-color:#6d28d9!important;box-shadow:0 0 0 3px rgba(109,40,217,0.12)!important}
+
+/* ── Spend ── */
+.spend-head{display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem;margin-bottom:0.75rem}
+.spend-amt{font-size:1.75rem;font-weight:800;color:#111827;letter-spacing:-0.02em}
+.spend-yr{font-size:0.75rem;font-weight:600;color:#6d28d9;background:#ede9fe;padding:0.25rem 0.65rem;border-radius:99px;white-space:nowrap}
+.preset-row{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.875rem}
+.preset{background:#fff!important;border:1.5px solid #e5e7eb!important;color:#4b5563;font-size:0.75rem;font-weight:600;padding:0.3rem 0.7rem;border-radius:99px;transition:all .2s}
+.preset:hover{border-color:#c4b5fd!important}
+.preset.act{background:#ede9fe!important;border-color:#6d28d9!important;color:#6d28d9}
+.slider-row{display:flex;align-items:center;gap:0.75rem;overflow:hidden}
+.slider-row input[type=range]{flex:1;height:5px;border-radius:99px;background:linear-gradient(to right,#6d28d9 var(--pct,50%),#e5e7eb var(--pct,50%));outline:none;-webkit-appearance:none;appearance:none;border:none!important;box-shadow:none!important}
+.slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#6d28d9;cursor:pointer;box-shadow:0 1px 4px rgba(109,40,217,0.4)}
+.slider-row input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#6d28d9;cursor:pointer;border:none;box-shadow:0 1px 4px rgba(109,40,217,0.4)}
+.slider-row .num-box{width:110px!important;min-width:110px!important;max-width:110px!important;flex:0 0 110px!important;padding:0.5rem 0.65rem;border:1.5px solid #e5e7eb!important;border-radius:0.5rem;font-size:0.9rem;font-weight:600;color:#111827;text-align:right;outline:none;background:#fff;-webkit-appearance:none;appearance:none}
+.slider-row .num-box:focus{border-color:#6d28d9!important;box-shadow:0 0 0 3px rgba(109,40,217,0.12)!important}
+.range-ends{display:flex;justify-content:space-between;font-size:0.7rem;color:#9ca3af;margin-top:0.35rem;padding-right:122px}
+.reset-btn{width:100%;background:#fff!important;border:1.5px solid #e5e7eb!important;color:#4b5563;font-size:0.85rem;font-weight:600;padding:0.6rem;border-radius:0.625rem;transition:all .2s}
+.reset-btn:hover{border-color:#6d28d9!important;color:#6d28d9}
+
+/* ── Result tiles ── */
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.875rem}
+.vs-tile{border-radius:0.875rem;padding:1rem 1.125rem;border:1.5px solid #f3f4f6;min-width:0}
+.vs-tile.mine{background:linear-gradient(135deg,#ede9fe,#faf5ff);border-color:#c4b5fd}
+.vs-tile.best{background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-color:#6ee7b7}
+.vs-lbl{font-size:0.7rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;margin-bottom:0.6rem}
+.vs-card{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;min-width:0}
+.vs-name{font-size:0.9rem;font-weight:700;color:#111827;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
+.vs-bank{font-size:0.72rem;color:#6b7280}
+.vs-val{font-size:1.5rem;font-weight:800;letter-spacing:-0.02em}
+.vs-tile.mine .vs-val{color:#6d28d9}
+.vs-tile.best .vs-val{color:#059669}
+.vs-val small{font-size:0.75rem;font-weight:600;color:#6b7280;letter-spacing:0}
+.vs-sub{font-size:0.78rem;color:#4b5563;margin-top:0.2rem}
+.vs-note{font-size:0.72rem;margin-top:0.5rem;font-weight:600}
+.vs-note.warn{color:#b45309}
+.vs-note.bad{color:#dc2626}
+.mini-card{width:40px;height:26px;border-radius:5px;flex-shrink:0;position:relative;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.mini-card::after{content:'';position:absolute;left:5px;top:8px;width:9px;height:7px;border-radius:2px;background:linear-gradient(135deg,#fde68a,#d97706)}
+
+/* ── Savings banner ── */
+.save-banner{margin-top:1rem;border-radius:0.875rem;padding:1rem 1.25rem;background:linear-gradient(90deg,#4338ca,#7c3aed);color:#fff;display:flex;align-items:center;gap:0.875rem}
+.save-banner.same{background:linear-gradient(90deg,#047857,#10b981)}
+.save-ico{font-size:1.6rem;line-height:1}
+.save-big{font-size:1.2rem;font-weight:800;letter-spacing:-0.01em}
+.save-txt{font-size:0.82rem;color:rgba(255,255,255,0.9);margin-top:0.1rem}
+.yr-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-top:1rem}
+.yr-c{background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.75rem;padding:0.75rem;text-align:center}
+.yr-lbl{font-size:0.66rem;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.2rem}
+.yr-val{font-size:1.05rem;font-weight:800;color:#111827}
+
+/* ── Ranking table ── */
+.rank-head{display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.875rem}
+.rank-ttl{font-size:1rem;font-weight:700;color:#111827}
+.rank-sub{font-size:0.78rem;color:#6b7280;margin-top:0.15rem}
+.filter-row{display:flex;gap:0.4rem;flex-wrap:wrap}
+.fchip{background:#fff!important;border:1.5px solid #e5e7eb!important;color:#6b7280;font-size:0.75rem;font-weight:600;padding:0.3rem 0.8rem;border-radius:99px;transition:all .2s}
+.fchip.act{background:#ede9fe!important;border-color:#6d28d9!important;color:#6d28d9}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:0.82rem}
+.tbl th{background:#f9fafb;padding:0.6rem 0.75rem;text-align:left;font-size:0.7rem;font-weight:700;color:#374151;letter-spacing:0.05em;text-transform:uppercase;border-bottom:1.5px solid #e5e7eb;white-space:nowrap}
+.tbl td{padding:0.65rem 0.75rem;border-bottom:1px solid #f3f4f6;color:#374151;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+.tbl tr.is-mine td{background:#f5f3ff}
+.tbl .r{text-align:right;white-space:nowrap}
+.tbl .rank{font-weight:700;color:#9ca3af;width:2rem}
+.tbl .rank.top{color:#d97706}
+.tc-card{display:flex;align-items:center;gap:0.6rem;min-width:190px}
+.tc-name{font-weight:600;color:#111827}
+.tc-hl{font-size:0.7rem;color:#6b7280;margin-top:0.1rem;line-height:1.35}
+.type-chip{font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:99px;text-transform:uppercase;margin-left:0.35rem;vertical-align:middle}
+.type-cashback{background:#d1fae5;color:#065f46}
+.type-points{background:#dbeafe;color:#1d4ed8}
+.you-chip{font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:99px;text-transform:uppercase;margin-left:0.35rem;background:#6d28d9;color:#fff;vertical-align:middle}
+.worth{font-weight:700;color:#059669}
+.dim{color:#9ca3af}
+.more-btn{display:block;margin:0.875rem auto 0;background:none!important;border:none!important;color:#6d28d9;font-size:0.82rem;font-weight:600}
+
+/* ── Callouts ── */
+.callout{border-radius:0.75rem;padding:0.875rem 1rem}
+.callout+.callout{margin-top:0.875rem}
+.callout.blue{background:#eff6ff;border:1px solid #bfdbfe}
+.callout.green{background:#f0fdf4;border:1px solid #bbf7d0}
+.callout.amber{background:#fffbeb;border:1px solid #fde68a}
+.callout h4{font-size:0.8rem;font-weight:700;margin-bottom:0.4rem}
+.callout.blue h4{color:#1e40af}
+.callout.green h4{color:#166534}
+.callout.amber h4{color:#92400e}
+.callout ul{margin:0.3rem 0 0 1rem;padding:0}
+.callout li{font-size:0.78rem;line-height:1.6;color:#374151}
+.callout p{font-size:0.78rem;line-height:1.6;color:#374151}
+
+@media(max-width:640px){
+  .vs-grid{grid-template-columns:1fr}
+  .yr-strip{grid-template-columns:1fr}
+  .cc-hero{padding:2rem 1.25rem}
+}
+</style>
+
+<div id="cc-page">
+<div class="cc-wrap">
+
+  <!-- Hero -->
+  <div class="cc-hero">
+    <h1>Credit Card Rewards Calculator</h1>
+    <p>See what your card really earns — and which card earns the most for how you spend</p>
+    <div class="hero-chips">
+      <span class="hero-chip">{CREDIT_CARDS.length}+ Cards</span>
+      <span class="hero-chip">{banks.length} Banks</span>
+      <span class="hero-chip">{CC_CATEGORIES.length} Spend Categories</span>
+      <span class="hero-chip">Cashback & Points</span>
+      <span class="hero-chip">Monthly Caps Included</span>
+    </div>
+  </div>
+
+  <div class="cc-body">
+
+    <!-- LEFT: Inputs -->
+    <div class="cc-card">
+      <div class="sec-label">Your card</div>
+      <div class="fg">
+        <label for="in-bank">Bank</label>
+        <select id="in-bank">
+          {banks.map(b => <option value={b} selected={b === defCard.bank}>{b}</option>)}
+        </select>
+      </div>
+      <div class="fg">
+        <label for="in-card">Card</label>
+        <select id="in-card">
+          <optgroup label="Popular">
+            {bankCards.filter(c => c.popular).map(c => <option value={c.id} selected={c.id === defCard.id}>{c.name}</option>)}
+          </optgroup>
+          {bankCards.some(c => !c.popular) && (
+            <optgroup label="Others">
+              {bankCards.filter(c => !c.popular).map(c => <option value={c.id} selected={c.id === defCard.id}>{c.name}</option>)}
+            </optgroup>
+          )}
+        </select>
+      </div>
+
+      <div class="sec-label">Your spend</div>
+      <div class="fg">
+        <label for="in-cat">Category</label>
+        <select id="in-cat">
+          {CC_CATEGORIES.map(c => <option value={c.id} selected={c.id === defCat.id}>{c.icon} {c.label}</option>)}
+        </select>
+      </div>
+
+      <div class="fg">
+        <label for="in-spend">Monthly spend</label>
+        <div class="spend-head">
+          <span class="spend-amt" id="rv-spend">{fmt(spend)}</span>
+          <span class="spend-yr" id="rv-spend-yr">{fmt(spend * 12)} / year</span>
+        </div>
+        <div class="preset-row">
+          {SPEND_PRESETS.map(p => <button type="button" class:list={['preset', { act: p === spend }]} data-v={p}>{presetLabel(p)}</button>)}
+        </div>
+        <div class="slider-row">
+          <input type="range" id="sl-spend" min="0" max="1000" step="1" aria-label="Monthly spend slider">
+          <input type="number" id="in-spend" class="num-box" value={spend} min="0" max="1000000" step="500">
+        </div>
+        <div class="range-ends"><span>₹2K</span><span>₹5L</span></div>
+      </div>
+
+      <button type="button" class="reset-btn" id="btn-reset">↺ Reset</button>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="cc-stack">
+      <div class="cc-card">
+        <div class="vs-grid">
+          <div class="vs-tile mine">
+            <div class="vs-lbl">Your card earns</div>
+            <div class="vs-card">
+              <span class="mini-card" id="rv-mine-mc" style={`background:linear-gradient(135deg,${BANK_COLORS[defCard.bank]},#111827)`}></span>
+              <div style="min-width:0">
+                <div class="vs-name" id="rv-mine-name">{defCard.name}</div>
+                <div class="vs-bank" id="rv-mine-bank">{defCard.bank}</div>
+              </div>
+            </div>
+            <div class="vs-val"><span id="rv-mine-worth">{fmt(mine.worth)}</span> <small>/ month</small></div>
+            <div class="vs-sub" id="rv-mine-sub">{rewardText(defCard, mine.points)} · {mine.rate.toFixed(2)}% back</div>
+            <div class="vs-note warn" id="rv-mine-note">{mine.capped ? 'Monthly cap reached for this category' : ''}</div>
+          </div>
+          <div class="vs-tile best">
+            <div class="vs-lbl">Best card for <span class="rv-cat-name">{defCat.label}</span></div>
+            <div class="vs-card">
+              <span class="mini-card" id="rv-best-mc" style={`background:linear-gradient(135deg,${BANK_COLORS[best.card.bank]},#111827)`}></span>
+              <div style="min-width:0">
+                <div class="vs-name" id="rv-best-name">{best.card.name}</div>
+                <div class="vs-bank" id="rv-best-bank">{best.card.bank}</div>
+              </div>
+            </div>
+            <div class="vs-val"><span id="rv-best-worth">{fmt(best.result.worth)}</span> <small>/ month</small></div>
+            <div class="vs-sub" id="rv-best-sub">{rewardText(best.card, best.result.points)} · {best.result.rate.toFixed(2)}% back</div>
+            <div class="vs-note warn" id="rv-best-note">{best.result.capped ? 'Monthly cap reached for this category' : ''}</div>
+          </div>
+        </div>
+
+        <div class:list={['save-banner', { same: extraYearly === 0 }]} id="rv-banner">
+          <span class="save-ico" id="rv-banner-ico">{extraYearly === 0 ? '🎉' : '💰'}</span>
+          <div>
+            <div class="save-big" id="rv-banner-big">{extraYearly === 0 ? 'You already hold the best card' : `${fmt(extraYearly)} more every year`}</div>
+            <div class="save-txt" id="rv-banner-txt">{extraYearly === 0 ? `Your card tops our list for ${defCat.label.toLowerCase()} at this spend.` : `by putting your ${defCat.label.toLowerCase()} spends on the ${best.card.bank} ${best.card.name} card.`}</div>
+          </div>
+        </div>
+
+        <div class="yr-strip">
+          <div class="yr-c">
+            <div class="yr-lbl">Yearly spend</div>
+            <div class="yr-val" id="rv-yr-spend">{fmt(spend * 12)}</div>
+          </div>
+          <div class="yr-c">
+            <div class="yr-lbl">Your yearly rewards</div>
+            <div class="yr-val" style="color:#6d28d9" id="rv-yr-mine">{fmt(mine.worth * 12)}</div>
+          </div>
+          <div class="yr-c">
+            <div class="yr-lbl">Best yearly rewards</div>
+            <div class="yr-val" style="color:#059669" id="rv-yr-best">{fmt(best.result.worth * 12)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ranking -->
+      <div class="cc-card">
+        <div class="rank-head">
+          <div>
+            <h2 class="rank-ttl">Top cards for <span class="rv-cat-name">{defCat.label}</span></h2>
+            <p class="rank-sub">At <span id="rv-rank-spend">{fmt(spend)}</span>/month · ranked by reward value</p>
+          </div>
+          <div class="filter-row">
+            <button type="button" class="fchip act" data-f="all">All</button>
+            <button type="button" class="fchip" data-f="cashback">Cashback</button>
+            <button type="button" class="fchip" data-f="points">Points</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Card</th>
+                <th class="r">Earns / month</th>
+                <th class="r">Worth</th>
+                <th class="r">Return</th>
+                <th class="r">Annual fee</th>
+              </tr>
+            </thead>
+            <tbody id="tb-rank">
+              {ranked.slice(0, 10).map(({ card, result }, i) => (
+                <tr class:list={[{ 'is-mine': card.id === defCard.id }]}>
+                  <td class:list={['rank', { top: i < 3 }]}>{i + 1}</td>
+                  <td>
+                    <div class="tc-card">
+                      <span class="mini-card" style={`background:linear-gradient(135deg,${BANK_COLORS[card.bank]},#111827)`}></span>
+                      <div>
+                        <div class="tc-name">{card.bank} {card.name}<span class={`type-chip type-${card.rewardType}`}>{card.rewardType}</span>{card.id === defCard.id && <span class="you-chip">You</span>}</div>
+                        <div class="tc-hl">{card.highlight}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="r">{result.excluded ? <span class="dim">Not eligible</span> : rewardText(card, result.points)}</td>
+                  <td class="r worth">{fmt(result.worth)}</td>
+                  <td class="r">{result.rate.toFixed(2)}%</td>
+                  <td class="r">{feeText(card.annualFee)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="more-btn" id="btn-more">Show all {CREDIT_CARDS.length} cards ↓</button>
+      </div>
+
+      <!-- Info -->
+      <div class="cc-card">
+        <div class="callout blue">
+          <h4>🧮 How we calculate</h4>
+          <ul>
+            <li><strong>Rewards = monthly spend × card's earn rate</strong> for the category, then limited by any monthly cap</li>
+            <li>Points are converted to rupees at a typical redemption value (e.g. ₹1/point via HDFC SmartBuy, ₹0.25/point for most SBI and ICICI cards)</li>
+            <li>Excluded spends like fuel, rent and wallet loads earn nothing on most cards</li>
+            <li>Welcome bonuses, milestone rewards and fee waivers are not included</li>
+          </ul>
+        </div>
+        <div class="callout green">
+          <h4>💡 Get more from your cards</h4>
+          <ul>
+            <li>Use different cards for different categories — a dining card and a shopping card often beat one all-rounder</li>
+            <li>Watch the monthly caps: once you hit one, move the rest of that spend to another card</li>
+            <li>Points cards pay best when redeemed for flights and hotels; cashback cards are simpler and pay as statement credit</li>
+            <li>Pay the full bill every month — 36–42% annual interest wipes out any reward</li>
+          </ul>
+        </div>
+        <div class="callout amber">
+          <h4>⚠️ Disclaimer</h4>
+          <p>Reward rates, caps and exclusions are indicative and change often. Check the issuer's latest terms before applying for a card. This is not financial advice.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script is:inline define:vars={{ CARDS: CREDIT_CARDS, CATS: CC_CATEGORIES, DEF: CC_DEFAULTS, BANK_COLORS }}>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmtINR=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n);
+  const byId=Object.fromEntries(CARDS.map(c=>[c.id,c]));
+  const catById=Object.fromEntries(CATS.map(c=>[c.id,c]));
+  const MIN=2000, MAX=500000;
+  let filter='all', showAll=false;
+
+  /* Mirror of calcCardReward() in src/data/credit-cards.ts — keep in sync */
+  function calcReward(card,cat,monthlySpend){
+    const spend=Math.max(0,monthlySpend);
+    const excluded=(card.excluded||[]).includes(cat)||(cat==='upi'&&card.earn.upi===undefined);
+    if(excluded||spend===0)return{points:0,worth:0,rate:0,capped:false,excluded};
+    const special=card.earn[cat];
+    let points;
+    if(special!==undefined)points=spend*special/100;
+    else if(card.tier&&spend>card.tier.above)points=(card.tier.above*card.earn.base+(spend-card.tier.above)*card.tier.earn)/100;
+    else points=spend*card.earn.base/100;
+    const caps=card.caps||{};
+    const cap=caps[cat]!==undefined?caps[cat]:(special===undefined?caps.base:undefined);
+    const capped=cap!==undefined&&points>cap;
+    if(capped)points=cap;
+    points=Math.round(points);
+    const worth=Math.round(points*card.pointValue);
+    return{points,worth,rate:worth/spend*100,capped,excluded:false};
+  }
+  function rank(cat,spend){
+    return CARDS.map(card=>({card,result:calcReward(card,cat,spend)}))
+      .sort((a,b)=>b.result.worth-a.result.worth||a.card.annualFee-b.card.annualFee);
+  }
+
+  const rewardText=(card,pts)=>card.rewardType==='cashback'?`${fmtINR(pts)} cashback`:`${pts.toLocaleString('en-IN')} points`;
+  const feeText=f=>f===0?'Lifetime free':fmtINR(f);
+  const mcBg=bank=>`linear-gradient(135deg,${BANK_COLORS[bank]||'#4338ca'},#111827)`;
+  const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  function note(card,r){
+    if(r.excluded)return{cls:'bad',txt:'This category earns no rewards on this card'};
+    if(r.capped)return{cls:'warn',txt:`Capped at ${rewardText(card,r.points)} a month`};
+    if(card.tier)return{cls:'warn',txt:`Higher rate on spends above ${fmtINR(card.tier.above)}/month`};
+    return{cls:'',txt:card.pointValueNote||''};
+  }
+
+  /* Log-scale slider: 0–1000 ↔ ₹2K–₹5L */
+  const roundSpend=s=>{const step=s<10000?500:s<100000?1000:5000;return Math.round(s/step)*step;};
+  const toSpend=v=>roundSpend(MIN*Math.pow(MAX/MIN,v/1000));
+  const fromSpend=s=>Math.max(0,Math.min(1000,Math.round(1000*Math.log(Math.max(s,MIN)/MIN)/Math.log(MAX/MIN))));
+  function setSl(v){$('sl-spend').value=v;$('sl-spend').style.setProperty('--pct',(v/10)+'%');}
+
+  function fillCards(bank,selectId){
+    const list=CARDS.filter(c=>c.bank===bank);
+    const pop=list.filter(c=>c.popular), oth=list.filter(c=>!c.popular);
+    const opts=arr=>arr.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    $('in-card').innerHTML=(pop.length?`<optgroup label="Popular">${opts(pop)}</optgroup>`:'')+(oth.length?`<optgroup label="Others">${opts(oth)}</optgroup>`:'');
+    $('in-card').value=selectId&&list.some(c=>c.id===selectId)?selectId:(pop[0]||oth[0]).id;
+  }
+
+  function getSpend(){return Math.max(0,Math.min(1000000,parseFloat($('in-spend').value)||0));}
+
+  function calc(sync=true){
+    const card=byId[$('in-card').value];
+    const cat=catById[$('in-cat').value];
+    const spend=getSpend();
+    if(!card||!cat)return;
+
+    const mine=calcReward(card,cat.id,spend);
+    const ranked=rank(cat.id,spend);
+    const best=ranked[0];
+    const extra=Math.max(0,(best.result.worth-mine.worth)*12);
+
+    $('rv-spend').textContent=fmtINR(spend);
+    $('rv-spend-yr').textContent=`${fmtINR(spend*12)} / year`;
+    $('rv-rank-spend').textContent=fmtINR(spend);
+    document.querySelectorAll('#cc-page .rv-cat-name').forEach(el=>el.textContent=cat.label);
+    document.querySelectorAll('#cc-page .preset').forEach(b=>b.classList.toggle('act',+b.dataset.v===spend));
+
+    [['mine',card,mine],['best',best.card,best.result]].forEach(([k,c,r])=>{
+      $(`rv-${k}-mc`).style.background=mcBg(c.bank);
+      $(`rv-${k}-name`).textContent=c.name;
+      $(`rv-${k}-bank`).textContent=c.bank;
+      $(`rv-${k}-worth`).textContent=fmtINR(r.worth);
+      $(`rv-${k}-sub`).textContent=r.excluded?'Not eligible for rewards':`${rewardText(c,r.points)} · ${r.rate.toFixed(2)}% back`;
+      const n=note(c,r);
+      $(`rv-${k}-note`).className='vs-note '+n.cls;
+      $(`rv-${k}-note`).textContent=n.txt;
+    });
+
+    const same=extra===0;
+    $('rv-banner').classList.toggle('same',same);
+    $('rv-banner-ico').textContent=same?'🎉':'💰';
+    $('rv-banner-big').textContent=same?'You already hold the best card':`${fmtINR(extra)} more every year`;
+    $('rv-banner-txt').textContent=same
+      ?`Your card tops our list for ${cat.label.toLowerCase()} at this spend.`
+      :`by putting your ${cat.label.toLowerCase()} spends on the ${best.card.bank} ${best.card.name} card.`;
+
+    $('rv-yr-spend').textContent=fmtINR(spend*12);
+    $('rv-yr-mine').textContent=fmtINR(mine.worth*12);
+    $('rv-yr-best').textContent=fmtINR(best.result.worth*12);
+
+    renderTable(ranked,card.id);
+    if(sync)syncUrl(card.id,cat.id,spend);
+  }
+
+  function renderTable(ranked,mineId){
+    const rows=ranked.filter(x=>filter==='all'||x.card.rewardType===filter);
+    const shown=showAll?rows:rows.slice(0,10);
+    $('tb-rank').innerHTML=shown.map(({card,result},i)=>`
+      <tr class="${card.id===mineId?'is-mine':''}">
+        <td class="rank${i<3?' top':''}">${i+1}</td>
+        <td><div class="tc-card"><span class="mini-card" style="background:${mcBg(card.bank)}"></span><div>
+          <div class="tc-name">${esc(card.bank)} ${esc(card.name)}<span class="type-chip type-${card.rewardType}">${card.rewardType}</span>${card.id===mineId?'<span class="you-chip">You</span>':''}</div>
+          <div class="tc-hl">${esc(card.highlight)}</div>
+        </div></div></td>
+        <td class="r">${result.excluded?'<span class="dim">Not eligible</span>':rewardText(card,result.points)}</td>
+        <td class="r worth">${fmtINR(result.worth)}</td>
+        <td class="r">${result.rate.toFixed(2)}%</td>
+        <td class="r">${feeText(card.annualFee)}</td>
+      </tr>`).join('');
+    const btn=$('btn-more');
+    btn.style.display=rows.length>10?'':'none';
+    btn.textContent=showAll?'Show top 10 ↑':`Show all ${rows.length} cards ↓`;
+  }
+
+  /* Shareable links: ?card=…&cat=…&spend=… */
+  function syncUrl(cardId,catId,spend){
+    const p=new URLSearchParams({card:cardId,cat:catId,spend:String(spend)});
+    history.replaceState(null,'',`${location.pathname}?${p}`);
+  }
+  function applyState(cardId,catId,spend){
+    const card=byId[cardId]||byId[DEF.cardId];
+    $('in-bank').value=card.bank;
+    fillCards(card.bank,card.id);
+    $('in-cat').value=catById[catId]?catId:DEF.category;
+    $('in-spend').value=spend;
+    setSl(fromSpend(spend));
+  }
+
+  /* ── Events ── */
+  $('in-bank').addEventListener('change',()=>{fillCards($('in-bank').value);calc();});
+  $('in-card').addEventListener('change',calc);
+  $('in-cat').addEventListener('change',calc);
+  $('sl-spend').addEventListener('input',()=>{const v=+$('sl-spend').value;setSl(v);$('in-spend').value=toSpend(v);calc();});
+  $('in-spend').addEventListener('input',()=>{setSl(fromSpend(getSpend()));calc();});
+  document.querySelectorAll('#cc-page .preset').forEach(b=>b.addEventListener('click',()=>{
+    $('in-spend').value=b.dataset.v;setSl(fromSpend(+b.dataset.v));calc();
+  }));
+  document.querySelectorAll('#cc-page .fchip').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#cc-page .fchip').forEach(x=>x.classList.remove('act'));
+    b.classList.add('act');filter=b.dataset.f;showAll=false;calc();
+  }));
+  $('btn-more').addEventListener('click',()=>{showAll=!showAll;calc();});
+  $('btn-reset').addEventListener('click',()=>{applyState(DEF.cardId,DEF.category,DEF.monthlySpend);calc();});
+
+  /* ── Init ── */
+  const q=new URLSearchParams(location.search);
+  const qSpend=parseFloat(q.get('spend'));
+  applyState(q.get('card')||DEF.cardId,q.get('cat')||DEF.category,isFinite(qSpend)&&qSpend>=0?Math.min(qSpend,1000000):DEF.monthlySpend);
+  calc(false);
+})();
+</script>
+</CalcLayout>

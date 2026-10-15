@@ -44,6 +44,7 @@ netlify.toml       ← Build config + cache headers
 | `swp-calc.astro` | `/swp-calc` | Systematic Withdrawal Plan calculator (SSR defaults) |
 | `retirement-calc.astro` | `/retirement-calc` | Retirement planning calculator (SSR defaults) |
 | `fire-calc.astro` | `/fire-calc` | FIRE calculator (5 variants, Indian context) |
+| `credit-card-rewards-calc.astro` | `/credit-card-rewards-calc` | Credit card rewards calculator — your card vs best card per spend category (data in `src/data/credit-cards.ts`) |
 | `portfolio.astro` | `/portfolio` | Mutual fund portfolio screenshot tracker |
 | `blogs.astro` | `/blogs` | Blog listing page |
 | `blog-sip-guide.astro` | `/blog-sip-guide` | Blog article |

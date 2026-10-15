@@ -44,7 +44,7 @@ test.describe('Static pages', () => {
 
   test('all calculator routes are reachable from tools page', async ({ page }) => {
     await page.goto('/tools');
-    const calcLinks = ['/fd-calc', '/tax-calc', '/swp-calc', '/retirement-calc', '/fire-calc'];
+    const calcLinks = ['/fd-calc', '/tax-calc', '/swp-calc', '/retirement-calc', '/fire-calc', '/credit-card-rewards-calc'];
     for (const href of calcLinks) {
       await expect(page.locator(`a[href="${href}"]`).first()).toBeVisible();
     }
